@@ -24,17 +24,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from abc import ABC, abstractmethod
 
-class KineticMechanism(ABC):
-    def __init__(self):
-        ABC.__init__()
-        pass
+# Test models
+from ..core import *
+from ..mechanisms import *
 
-    @abstractmethod
-    def get_qssa_rate_expression(self):
-        pass
+name = 'pfk'
+metabolites = ['A','B']
 
-    @abstractmethod
-    def get_full_rate_expression(self):
-        pass
+thermo_data = {'S':     1e-2,
+               'P':     1e-2,
+               'sig_S': 0.1,
+               'sig_P': 0.1,
+               'gamma': 0.1,
+               'flux':  1.0,
+               'E_tot': 1e-5}
+
+enzyme_1 = ReversibleMichaelisMenten(name,metabolites,thermo_data)
+
+this_model = KineticModel()
+this_model.add_reaction(enzyme_1)
+
+this_sol = this_model.solve_ode([0,1.0],
+                                [10e-2,0.1e-2,9e-5,0.1e-5],
+                                sim_type = 'full',
+                                solver_type = 'vode')

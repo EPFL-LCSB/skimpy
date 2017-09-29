@@ -24,17 +24,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from abc import ABC, abstractmethod
 
-class KineticMechanism(ABC):
-    def __init__(self):
-        ABC.__init__()
-        pass
+class Boundary(object):
+    def __init__(self,boundary_method):
+        self.boundary_method = boundary_method
 
-    @abstractmethod
-    def get_qssa_rate_expression(self):
-        pass
+    def __call__(self,expressions):
+        self.boundary_method(expressions)
 
-    @abstractmethod
-    def get_full_rate_expression(self):
-        pass
+
+class ConstantConcentration(Boundary):
+
+    def __init__(self,metabolite):
+        method = lambda expression: set_const(expression,metabolite)
+        Boundary.__init__(self,method)
+
+
+# Private function
+def set_constant_concentration(expressions,metabolite):
+    expressions[metabolite] = expressions[metabolite]*0.0

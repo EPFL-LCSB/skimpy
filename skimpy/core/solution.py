@@ -24,17 +24,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from abc import ABC, abstractmethod
 
-class KineticMechanism(ABC):
-    def __init__(self):
-        ABC.__init__()
-        pass
+# Class for ode solutions
+class Solution:
+    def __init__(self,model,t,y):
+        self.time    = t
+        self.species = y
+        self.names   = model.ode_fun.variables
 
-    @abstractmethod
-    def get_qssa_rate_expression(self):
-        pass
 
-    @abstractmethod
-    def get_full_rate_expression(self):
-        pass
+    def plot(self, filename = ''):
+        # Make cool plot functions maype there is also a cooler way?
+        if filename == '':
+            #show the plot
+            pass
+        else:
+            #print to file
+            pass

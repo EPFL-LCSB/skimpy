@@ -24,17 +24,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from abc import ABC, abstractmethod
 
-class KineticMechanism(ABC):
-    def __init__(self):
-        ABC.__init__()
-        pass
 
-    @abstractmethod
-    def get_qssa_rate_expression(self):
-        pass
+class Reaction(object):
+    """
+    Global reaction class
+    """
+    def __init__(self, name, substrates, enz_type, params, rates):
+        self.name = name
+        self.metabolites = substrates
+        self.type = enz_type
+        self.params = params
+        self.rates  = rates
 
-    @abstractmethod
-    def get_full_rate_expression(self):
-        pass
+    def __str__(self):
+        return "%s of with %s kinetics "%(self.name, self.type)
