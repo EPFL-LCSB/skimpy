@@ -25,19 +25,16 @@ limitations under the License.
 
 """
 
+import numpy as np
+from ..viz.plotting import timetrace_plot
+
 # Class for ode solutions
 class Solution:
     def __init__(self,model,t,y):
-        self.time    = t
-        self.species = y
+        self.time    = np.array(t)
+        self.species = np.array(y)
         self.names   = model.ode_fun.variables
 
-
     def plot(self, filename = ''):
-        # Make cool plot functions maype there is also a cooler way?
-        if filename == '':
-            #show the plot
-            pass
-        else:
-            #print to file
-            pass
+        timetrace_plot(self.time,self.species,filename,legend = self.names)
+

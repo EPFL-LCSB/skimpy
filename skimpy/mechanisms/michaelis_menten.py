@@ -64,11 +64,11 @@ class ReversibleMichaelisMenten(KineticMechanism):
         # Param families/ set ?
 
         params = self.parameters
-        k1_fwd = params.vmax_forward  / params.total_enzyme_concentration
+        k1_bwd = params.vmax_forward  / params.total_enzyme_concentration
         k2_fwd = params.vmax_backward / params.total_enzyme_concentration
 
-        k1f = (k1_fwd + k2_fwd ) / params.km_substrate
-        k2b = (k1_fwd + k2_fwd ) / params.km_product
+        k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
+        k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
 
         self.rates = self.Rates (k1_fwd = k1_fwd,
                                  k2_fwd = k2_fwd,
@@ -118,10 +118,10 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
         enzyme_complex = 'EC_'+self.name
 
-        r1f = sympify(subs.substrates[0]+"*"+self.name+'*'+'k1_fwd'+self.name)
-        r1b = sympify(enzyme_complex+'*k1_bwd'+self.name)
-        r2f = sympify(enzyme_complex+'*k2_fwd'+self.name)
-        r2b = sympify(subs.substrates[1]+"*"+self.name+'*k2_bwd'+self.name)
+        r1f = sympify(subs.substrate+"*"+self.name+'*'+'k1_fwd_'+self.name)
+        r1b = sympify(enzyme_complex+'*k1_bwd_'+self.name)
+        r2f = sympify(enzyme_complex+'*k2_fwd_'+self.name)
+        r2b = sympify(subs.product  +"*"+self.name+'*k2_bwd_'+self.name)
 
         expressions = {subs.substrate   : r1b - r1f,
                        subs.product     : r2f - r2b,

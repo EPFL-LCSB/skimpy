@@ -40,11 +40,14 @@ metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
 #                'gamma': 0.1,
 #                'flux':  1.0,
 #                'E_tot': 1e-5}
+
+## QSSA Method
 parameters = ReversibleMichaelisMenten.Parameters(
     vmax_forward = 1,
     vmax_backward = 0.5,
     km_substrate = 10,
     km_product = 10,
+    total_enzyme_concentration = 1,
 )
 
 pfk = Reaction(name=name,
@@ -56,7 +59,18 @@ this_model = KineticModel()
 this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
 
-this_sol = this_model.solve_ode([0,1.0],
-                                [10e-2,0.1e-2],#,9e-5,0.1e-5],
-                                sim_type = 'QSSA',
-                                solver_type = 'vode')
+this_sol_qssa = this_model.solve_ode(   [0,100.0],
+                                        [10e-2,0.1e-2],#,9e-5,0.1e-5],
+                                        sim_type = 'QSSA',
+                                        solver_type = 'vode')
+
+this_sol_qssa.plot('out_qssa.html')
+
+## Full rate method
+
+this_sol_full = this_model.solve_ode(   [0,100.0],
+                                        [10e-2,0.1e-2,1,0],
+                                        sim_type = 'full',
+                                        solver_type = 'vode')
+
+this_sol_full.plot('out_full.html')

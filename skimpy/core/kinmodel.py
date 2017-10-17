@@ -49,6 +49,7 @@ class KineticModel(object):
         # List of enzyme objects
         self.reactions   = iterable_to_tabdict(reactions)
         self.boundaries  = iterable_to_tabdict(boundaries)
+        self.initial_conditions = iterable_to_tabdict([])
         self._modifed    = True
 
     # TODO : Implement
@@ -84,24 +85,41 @@ class KineticModel(object):
         # Add a boundary to the model
         self.boundaries.append(boundary)
 
+    @property
+    def sim_type(self):
+        return self._simtype
+
+    @sim_type.setter
+    def sim_type(self, value):
+        self._simtype = value
+        self._modified = True
+
+    def compile_ode(self,
+                    sim_type='QSSA',):
+
+        self.sim_type = sim_type
+
+        # Create the ode_fun if modified or non exisitent
+        if self._modified:
+            self.make_ode_fun(sim_type)
+            self._modified = False
+
+
     def solve_ode(self,
                   time_int,
-                  initial_concentrations,
-                  sim_type = 'QSSA',
                   solver_type = 'vode',
                   reltol = 1e-8,
                   abstol = 1e-8):
 
-        # Create the ode_fun if modified or non exisitent
-        if self._modifed and not(hasattr(self,'ode_fun')):
-            self.ode_fun = self.make_ode_fun(sim_type)
-            self._modifed = False
-
         # Choose a solver
         self.solver = get_ode_solver(self.ode_fun,solver_type,reltol,abstol)
 
+        # Order the initial conditions according to variables
+
         # solve the ode
-        t_sol,y_sol = solve_ode(self.solver,time_int,initial_concentrations)
+        t_sol,y_sol = _solve_ode(self.solver,
+                                 time_int,
+                                 ordered_initial_conditions)
 
         return Solution(self,t_sol,y_sol)
 
@@ -148,8 +166,9 @@ class KineticModel(object):
             this_boundary(expr)
 
         # Make vector function from expressions
-        return ODEFunction(variables, expr, all_param)
-
+        self.ode_fun = ODEFunction(variables, expr, all_param)
+        # Ode variables
+        self.variables = variables
 
 def get_ode_solver(  ode_fun,
                      solver_type = "vode",
@@ -166,7 +185,7 @@ def get_ode_solver(  ode_fun,
 
     return ode_solver
 
-def solve_ode(solver,time_int,initial_concentrations):
+def _solve_ode(solver, time_int, initial_concentrations):
 
     solver.set_initial_value(initial_concentrations, time_int[0])
 
