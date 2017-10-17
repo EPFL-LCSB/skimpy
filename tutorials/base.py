@@ -26,8 +26,8 @@ limitations under the License.
 """
 
 # Test models
-from ..core import *
-from ..mechanisms import *
+from skimpy.core import *
+from skimpy.mechanisms import *
 
 name = 'pfk'
 metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
@@ -57,6 +57,6 @@ this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
 
 this_sol = this_model.solve_ode([0,1.0],
-                                [10e-2,0.1e-2,9e-5,0.1e-5],
-                                sim_type = 'full',
+                                [10e-2,0.1e-2],#,9e-5,0.1e-5],
+                                sim_type = 'QSSA',
                                 solver_type = 'vode')

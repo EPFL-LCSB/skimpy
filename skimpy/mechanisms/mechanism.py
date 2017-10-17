@@ -30,25 +30,33 @@ from collections import namedtuple
 
 
 class KineticMechanism(ABC):
-    def __init__(self, name, substrates, parameters):
-        ABC.__init__()
+    def __init__(self, name, substrates, parameters = None):
+        # ABC.__init__()
         self.name = name
-        self._substrates = substrates
-        self._parameters = parameters
+        self.substrates = substrates
+        # self.set_dynamic_attribute_links(self._substrates)
 
-        for metafield in [self._substrates, self._parameters]:
-            for field in metafield.__dict__.keys():
-                setattr(self, field) = property(
-                    lambda self:getattr(metafield,field))
+        if parameters is not None:
+            self.parameters = parameters
+            # self.set_dynamic_attribute_links(self._parameters)
 
-    @abstractproperty
+    #
+    # def set_dynamic_attribute_links(self, metafield):
+    #     for field in metafield.__dict__.keys():
+    #         setattr(self, field) = property(
+    #             lambda self: getattr(metafield, field))
+
+
+    @property
+    @abstractmethod
     def Substrates(self):
         """
         Class to define metabolites and their roles in the reaction
         :return:
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def Parameters(self):
         """
         Class to define parameters and their roles in the reaction
@@ -56,7 +64,8 @@ class KineticMechanism(ABC):
         """
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def Rates(self):
         """
         Class to define rates and their roles in the reaction
@@ -76,3 +85,15 @@ class KineticMechanism(ABC):
     def get_full_rate_expression(self):
         pass
 
+    def get_expression_parameters_from(self,kind):
+        parameters = {}
+        values_from_kind = getattr(self,kind)
+
+        for the_param in values_from_kind._fields:
+            param_value = getattr(values_from_kind,the_param)
+            if param_value is None:
+                continue
+            param_name = the_param + '_' + self.name
+            parameters[param_name] = param_value
+
+        return parameters

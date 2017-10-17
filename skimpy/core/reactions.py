@@ -30,10 +30,41 @@ class Reaction(object):
     """
     Global reaction class
     """
-    def __init__(self, name, substrates, mechanism, params, rates):
+    def __init__(self, name, substrates, mechanism, parameters=None):
         self.name = name
-        self._substrates = substrates
-        self.mechanism = mechanism
+        self.mechanism = mechanism(name = name,
+                                   substrates = substrates,
+                                   parameters = parameters)
+
+
+    # Hooks to the mechanism attributes for convenience
+    @property
+    def substrates(self):
+        return self.mechanism.substrates
+
+    @substrates.setter
+    def substrates(self, value):
+        self.mechanism.substrates = value
+
+    @property
+    def parameters(self):
+        return self.mechanism.parameters
+
+    @parameters.setter
+    def parameters(self, value):
+        self.mechanism.parameters = value
+
+    @property
+    def rates(self):
+        return self.mechanism.rates
+
+    @rates.setter
+    def rates(self, value):
+        self.mechanism.rates = value
+
 
     def __str__(self):
         return "%s of with %s kinetics "%(self.name, self.type)
+
+    def parametrize(self, params):
+        self.mechanism.parameters = params
