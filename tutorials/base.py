@@ -65,7 +65,7 @@ this_model.initial_conditions.B = 1.0
 
 this_sol_qssa = this_model.solve_ode([0,100.0],solver_type = 'vode')
 
-this_sol_qssa.plot('out_qssa.html')
+this_sol_qssa.plot('output/base_out_qssa.html')
 
 ## Full rate method
 
@@ -78,4 +78,4 @@ this_model.initial_conditions.pfk = 1.0
 
 this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
 
-this_sol_full.plot('out_full.html')
+this_sol_full.plot('output/base_out_full.html')
