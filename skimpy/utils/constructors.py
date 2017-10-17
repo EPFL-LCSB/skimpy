@@ -29,31 +29,35 @@ from ..mechanisms import *
 
 #Create enzyme parameterization from
 #Thermodynamics data
-def uni_uni_from_thermo(name,substrates,thermo_data):
-    """Create an reaction from thermodynamic data"""
+def reversible_michalies_menten_from_thermo_data(thermo_data):
+    """Create reaction parameters from thermodynamic data"""
 
     # v_maxes
-    v_max_f =  thermo_data['flux'] \
-                /((1.0-thermo_data['gamma'])*thermo_data['sig_S'])
+    vmax_forward =  thermo_data['flux'] \
+                    /((1.0-thermo_data['thermo_displacement'])\
+                    *thermo_data['saturation_substrate'])
 
-    v_max_r =  thermo_data['gamma']*thermo_data['flux'] \
-                /((1.0-thermo_data['gamma'])*thermo_data['sig_P'])
+    vmax_backward =  thermo_data['thermo_displacement']*thermo_data['flux'] \
+                    /((1.0-thermo_data['thermo_displacement'])\
+                    *thermo_data['saturation_substrate'])
     # K_M values
-    nominator = (1.0-thermo_data['sig_S']-thermo_data['sig_P'])
-    K_S = thermo_data['S']*nominator/thermo_data['sig_S']
-    K_P = thermo_data['P']*nominator/thermo_data['sig_P']
+    nominator = 1.0-thermo_data['saturation_product'] \
+                        -thermo_data['saturation_substrate']
 
-    params = {'K_S'     : K_S ,
-              'K_P'     : K_P ,
-              'v_max_r' :v_max_r,
-              'v_max_f' :v_max_f,
-              'E_tot'   :thermo_data['E_tot']}
+    km_substrate = thermo_data['concetration_substrate']\
+                        *nominator/thermo_data['saturation_substrate']
 
-    new_enzyme = ReversibleMichaelisMenten(name,substrates,params)
-    return new_enzyme
+    km_product = thermo_data['concetration_product']\
+                        *nominator/thermo_data['saturation_product']
 
-def uni_uni_from_data(name,substrates,params):
-    """Create an enzmye from enzyme data"""
-    new_enzyme = ReversibleMichaelisMenten(name,substrates,params)
 
-    return new_enzyme
+    parameters = ReversibleMichaelisMenten.Parameters(
+        vmax_forward = vmax_forward,
+        vmax_backward = vmax_backward,
+        km_substrate = km_substrate,
+        km_product = km_product,
+        total_enzyme_concentration = thermo_data['total_enzyme_concentration'],
+    )
+
+
+    return parameters
