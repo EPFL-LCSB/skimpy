@@ -41,7 +41,7 @@ class ODEFunction:
         the_param_keys = [x for x in self.parameters]
         sym_vars = list(symbols(variables+the_param_keys))
         # Awsome sympy magic
-        the_expressions = [x for x in self.expr.values()]
+        the_expressions = [self.expr[x] for x in self.variables]
         self.function = ufuncify(sym_vars,the_expressions)
 
     @property
@@ -65,4 +65,3 @@ class ODEFunction:
         input_vars = list(y)+self.parameter_values
         result = self.function(*input_vars)
         return np.array(result)
-

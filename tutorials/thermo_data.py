@@ -38,8 +38,8 @@ thermo_data_pfk = {'concetration_substrate':     1e-2,
                    'concetration_product':       1e-2,
                    'saturation_substrate':       0.1,
                    'saturation_product':         0.1,
-                   'thermo_displacement':        0.1,
-                   'flux':                       1e-2,
+                   'thermo_displacement':        0.8,
+                   'flux':                       1e-4,
                    'total_enzyme_concentration': 1e-5}
 
 ## QSSA Method
