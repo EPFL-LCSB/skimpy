@@ -99,11 +99,13 @@ class KineticModel(object):
 
         self.sim_type = sim_type
 
-        # Create the ode_fun if modified or non exisitent
+        # Recompile only if modified
         if self._modified:
+            # Compile ode function
             self.make_ode_fun(sim_type)
             self._modified = False
-
+            # Create initial_conditions from variables
+            self.initial_conditions = TabDict([(x,0.0) for x in self.variables])
 
     def solve_ode(self,
                   time_int,
@@ -115,6 +117,8 @@ class KineticModel(object):
         self.solver = get_ode_solver(self.ode_fun,solver_type,reltol,abstol)
 
         # Order the initial conditions according to variables
+        ordered_initial_conditions = [self.initial_conditions[variable]
+                                    for variable in self.variables]
 
         # solve the ode
         t_sol,y_sol = _solve_ode(self.solver,

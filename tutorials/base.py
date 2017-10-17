@@ -58,19 +58,24 @@ pfk = Reaction(name=name,
 this_model = KineticModel()
 this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
+this_model.compile_ode(sim_type = 'QSSA')
 
-this_sol_qssa = this_model.solve_ode(   [0,100.0],
-                                        [10e-2,0.1e-2],#,9e-5,0.1e-5],
-                                        sim_type = 'QSSA',
-                                        solver_type = 'vode')
+this_model.initial_conditions.A = 10.0
+this_model.initial_conditions.B = 1.0
+
+this_sol_qssa = this_model.solve_ode([0,100.0],solver_type = 'vode')
 
 this_sol_qssa.plot('out_qssa.html')
 
 ## Full rate method
 
-this_sol_full = this_model.solve_ode(   [0,100.0],
-                                        [10e-2,0.1e-2,1,0],
-                                        sim_type = 'full',
-                                        solver_type = 'vode')
+
+this_model.compile_ode(sim_type = 'full')
+
+this_model.initial_conditions.A = 10.0
+this_model.initial_conditions.B = 1.0
+this_model.initial_conditions.pfk = 1.0
+
+this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
 
 this_sol_full.plot('out_full.html')
