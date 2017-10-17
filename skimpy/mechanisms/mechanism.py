@@ -26,9 +26,46 @@ limitations under the License.
 """
 from abc import ABC, abstractmethod
 
+from collections import namedtuple
+
+
 class KineticMechanism(ABC):
-    def __init__(self):
+    def __init__(self, name, substrates, parameters):
         ABC.__init__()
+        self.name = name
+        self._substrates = substrates
+        self._parameters = parameters
+
+        for metafield in [self._substrates, self._parameters]:
+            for field in metafield.__dict__.keys():
+                setattr(self, field) = property(
+                    lambda self:getattr(metafield,field))
+
+    @abstractproperty
+    def Substrates(self):
+        """
+        Class to define metabolites and their roles in the reaction
+        :return:
+        """
+
+    @abstractproperty
+    def Parameters(self):
+        """
+        Class to define parameters and their roles in the reaction
+        :return:
+        """
+        pass
+
+    @abstractproperty
+    def Rates(self):
+        """
+        Class to define rates and their roles in the reaction
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def calculate_rates(self):
         pass
 
     @abstractmethod
@@ -38,3 +75,4 @@ class KineticMechanism(ABC):
     @abstractmethod
     def get_full_rate_expression(self):
         pass
+

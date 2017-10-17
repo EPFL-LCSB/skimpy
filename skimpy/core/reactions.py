@@ -30,12 +30,10 @@ class Reaction(object):
     """
     Global reaction class
     """
-    def __init__(self, name, substrates, enz_type, params, rates):
+    def __init__(self, name, substrates, mechanism, params, rates):
         self.name = name
-        self.metabolites = substrates
-        self.type = enz_type
-        self.params = params
-        self.rates  = rates
+        self._substrates = substrates
+        self.mechanism = mechanism
 
     def __str__(self):
         return "%s of with %s kinetics "%(self.name, self.type)

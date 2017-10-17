@@ -28,24 +28,43 @@ limitations under the License.
 from sympy import sympify
 from .mechanism import KineticMechanism
 from ..core.reactions import Reaction
+from collections import namedtuple
+
 
 class ReversibleMichaelisMenten(KineticMechanism):
     """A reversible uni uni reaction enzmye class"""
+
+    Substrates = namedtuple('Substrates', ['substrate', 'product'])
+    Parameters = namedtuple('Parameters', ['vmax_forward',
+                                           'vmax_backward',
+                                           'km_substrate',
+                                           'km_product',
+                                           'thermo_displacement',
+                                           'k_equilibrium',
+                                           'total_enzyme_concentration',
+                                           ])
+    Rates = namedtuple('Rates',['k1_fwd',
+                                'k1_bwd',
+                                'k2_fwd',
+                                'k2_bwd',
+                                ])
+
     def __init__(self, name, substrates, params):
         # FIXME dynamic linking, separaret parametrizations from model init
         # FIXME Reaction has a mechanism, and this is a mechanism
-        #KineticMechanism.__init__(**kwargs)
+        KineticMechanism.__init__(name, substrates, params)
         # initialize from super class
-        Reaction.__init__(self, name, substrates, 'rev_uni_uni', params, {}) ## WROOOOONG
-        k1b = self.params['v_max_r'] / self.params['E_tot']
-        k2f = self.params['v_max_f'] / self.params['E_tot']
-        k1f = (k1b + k2f) / self.params['K_S']
-        k2b = (k1b + k2f) / self.params['K_P']
         rates = {"k1f": k1f, "k1b": k1b, "k2f": k2f, "k2b": k2b}
         self.rates = rates
 
+    def calculate_rates(self):
+        k1b = self.params['v_max_ / self.params['E_tot']
+        k2f = self.params['v_max_f'] / self.params['E_tot']
+        k1f = (k1b + k2f) / self.params['K_S']
+        k2b = (k1b + k2f) / self.params['K_P']
+
     def get_qssa_rate_expression(self):
-        # FIXME dynamic linking, separaret parametrizations from model init
+        # FIXME dynamic linking, separated parametrizations from model init
         denominator = sympify('1+' + self.substrates[1] + '/K_P_' + self.name \
                               + "+" + self.substrates[0] + '/K_S_' + self.name)
         reverse_flux = sympify(

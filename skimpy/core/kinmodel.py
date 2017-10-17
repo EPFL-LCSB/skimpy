@@ -54,6 +54,13 @@ class KineticModel(object):
             self.metabolites.append(this_metabolite)
         self._modifed = True
 
+    def parametrize():
+        """
+        If has input: apply as dict to reactions in the model by
+            reaction.parametrize(args)
+        :return:
+        """
+
     def add_boundary(self, boundary):
         # Add a boundary to the model
         self.boundaries.append(boundary)

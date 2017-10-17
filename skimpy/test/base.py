@@ -30,20 +30,31 @@ from ..core import *
 from ..mechanisms import *
 
 name = 'pfk'
-metabolites = ['A','B']
+metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
+                                                   product = 'B')
 
-thermo_data = {'S':     1e-2,
-               'P':     1e-2,
-               'sig_S': 0.1,
-               'sig_P': 0.1,
-               'gamma': 0.1,
-               'flux':  1.0,
-               'E_tot': 1e-5}
+# thermo_data = {'S':     1e-2,
+#                'P':     1e-2,
+#                'sig_S': 0.1,
+#                'sig_P': 0.1,
+#                'gamma': 0.1,
+#                'flux':  1.0,
+#                'E_tot': 1e-5}
+parameters = ReversibleMichaelisMenten.Parameters(
+    vmax_forward = 1,
+    vmax_backward = 0.5,
+    km_substrate = 10,
+    km_product = 10,
+)
 
-enzyme_1 = ReversibleMichaelisMenten(name,metabolites,thermo_data)
+pfk = Reaction(name=name,
+               mechanism = ReversibleMichaelisMenten,
+               substrates=metabolites,
+               )
 
 this_model = KineticModel()
-this_model.add_reaction(enzyme_1)
+this_model.add_reaction(pfk)
+this_model.parametrize({pfk.name:parameters})
 
 this_sol = this_model.solve_ode([0,1.0],
                                 [10e-2,0.1e-2,9e-5,0.1e-5],
