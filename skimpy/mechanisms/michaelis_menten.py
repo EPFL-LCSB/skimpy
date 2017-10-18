@@ -28,6 +28,7 @@ limitations under the License.
 from sympy import sympify
 from .mechanism import KineticMechanism
 from ..core.reactions import Reaction
+from ..utils.tabdict import TabDict
 from collections import namedtuple
 
 
@@ -46,59 +47,42 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                            ])
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
-    Rates = namedtuple('Rates',['k1_fwd',
-                                'k1_bwd',
-                                'k2_fwd',
-                                'k2_bwd',
-                                ])
+    RateConstants = namedtuple('RateConstants',['k1_fwd',
+                                                'k1_bwd',
+                                                'k2_fwd',
+                                                'k2_bwd',
+                                                ])
 
     def __init__(self, name, substrates, parameters=None):
         # FIXME dynamic linking, separaret parametrizations from model init
         # FIXME Reaction has a mechanism, and this is a mechanism
         KineticMechanism.__init__(self,name, substrates, parameters)
 
-    def calculate_rates(self):
-        # Calcuate elementary rates
-
-        # TODO: Check that the not None params are compatible
-        # Param families/ set ?
-
-        params = self.parameters
-        k1_bwd = params.vmax_forward  / params.total_enzyme_concentration
-        k2_fwd = params.vmax_backward / params.total_enzyme_concentration
-
-        k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
-        k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
-
-        self.rates = self.Rates (k1_fwd = k1_fwd,
-                                 k2_fwd = k2_fwd,
-                                 k1_bwd = k1_bwd,
-                                 k2_bwd = k2_bwd,
-                                 )
-
-        # self.set_dynamic_attribute_links(self._rates)
-
-
     def get_qssa_rate_expression(self):
-        # FIXME dynamic linking, separated parametrizations from model init
-
         subs = self.substrates
 
-        common_expression = sympify('1'                           \
+        common_denominator = sympify('1'                           \
                                     + '+'+subs.substrate+'/'      \
                                     +'km_substrate'+'_'+self.name \
                                     + '+'+subs.product+'/'        \
                                     +'km_product'+'_'+self.name  \
                                     )
-        bwd_expression = sympify( 'vmax_backward'+'_'+self.name    \
+        bwd_nominator = sympify( 'vmax_backward'+'_'+self.name    \
                                   +'*'+subs.product               \
                                   +'/'+'km_product'+'_'+self.name)
 
-        fwd_expression = sympify( 'vmax_forward'+'_'+self.name    \
+        fwd_nominator = sympify( 'vmax_forward'+'_'+self.name    \
                                   +'*'+subs.substrate             \
                                   +'/'+'km_substrate'+'_'+self.name)
 
-        rate_expression = (fwd_expression-bwd_expression)/common_expression
+        forward_rate_expression = fwd_nominator/common_denominator
+        backward_rate_expression = bwd_nominator/common_denominator
+        rate_expression = forward_rate_expression-backward_rate_expression
+
+        self.reaction_rates = TabDict([('v_net',rate_expression),
+                                       ('v_fwd', forward_rate_expression),
+                                       ('v_bwd', backward_rate_expression),
+                                       ])
 
         expressions = {subs.substrate: -rate_expression,
                        subs.product:    rate_expression}
@@ -111,8 +95,8 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
     def get_full_rate_expression(self):
         # Calculate rates uppon initialization
-        if not hasattr(self,'rates'):
-            self.calculate_rates()
+        if not hasattr(self,'rate_constants'):
+            self.calculate_rate_constants()
 
         subs = self.substrates
 
@@ -123,15 +107,41 @@ class ReversibleMichaelisMenten(KineticMechanism):
         r2f = sympify(enzyme_complex+'*k2_fwd_'+self.name)
         r2b = sympify(subs.product  +"*"+self.name+'*k2_bwd_'+self.name)
 
-        expressions = {subs.substrate   : r1b - r1f,
-                       subs.product     : r2f - r2b,
-                       enzyme_complex   : r1f - r1b - r2f + r2b,
-                       self.name        : r1b - r1f - r2b + r2f}
+        self.reaction_rates = TabDict([('r1f',r1f),
+                                       ('r1b', r1b),
+                                       ('r2f', r2f),
+                                       ('r2b', r2b),
+                                       ])
+
+        expressions = {subs.substrate: r1b - r1f,
+                       subs.product: r2f - r2b,
+                       enzyme_complex: r1f - r1b - r2f + r2b,
+                       self.name: r1b - r1f - r2b + r2f}
+
+        parameters = self.get_expression_parameters_from('rate_constants')
+        return expressions, parameters
 
 
-        parameters = self.get_expression_parameters_from('rates')
+    def calculate_rate_constants(self):
+        # Calcuate elementary rates
 
-        return expressions,parameters
+        # TODO: Check that the not None params are compatible
+        # Param families/ set ?
+
+        params = self.parameters
+        k1_bwd = params.vmax_forward  / params.total_enzyme_concentration
+        k2_fwd = params.vmax_backward / params.total_enzyme_concentration
+
+        k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
+        k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
+
+        self.rate_constants = self.RateConstants (k1_fwd = k1_fwd,
+                                                  k2_fwd = k2_fwd,
+                                                  k1_bwd = k1_bwd,
+                                                  k2_bwd = k2_bwd,
+                                                  )
+
+        # self.set_dynamic_attribute_links(self._rates)
 
 
 

@@ -26,9 +26,6 @@ limitations under the License.
 """
 from abc import ABC, abstractmethod
 
-from collections import namedtuple
-
-
 class KineticMechanism(ABC):
     def __init__(self, name, substrates, parameters = None):
         # ABC.__init__()
@@ -66,15 +63,11 @@ class KineticMechanism(ABC):
 
     @property
     @abstractmethod
-    def Rates(self):
+    def RateConstants(self):
         """
         Class to define rates and their roles in the reaction
         :return:
         """
-        pass
-
-    @abstractmethod
-    def calculate_rates(self):
         pass
 
     @abstractmethod
@@ -83,6 +76,10 @@ class KineticMechanism(ABC):
 
     @abstractmethod
     def get_full_rate_expression(self):
+        pass
+
+    @abstractmethod
+    def calculate_rate_constants(self):
         pass
 
     def get_expression_parameters_from(self,kind):
