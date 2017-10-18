@@ -55,8 +55,8 @@ this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
 this_model.compile_ode(sim_type = 'QSSA')
 
-this_model.initial_conditions.A = 10e-2
-this_model.initial_conditions.B = 0.1e-2
+this_model.initial_conditions.A = 1e-2
+this_model.initial_conditions.B = 1e-2
 
 this_sol_qssa = this_model.solve_ode([0,100.0],solver_type = 'vode')
 
@@ -65,10 +65,14 @@ this_sol_qssa.plot('output/thermo_data_out_qssa.html')
 ## Full rate method
 this_model.compile_ode(sim_type = 'full')
 
-this_model.initial_conditions.A = 10e-2
-this_model.initial_conditions.B = 0.1e-2
-this_model.initial_conditions.pfk = 1e-5
+this_model.initial_conditions.A = 1e-2
+this_model.initial_conditions.B = 1e-2
+this_model.initial_conditions.pfk = (0.8)*thermo_data_pfk['total_enzyme_concentration']
+this_model.initial_conditions.EC_pfk = (0.2)*thermo_data_pfk['total_enzyme_concentration']
 
 this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
 
 this_sol_full.plot('output/thermo_data_out_full.html')
+
+
+#this_sol_full.species[-1,[2,3]] - this_sol_qssa.species[-1,:]
