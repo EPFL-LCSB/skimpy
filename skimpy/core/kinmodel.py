@@ -34,23 +34,42 @@ from .solution import Solution
 from ..utils import TabDict
 from ..utils.general import join_dicts
 
-def iterable_to_tabdict(iterable):
-    return TabDict([(x.name, x) for x in iterable])
+from sympy import sympify
+
+def iterable_to_tabdict(iterable, use_name = True):
+    """
+    Takes the items from an iterable and puts them in a TabDict, indexed by the
+    elements' .name property
+
+    :param iterable:
+    :return:
+    """
+    if iterable is None:
+        return TabDict()
+
+    if use_name:
+        return TabDict([(x.name, x) for x in iterable])
+    else:
+        return TabDict([(x.__str__(), x) for x in iterable])
 
 class KineticModel(object):
     # Consult with Pierre about this class!
     # Better use dicts with names! + inherited objects!
 
-    def __init__(self, reactions = [], boundaries = []):
+    def __init__(self,
+                 reactions=None,
+                 boundary_conditions=None,
+                 constraints=None):
         # initialize the model is stated
         # FIXME Add dictlists from cobra ? or reimplement a similar data structure
         # self.metabolites = metabolites    #List of metabolite objects/ids
 
         # List of enzyme objects
         self.reactions   = iterable_to_tabdict(reactions)
-        self.boundaries  = iterable_to_tabdict(boundaries)
+        self.boundary_conditions  = iterable_to_tabdict(boundary_conditions)
+        self.constraints  = iterable_to_tabdict(constraints)
         self.initial_conditions = iterable_to_tabdict([])
-        self._modifed    = True
+        self._modified    = True
 
     # TODO : Implement
     @property
@@ -58,17 +77,32 @@ class KineticModel(object):
         pass
 
     def add_reaction(self, reaction):
-        # Add an enzyme to the model
-        if reaction.name in self.reactions:
-            error_msg = 'Reaction {} already exists in the model'
-            raise(Exception(error_msg.format(reaction.name)))
+        self.add_to_tabdict(reaction, 'reactions')
 
-        self.reactions[reaction.name] = reaction
+    def add_constraint(self, constraint):
+        constraint.link(self)
+        self.add_to_tabdict(constraint, 'constraints')
+
+    def add_boundary_condition(self, boundary_condition):
+        boundary_condition.link(self)
+        self.add_to_tabdict(boundary_condition, 'boundary_conditions')
+
+    def add_to_tabdict(self, element, kind):
+
+        the_tabdict = getattr(self, kind)
+
+        # Add an enzyme to the model
+        if element.name in the_tabdict:
+            error_msg = 'Reaction {} already exists in the model'
+            raise(Exception(error_msg.format(element.name)))
+
+        the_tabdict[element.name] = element
 
         # TODO : Implement with metabolites
         # for this_metabolite in reaction.metabolites:
         #     self.metabolites.append(this_metabolite)
         self._modifed = True
+
 
     def parametrize(self,param_dict):
         """
@@ -80,10 +114,6 @@ class KineticModel(object):
         for reaction_name, the_params in param_dict.items():
             the_reaction = self.reactions[reaction_name]
             the_reaction.parametrize(the_params)
-
-    def add_boundary(self, boundary):
-        # Add a boundary to the model
-        self.boundaries.append(boundary)
 
     @property
     def sim_type(self):
@@ -154,7 +184,8 @@ class KineticModel(object):
         all_param = join_dicts(all_param)
 
         # Get unique set of all the variables
-        variables = list(set(all_rates))
+        variables = [sympify(x) for x in set(all_rates)]
+        variables = iterable_to_tabdict(variables, use_name=False)
 
         expr = dict.fromkeys(variables, 0.0)
 
@@ -164,10 +195,16 @@ class KineticModel(object):
             for this_variable_key in this_reaction:
                 expr[this_variable_key] += this_reaction[this_variable_key]
 
-        # Apply boundary conditions. Boundaries are objects that act on
+        # Apply constraints. Constraints are modifiers that act on
         # expressions
-        for this_boundary in self.boundaries:
-            this_boundary(expr)
+        for this_constraint in self.constraints.values():
+            this_constraint(expr)
+
+        # Apply boundary conditions. Boundaries are modifiers that act on
+        # expressions
+        for this_boundary_condition in self.boundary_conditions.values():
+            this_boundary_condition(expr)
+
 
         # Make vector function from expressions
         self.ode_fun = ODEFunction(variables, expr, all_param)

@@ -37,9 +37,11 @@ class ODEFunction:
         self.expr = expr
         self.parameters = parameters
 
-        #Create a binary function
+        # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self.parameters]
-        sym_vars = list(symbols(variables+the_param_keys))
+        the_variable_keys = [x for x in variables]
+        sym_vars = list(symbols(the_variable_keys+the_param_keys))
+
         # Awsome sympy magic
         the_expressions = [self.expr[x] for x in self.variables]
         self.function = ufuncify(sym_vars,the_expressions)

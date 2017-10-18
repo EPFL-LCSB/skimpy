@@ -29,7 +29,7 @@ from ..mechanisms import *
 
 #Create enzyme parameterization from
 #Thermodynamics data
-def reversible_michalies_menten_from_thermo_data(thermo_data):
+def reversible_michaelis_menten_from_thermo_data(thermo_data):
     """Create reaction parameters from thermodynamic data"""
 
     # v_maxes

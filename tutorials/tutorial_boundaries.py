@@ -28,22 +28,19 @@ limitations under the License.
 # Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
-from skimpy.utils.constructors import reversible_michaelis_menten_from_thermo_data
 
 name = 'pfk'
 metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
                                                    product = 'B')
 
-thermo_data_pfk = {'concetration_substrate':     1e-2,
-                   'concetration_product':       1e-2,
-                   'saturation_substrate':       0.1,
-                   'saturation_product':         0.1,
-                   'thermo_displacement':        0.8,
-                   'flux':                       1e-4,
-                   'total_enzyme_concentration': 1e-5}
-
 ## QSSA Method
-parameters = reversible_michaelis_menten_from_thermo_data(thermo_data_pfk)
+parameters = ReversibleMichaelisMenten.Parameters(
+    vmax_forward = 1,
+    vmax_backward = 0.5,
+    km_substrate = 10,
+    km_product = 10,
+    total_enzyme_concentration = 1,
+)
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
@@ -53,26 +50,24 @@ pfk = Reaction(name=name,
 this_model = KineticModel()
 this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
-this_model.compile_ode(sim_type = 'QSSA')
 
-this_model.initial_conditions.A = 1e-2
-this_model.initial_conditions.B = 1e-2
+## Make the Boundary Condition
 
-this_sol_qssa = this_model.solve_ode([0,100.0],solver_type = 'vode')
+the_boundary_condition = ConstantConcentration("A")
+# -- OR -- substrates ?
+# TODO
 
-this_sol_qssa.plot('output/thermo_data_out_qssa.html')
+this_model.add_boundary_condition(the_boundary_condition)
 
 ## Full rate method
+
+
 this_model.compile_ode(sim_type = 'full')
 
-this_model.initial_conditions.A = 1e-2
-this_model.initial_conditions.B = 1e-2
-this_model.initial_conditions.pfk = (0.8)*thermo_data_pfk['total_enzyme_concentration']
-this_model.initial_conditions.EC_pfk = (0.2)*thermo_data_pfk['total_enzyme_concentration']
+this_model.initial_conditions.A = 10.0
+this_model.initial_conditions.B = 1.0
+this_model.initial_conditions.pfk = 1.0
 
 this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
 
-this_sol_full.plot('output/thermo_data_out_full.html')
-
-
-#this_sol_full.species[-1,[2,3]] - this_sol_qssa.species[-1,:]
+this_sol_full.plot('output/boundary_out_full.html')

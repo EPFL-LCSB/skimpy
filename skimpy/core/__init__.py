@@ -26,3 +26,4 @@ limitations under the License.
 """
 
 from .kinmodel import KineticModel
+from .modifiers import *

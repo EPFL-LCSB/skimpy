@@ -33,7 +33,7 @@ class Solution:
     def __init__(self,model,t,y):
         self.time    = np.array(t)
         self.species = np.array(y)
-        self.names   = model.ode_fun.variables
+        self.names   = [x for x in model.ode_fun.variables]
 
     def plot(self, filename = ''):
         timetrace_plot(self.time,self.species,filename,legend = self.names)
