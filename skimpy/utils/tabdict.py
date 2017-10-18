@@ -47,4 +47,8 @@ class TabDict(OrderedDict):
                                  attr)
 
     def __setattr__(self, attr, value):
-        return TabDict.__setitem__(self, attr,value)
+        try:
+            return TabDict.__setitem__(self, attr,value)
+        except KeyError:
+            raise AttributeError("TabDict has no attribute or entry %s" %
+                                 attr)
