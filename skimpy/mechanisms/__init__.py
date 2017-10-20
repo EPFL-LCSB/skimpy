@@ -26,3 +26,4 @@ limitations under the License.
 """
 
 from .michaelis_menten import *
+from .mechanisms import Mechanism
