@@ -52,3 +52,20 @@ class TabDict(OrderedDict):
         except KeyError:
             raise AttributeError("TabDict has no attribute or entry %s" %
                                  attr)
+
+
+def iterable_to_tabdict(iterable, use_name = True):
+    """
+    Takes the items from an iterable and puts them in a TabDict, indexed by the
+    elements' .name property
+
+    :param iterable:
+    :return:
+    """
+    if iterable is None:
+        return TabDict()
+
+    if use_name:
+        return TabDict([(x.name, x) for x in iterable])
+    else:
+        return TabDict([(x.__str__(), x) for x in iterable])

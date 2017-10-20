@@ -31,40 +31,26 @@ from numpy import array, append
 from .ode_fun import ODEFunction
 from .solution import Solution
 
-from ..utils import TabDict
+from ..utils import TabDict,iterable_to_tabdict
 from ..utils.general import join_dicts
+
 
 from sympy import sympify
 
-def iterable_to_tabdict(iterable, use_name = True):
-    """
-    Takes the items from an iterable and puts them in a TabDict, indexed by the
-    elements' .name property
-
-    :param iterable:
-    :return:
-    """
-    if iterable is None:
-        return TabDict()
-
-    if use_name:
-        return TabDict([(x.name, x) for x in iterable])
-    else:
-        return TabDict([(x.__str__(), x) for x in iterable])
 
 class KineticModel(object):
-    # Consult with Pierre about this class!
-    # Better use dicts with names! + inherited objects!
+    """
+    This class contains the kinetic model as described by reaction and
+    boundary conditions and constratins.
+
+    :param :
+    :return:
+    """
 
     def __init__(self,
                  reactions=None,
                  boundary_conditions=None,
                  constraints=None):
-        # initialize the model is stated
-        # FIXME Add dictlists from cobra ? or reimplement a similar data structure
-        # self.metabolites = metabolites    #List of metabolite objects/ids
-
-        # List of enzyme objects
         self.reactions   = iterable_to_tabdict(reactions)
         self.boundary_conditions  = iterable_to_tabdict(boundary_conditions)
         self.constraints  = iterable_to_tabdict(constraints)
