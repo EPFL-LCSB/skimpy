@@ -153,16 +153,16 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
         r1f = ElementrayReactionStep([self.name,subs.substrate],
                                      [enzyme_complex],
-                                     'k1_fwd')
+                                     'k1_fwd_'+self.name)
         r1b = ElementrayReactionStep([enzyme_complex],
                                      [self.name,subs.substrate],
-                                     'k1_bwd')
+                                     'k1_bwd_'+self.name)
         r2f = ElementrayReactionStep([self.name,subs.product],
                                      [enzyme_complex],
-                                     'k2_fwd')
+                                     'k2_fwd_'+self.name)
         r2b = ElementrayReactionStep([enzyme_complex],
                                      [self.name,subs.product],
-                                     'k2_bwd')
+                                     'k2_bwd_'+self.name)
 
         self.elementary_reactions = self.ElementaryReactions( r1f = r1f,
                                                               r1b = r1b,
