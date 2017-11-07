@@ -94,3 +94,34 @@ class KineticMechanism(ABC):
             parameters[param_name] = param_value
 
         return parameters
+
+
+
+
+class ElementrayReactionStep(object):
+    def __init__(self,educts,products,rate_constant_name):
+        self.educts = educts
+        self.products = products
+        self.rate_constant_name = rate_constant_name
+
+    def __str__(self):
+        is_first = True
+        for educt in self.educts:
+            if is_first:
+                educt_string = educt
+            else:
+                educt_string += " + "+educt
+            is_first = False
+
+        is_first = True
+        for product in self.products:
+            if is_first:
+                product_string = product
+            else:
+                product_string += " + "+product
+            is_first = False
+
+        return educt_string + " --" + self.rate_constant_name + "--> " + product_string
+
+    def __repr__(self):
+        return self.__str__()

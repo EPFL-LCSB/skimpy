@@ -26,7 +26,7 @@ limitations under the License.
 """
 
 from sympy import sympify
-from .mechanism import KineticMechanism
+from .mechanism import KineticMechanism,ElementrayReactionStep
 from ..core.reactions import Reaction
 from ..utils.tabdict import TabDict
 from collections import namedtuple
@@ -52,6 +52,12 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                                 'k2_fwd',
                                                 'k2_bwd',
                                                 ])
+    ElementaryReactions = namedtuple('ElementaryReactions',['r1f',
+                                                            'r1b',
+                                                            'r2f',
+                                                            'r2b',
+                                                            ])
+
 
     def __init__(self, name, substrates, parameters=None):
         # FIXME dynamic linking, separaret parametrizations from model init
@@ -135,10 +141,30 @@ class ReversibleMichaelisMenten(KineticMechanism):
         k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
         k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
 
-        self.rate_constants = self.RateConstants (k1_fwd = k1_fwd,
+        self.rate_constants = self.RateConstants( k1_fwd = k1_fwd,
                                                   k2_fwd = k2_fwd,
                                                   k1_bwd = k1_bwd,
                                                   k2_bwd = k2_bwd,
                                                   )
 
         # self.set_dynamic_attribute_links(self._rates)
+        subs = self.substrates
+        enzyme_complex = 'EC_'+self.name
+
+        r1f = ElementrayReactionStep([self.name,subs.substrate],
+                                     [enzyme_complex],
+                                     'k1_fwd')
+        r1b = ElementrayReactionStep([enzyme_complex],
+                                     [self.name,subs.substrate],
+                                     'k1_bwd')
+        r2f = ElementrayReactionStep([self.name,subs.product],
+                                     [enzyme_complex],
+                                     'k2_fwd')
+        r2b = ElementrayReactionStep([enzyme_complex],
+                                     [self.name,subs.product],
+                                     'k2_bwd')
+
+        self.elementary_reactions = self.ElementaryReactions( r1f = r1f,
+                                                              r1b = r1b,
+                                                              r2f = r2f,
+                                                              r2b = r2b,)
