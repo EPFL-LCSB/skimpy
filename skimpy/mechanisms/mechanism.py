@@ -121,7 +121,7 @@ class ElementrayReactionStep(object):
                 product_string += " + "+product
             is_first = False
 
-        return educt_string + " --" + self.rate_constant_name + "--> " + product_string
+        return educt_string + " --> " + product_string
 
     def __repr__(self):
         return self.__str__()
