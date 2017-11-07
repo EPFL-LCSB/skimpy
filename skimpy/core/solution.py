@@ -27,14 +27,21 @@ limitations under the License.
 
 import numpy as np
 from ..viz.plotting import timetrace_plot
+from ..utils import TabDict,iterable_to_tabdict
 
 # Class for ode solutions
 class Solution:
     def __init__(self,model,t,y):
         self.time    = np.array(t)
+
         self.species = np.array(y)
-        self.names   = [x for x in model.ode_fun.variables]
+        self.names = [x for x in model.ode_fun.variables]
+
+        self.concentrations = iterable_to_tabdict([])
+        for this_species, this_name in zip(self.species.T,self.names):
+            self.concentrations[this_name] = this_species
+
+
 
     def plot(self, filename = ''):
         timetrace_plot(self.time,self.species,filename,legend = self.names)
-
