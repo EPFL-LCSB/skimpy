@@ -129,8 +129,8 @@ class ReversibleMichaelisMenten(KineticMechanism):
         # Param families/ set ?
 
         params = self.parameters
-        k1_fwd = params.vmax_forward  / params.total_enzyme_concentration
-        k2_bwd = params.vmax_backward / params.total_enzyme_concentration
+        k1_bwd = params.vmax_backward / params.total_enzyme_concentration
+        k2_fwd = params.vmax_forward  / params.total_enzyme_concentration
 
         k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
         k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
