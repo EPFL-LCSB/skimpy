@@ -27,7 +27,7 @@ limitations under the License.
 
 import numpy as np
 
-from sympy import symbols
+from sympy import symbols, Array
 from sympy.utilities.autowrap import ufuncify
 
 
@@ -42,9 +42,15 @@ class ODEFunction:
         the_variable_keys = [x for x in variables]
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
-        # Awsome sympy magic
+        # Sort the expressions
         the_expressions = [self.expr[x] for x in self.variables]
-        self.function = ufuncify(sym_vars,the_expressions)
+
+         # Awsome sympy magic
+        self.function = []
+        for exp in the_expressions:
+           self.function.append(ufuncify(   tuple(sym_vars),
+                                            exp,
+                                            backend = 'Cython'))
 
     @property
     def parameters(self):
@@ -65,5 +71,7 @@ class ODEFunction:
 
     def __call__(self,t,y):
         input_vars = list(y)+self.parameter_values
-        result = self.function(*input_vars)
-        return np.array(result)
+        #result = self.functin
+        array_input = [np.array([input_var])  for input_var in  input_vars  ]
+        results = [f(*array_input) for f in self.function ]
+        return np.array(results)
