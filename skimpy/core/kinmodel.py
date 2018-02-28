@@ -25,17 +25,9 @@ limitations under the License.
 
 """
 
-from scipy.integrate import ode
-from numpy import array, append
-
-from .ode_fun import ODEFunction
+from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
 from .solution import Solution
-
-from ..utils import TabDict,iterable_to_tabdict
-from ..utils.general import join_dicts
-
-
-from sympy import sympify
+from ..utils import TabDict, iterable_to_tabdict
 
 
 class KineticModel(object):
@@ -51,11 +43,11 @@ class KineticModel(object):
                  reactions=None,
                  boundary_conditions=None,
                  constraints=None):
-        self.reactions   = iterable_to_tabdict(reactions)
-        self.boundary_conditions  = iterable_to_tabdict(boundary_conditions)
-        self.constraints  = iterable_to_tabdict(constraints)
+        self.reactions = iterable_to_tabdict(reactions)
+        self.boundary_conditions = iterable_to_tabdict(boundary_conditions)
+        self.constraints = iterable_to_tabdict(constraints)
         self.initial_conditions = iterable_to_tabdict([])
-        self._modified    = True
+        self._modified = True
 
     # TODO : Implement
     @property
@@ -89,14 +81,12 @@ class KineticModel(object):
         #     self.metabolites.append(this_metabolite)
         self._modifed = True
 
-
     def parametrize(self,param_dict):
         """
         If has input: apply as dict to reactions in the model by
             reaction.parametrize(args)
         :return:
         """
-
         for reaction_name, the_params in param_dict.items():
             the_reaction = self.reactions[reaction_name]
             the_reaction.parametrize(the_params)
@@ -118,7 +108,11 @@ class KineticModel(object):
         # Recompile only if modified
         if self._modified:
             # Compile ode function
-            self.make_ode_fun(sim_type)
+            ode_fun, variables = make_ode_fun(self, sim_type)
+            # TODO define the init properly
+            self.ode_fun = ode_fun
+            self.variables = variables
+
             self._modified = False
             # Create initial_conditions from variables
             self.initial_conditions = TabDict([(x,0.0) for x in self.variables])
@@ -130,7 +124,7 @@ class KineticModel(object):
                   abstol = 1e-8):
 
         # Choose a solver
-        self.solver = get_ode_solver(self.ode_fun,solver_type,reltol,abstol)
+        self.solver = get_ode_solver(self.ode_fun, solver_type, reltol, abstol)
 
         # Order the initial conditions according to variables
         ordered_initial_conditions = [self.initial_conditions[variable]
@@ -143,85 +137,9 @@ class KineticModel(object):
 
         return Solution(self,t_sol,y_sol)
 
-    def make_ode_fun(self, sim_type):
 
-        # Gete all variables and expressions (Better solution with types?)
-        if sim_type == 'QSSA':
-            all_data = [this_reaction.mechanism.get_qssa_rate_expression()  \
-                        for this_reaction in self.reactions.values()]
-
-        elif sim_type == 'tQSSA':
-            raise(NotImplementedError)
-            all_data = [this_reaction.mechanism.get_tqssa_rate_expression() \
-                        for this_reaction in self.reactions.values()]
-
-        elif sim_type == 'full':
-            all_data = [this_reaction.mechanism.get_full_rate_expression()  \
-                        for this_reaction in self.reactions.values()]
-
-        all_expr, all_param = list(zip(*all_data))
-
-        # Flatten all the lists
-        flatten_list = lambda this_list: [item for sublist in this_list \
-                                          for item in sublist]
-
-        all_rates = flatten_list([these_expressions.keys()
-                                  for these_expressions in all_expr])
-        all_param = join_dicts(all_param)
-
-        # Get unique set of all the variables
-        variables = [sympify(x) for x in set(all_rates)]
-        variables = iterable_to_tabdict(variables, use_name=False)
-
-        expr = dict.fromkeys(variables, 0.0)
-
-        # Mass balance
-        # Sum up all rate expressions
-        for this_reaction in all_expr:
-            for this_variable_key in this_reaction:
-                expr[this_variable_key] += this_reaction[this_variable_key]
-
-        # Apply constraints. Constraints are modifiers that act on
-        # expressions
-        for this_constraint in self.constraints.values():
-            this_constraint(expr)
-
-        # Apply boundary conditions. Boundaries are modifiers that act on
-        # expressions
-        for this_boundary_condition in self.boundary_conditions.values():
-            this_boundary_condition(expr)
+    def compile_mca(self,):
+        """Compile MCA expressions for """
+        pass
 
 
-        # Make vector function from expressions
-        self.ode_fun = ODEFunction(variables, expr, all_param)
-        # Ode variables
-        self.variables = variables
-
-def get_ode_solver(  ode_fun,
-                     solver_type = "vode",
-                     reltol = 1e-8,
-                     abstol = 1e-8):
-
-    # Initialize the integrator
-    ode_solver = ode(ode_fun)
-    # Set properties
-    ode_solver.set_integrator(  solver_type,
-                                method='bdf',
-                                atol=abstol,
-                                rtol=reltol )
-
-    return ode_solver
-
-def _solve_ode(solver, time_int, initial_concentrations):
-
-    solver.set_initial_value(initial_concentrations, time_int[0])
-
-    t_sol = [time_int[0]]
-    y_sol = [initial_concentrations]
-
-    while solver.t <= time_int[1] and solver.successful():
-            solver.integrate(time_int[1], step=True)
-            t_sol.append(solver.t)
-            y_sol.append(solver.y)
-
-    return t_sol,y_sol
