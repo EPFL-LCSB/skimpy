@@ -26,13 +26,12 @@ limitations under the License.
 """
 
 import numpy as np
-
 from sympy import symbols, Array
 from sympy.utilities.autowrap import ufuncify
 
 
 class ODEFunction:
-    def __init__(self,variables,expr,parameters):
+    def __init__(self, variables, expr, parameters):
         self.variables  = variables
         self.expr = expr
         self.parameters = parameters
@@ -45,12 +44,13 @@ class ODEFunction:
         # Sort the expressions
         the_expressions = [self.expr[x] for x in self.variables]
 
-         # Awsome sympy magic
+        # Awsome sympy magic
+        # TODO problem with typs if any parameter ot vairabls is interpreted as interger
         self.function = []
         for exp in the_expressions:
-           self.function.append(ufuncify(   tuple(sym_vars),
-                                            exp,
-                                            backend = 'Cython'))
+           self.function.append(ufuncify(tuple(sym_vars),
+                                         exp,
+                                         backend='Cython'))
 
     @property
     def parameters(self):

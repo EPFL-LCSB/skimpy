@@ -43,11 +43,11 @@ metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
 
 ## QSSA Method
 parameters = ReversibleMichaelisMenten.Parameters(
-    vmax_forward = 1,
+    vmax_forward = 1.0,
     vmax_backward = 0.5,
-    km_substrate = 10,
-    km_product = 10,
-    total_enzyme_concentration = 1,
+    km_substrate = 10.0,
+    km_product = 10.0,
+    total_enzyme_concentration = 1.0,
 )
 
 pfk = Reaction(name=name,
@@ -63,7 +63,7 @@ this_model.compile_ode(sim_type = 'QSSA')
 this_model.initial_conditions.A = 10.0
 this_model.initial_conditions.B = 1.0
 
-this_sol_qssa = this_model.solve_ode([0,100.0],solver_type = 'vode')
+this_sol_qssa = this_model.solve_ode([0.0,100.0],solver_type = 'vode')
 
 this_sol_qssa.plot('output/base_out_qssa.html')
 
