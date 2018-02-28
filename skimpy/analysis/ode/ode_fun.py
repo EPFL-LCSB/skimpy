@@ -32,7 +32,16 @@ from sympy.utilities.autowrap import ufuncify
 
 class ODEFunction:
     def __init__(self, variables, expr, parameters):
-        self.variables  = variables
+        """
+        Constructor for a precompiled function to solve the ode epxressions
+        numerically
+        :param variables: a list of strings with variables names
+        :param expr: dict of sympy expressions for the rate of
+                     change of a variable indexed by the variable name
+        :param parameters: dict of parameters with parameter values
+
+        """
+        self.variables = variables
         self.expr = expr
         self.parameters = parameters
 
