@@ -1,6 +1,7 @@
 # Pycharm folders
 .idea/*
 cobra_docker/work/.idea/*
+*.html
 
 ###########################################
 ###	Standard Python	.gitignore	###
