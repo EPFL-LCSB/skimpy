@@ -113,7 +113,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
         r2f = sympify(enzyme_complex+'*k2_fwd_'+self.name)
         r2b = sympify(subs.product  +"*"+self.name+'*k2_bwd_'+self.name)
 
-        self.reaction_rates = TabDict([('r1f',r1f),
+        self.reaction_rates = TabDict([('r1f', r1f),
                                        ('r1b', r1b),
                                        ('r2f', r2f),
                                        ('r2b', r2b),
