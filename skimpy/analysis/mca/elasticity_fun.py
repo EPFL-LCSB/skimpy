@@ -24,46 +24,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+import numpy as np
 
 from sympy import symbols, Array
 from sympy.utilities.autowrap import ufuncify
 
 
-
 class ElasticityFunction:
-    def _init_(self,
-               independent_variables,
-               dependent_variables,
-               expressions,
-               parameters):
+    def __init__(self, variables, expressions, parameters):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
-        :param independent_variables: a list of strings denoting
+        :param variables: a list of strings denoting
                                       the independent variables names
-        :param dependent_variables: a list of strings denoting
-                                      the dependent variables names
         :param expressions: dict of sympy expressions for the rate of
                             change of a variable indexed by the variable
                             name
         :param parameters: dict of parameters with parameter values
 
         """
-        self.independent_variables = independent_variables
-        self.dependent_variables = dependent_variables
+        self.variables = variables
         self.expressions = expressions
         self.parameters = parameters
 
-
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self.parameters]
-        the_independent_variable_keys = [x for x in independent_variables]
-        the_dependent_variable_keys = [x for x in dependent_variables]
+        the_variable_keys = [x for x in variables]
 
-        sym_vars = list(symbols(independent_variables+dependent_variables+the_param_keys))
+        sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
         # Sort the expressions
-        the_expressions = [self.expressions[x] for x in self.the_independent_variable_keys]
+        the_expressions = [self.expressions[x] for x in self.the_variable_keys]
 
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot vairabls is interpreted as interger
@@ -91,8 +82,9 @@ class ElasticityFunction:
         self.parameter_values = [x for x in self.parameters.values()]
 
     def __call__(self,
-                 independent_variables,
-                 dependent_variables,
-                 expressions,
+                 variables,
                  parameters):
-        pass
+        input_vars = variables+parameters
+        array_input = [np.array([input_var])  for input_var in  input_vars  ]
+        results = [f(*array_input) for f in self.function ]
+        return np.array(results)
