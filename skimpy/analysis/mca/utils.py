@@ -25,13 +25,73 @@ limitations under the License.
 
 """
 
+from sympy import diff,sympify
 
-def make_elasticities(kinetic_model,elasticity_type):
+from .elasticity_fun import ElasticityFunction
+from ..ode.flux_fun import FluxFunction
 
 
-    # Get the elasticity expression for every mechanism
+def make_mca_functions(kinmodel):
+    """"Create the elasticity and flux functions for MCA"""
+
+    # Get flux expressions for forward an backward fluxes
+    all_fluxes = [this_reaction.mechanism.reaction_rates \
+                    for this_reaction in kinmodel.reactions]
+
+    #Split forward and backward fluxes
 
 
-    #
+    #TODO handle depedent variables (i.e. concentrations)   
 
-    pass
+
+
+
+    #parameter elasticitiesfunction
+    parameter_elasticities_fun = make_elasticity_fun(fluxes, parameters, all_parameters)
+
+
+    #concentration elasticity functions
+    concentration_elasticities_fun = make_elasticity_fun(fluxes, concentrations, all_parameters)
+
+
+    # Fluxes
+    flux_fun = FluxFunction(concentrations, fluxes, all_parameters)
+
+
+
+def make_elasticity_fun(expressions, variables, all_parameters):
+    """
+    Create an ElasticityFunction with elasticity = dlog(expression)/dlog(variable)
+    :param expressions  tab_dict of expressions (e.g. forward and backward fluxes)
+    :param variables    list of variables as string (e.g. concentrations or parameters)
+    
+    """
+
+    # Get the derivative of expression x vs variable y
+    elasticity_expressions = {}
+    column = 0
+    row = 0
+    for this_expression in expressions.values():
+        for this_variable in variables:
+            row += 1
+            column += 1
+            this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
+
+            if this_elasticity != 0:
+                elasticity_expressions[(row, column)] = this_elasticity
+
+    # Create the elasticity function
+    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, all_parameters)
+
+    return elasticity_fun
+
+
+def get_dlogx_dlogy(sympy_expression, string_variable):
+    """
+    Calc d_log_x/d_log_y = y/x*dx/dy
+    """
+    variable = sympify(string_variable)
+    partial_derivative = diff(sympy_expression, variable)
+
+    return partial_derivative/sympy_expression*variable
+
