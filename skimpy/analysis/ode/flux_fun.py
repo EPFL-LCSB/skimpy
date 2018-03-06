@@ -25,49 +25,39 @@ limitations under the License.
 
 """
 
+import numpy as np
 from sympy import symbols, Array
 from sympy.utilities.autowrap import ufuncify
 
 
-
-class ElasticityFunction:
-    def _init_(self, expressions, variables,  parameters):
+class FluxFunction:
+    def __init__(self, variables, expr, parameters):
         """
-        Constructor for a precompiled function to compute elasticities
+        Constructor for a precompiled function to solve the ode epxressions
         numerically
-        :param variables: a list of strings denoting
-                                      the independent variables names
-        :param expressions: dict of  non-zero sympy expressions for the rate of
-                            change of a variable indexed by a tuple of the matrix position
-                            e.g: (1,1)
-        :param parameters: orderred_dict of parameters with parameter values
+        :param variables: a list of strings with variables names
+        :param expr: dict of sympy expressions for the rate of
+                     change of a variable indexed by the variable name
+        :param parameters: dict of parameters with parameter values
 
         """
-
         self.variables = variables
-        self.expressions = expressions
+        self.expr = expr
         self.parameters = parameters
-
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self.parameters]
-        variables = [x for x in variables]
-
-
-        sym_vars = list(symbols(variables+the_param_keys))
+        the_variable_keys = [x for x in variables]
+        sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
 
         # Awsome sympy magic
-        # TODO problem with typs if any parameter ot variables is interpreted as interger
-        # Make a function to compute every non zero entry in the matrix
-        self.function = []
-        self.coordinates = []
-        for coord,exp in expressions.items():
-           self.function.append(ufuncify(tuple(sym_vars),
+        # TODO problem with typs if any parameter ot vairabls is interpreted as interger
+        self.function = {}
+        for key, exp in expr.items():
+           self.function[key] = ufuncify(tuple(sym_vars),
                                          exp,
-                                         backend='Cython'))
-            self.coordinates.append(coord)
-
+                                         backend='Cython')
 
     @property
     def parameters(self):
@@ -78,18 +68,17 @@ class ElasticityFunction:
         """
         Would-be optimization hack to avoid looking up thr whole dict at each
         iteration step in __call__
+
         :param value:
         :return:
-
         """
         self._parameters = value
         self.parameter_values = [x for x in self.parameters.values()]
 
-    def __call__(self,
-                 variables,
-                 parameters):
-        """
-        Return a sparse matrix type of elasticites
-        """
 
-        pass
+    def __call__(self,variables):
+        input_vars = list(variables)+self.parameter_values
+        #result = self.functin
+        array_input = [np.array([input_var])  for input_var in  input_vars]
+        results = {key:f(*array_input) for key,f in self.function.items()}
+        return results
