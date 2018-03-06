@@ -31,47 +31,42 @@ from sympy.utilities.autowrap import ufuncify
 
 
 class ElasticityFunction:
-    def _init_(self,
-               independent_variables,
-               dependent_variables,
-               expressions,
-               parameters):
+    def _init_(self, expressions, variables,  parameters):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
-        :param independent_variables: a list of strings denoting
+        :param variables: a list of strings denoting
                                       the independent variables names
-        :param dependent_variables: a list of strings denoting
-                                      the dependent variables names
-        :param expressions: dict of sympy expressions for the rate of
-                            change of a variable indexed by the variable
-                            name
-        :param parameters: dict of parameters with parameter values
+        :param expressions: dict of  non-zero sympy expressions for the rate of
+                            change of a variable indexed by a tuple of the matrix position
+                            e.g: (1,1)
+        :param parameters: orderred_dict of parameters with parameter values
 
         """
-        self.independent_variables = independent_variables
-        self.dependent_variables = dependent_variables
+
+        self.variables = variables
         self.expressions = expressions
         self.parameters = parameters
 
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self.parameters]
-        the_independent_variable_keys = [x for x in independent_variables]
-        the_dependent_variable_keys = [x for x in dependent_variables]
+        variables = [x for x in variables]
 
-        sym_vars = list(symbols(independent_variables+dependent_variables+the_param_keys))
 
-        # Sort the expressions
-        the_expressions = [self.expressions[x] for x in self.the_independent_variable_keys]
+        sym_vars = list(symbols(variables+the_param_keys))
+
 
         # Awsome sympy magic
-        # TODO problem with typs if any parameter ot vairabls is interpreted as interger
+        # TODO problem with typs if any parameter ot variables is interpreted as interger
+        # Make a function to compute every non zero entry in the matrix
         self.function = []
-        for exp in the_expressions:
+        self.coordinates = []
+        for coord,exp in expressions.items():
            self.function.append(ufuncify(tuple(sym_vars),
                                          exp,
                                          backend='Cython'))
+            self.coordinates.append(coord)
 
 
     @property
@@ -91,8 +86,10 @@ class ElasticityFunction:
         self.parameter_values = [x for x in self.parameters.values()]
 
     def __call__(self,
-                 independent_variables,
-                 dependent_variables,
-                 expressions,
+                 variables,
                  parameters):
+        """
+        Return a sparse matrix type of elasticites
+        """
+
         pass

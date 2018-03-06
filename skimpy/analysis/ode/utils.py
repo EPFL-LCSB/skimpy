@@ -33,37 +33,6 @@ from skimpy.utils import iterable_to_tabdict
 from skimpy.utils.general import join_dicts
 
 
-def get_ode_solver(  ode_fun,
-                     solver_type = "vode",
-                     reltol = 1e-8,
-                     abstol = 1e-8):
-
-    # Initialize the integrator
-    ode_solver = ode(ode_fun)
-    # Set properties
-    ode_solver.set_integrator(  solver_type,
-                                method='bdf',
-                                atol=abstol,
-                                rtol=reltol )
-
-    return ode_solver
-
-
-def _solve_ode(solver, time_int, initial_concentrations):
-
-    solver.set_initial_value(initial_concentrations, time_int[0])
-
-    t_sol = [time_int[0]]
-    y_sol = [initial_concentrations]
-
-    while solver.t <= time_int[1] and solver.successful():
-            solver.integrate(time_int[1], step=True)
-            t_sol.append(solver.t)
-            y_sol.append(solver.y)
-
-    return t_sol,y_sol
-
-
 def make_ode_fun(kinetic_model, sim_type):
 
     # Get all variables and expressions (Better solution with types?)
@@ -146,4 +115,38 @@ def make_flux_fun(kinetic_model):
     flux_fun = FluxFunction(variables, expr, all_param)
 
     return flux_fun
+
+
+
+def get_ode_solver(  ode_fun,
+                     solver_type = "vode",
+                     reltol = 1e-8,
+                     abstol = 1e-8):
+
+    # Initialize the integrator
+    ode_solver = ode(ode_fun)
+    # Set properties
+    ode_solver.set_integrator(  solver_type,
+                                method='bdf',
+                                atol=abstol,
+                                rtol=reltol )
+
+    return ode_solver
+
+
+def _solve_ode(solver, time_int, initial_concentrations):
+
+    solver.set_initial_value(initial_concentrations, time_int[0])
+
+    t_sol = [time_int[0]]
+    y_sol = [initial_concentrations]
+
+    while solver.t <= time_int[1] and solver.successful():
+            solver.integrate(time_int[1], step=True)
+            t_sol.append(solver.t)
+            y_sol.append(solver.y)
+
+    return t_sol,y_sol
+
+
 
