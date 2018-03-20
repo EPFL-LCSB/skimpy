@@ -54,6 +54,7 @@ class ExpressionModifier(object):
     def modifier(self):
         return self._modifier
 
+
     def link(self,model):
         """
         Link the modifier to a model, to gain awareness of the inner/outer

@@ -41,10 +41,7 @@ def make_mca_functions(kinmodel):
     #Split forward and backward fluxes
 
 
-    #TODO handle depedent variables (i.e. concentrations)   
-
-
-
+    #TODO handle depedent variables (i.e. concentrations)
 
     #parameter elasticitiesfunction
     parameter_elasticities_fun = make_elasticity_fun(fluxes, parameters, all_parameters)
