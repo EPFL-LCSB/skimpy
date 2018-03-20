@@ -29,9 +29,8 @@ from sympy import symbols, Array
 from sympy.utilities.autowrap import ufuncify
 
 
-
 class ElasticityFunction:
-    def _init_(self, expressions, variables,  parameters):
+    def __init__(self, expressions, variables,  parameters):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
@@ -40,7 +39,7 @@ class ElasticityFunction:
         :param expressions: dict of  non-zero sympy expressions for the rate of
                             change of a variable indexed by a tuple of the matrix position
                             e.g: (1,1)
-        :param parameters: orderred_dict of parameters with parameter values
+        :param parameters:  list of parameter names
 
         """
 
@@ -50,11 +49,11 @@ class ElasticityFunction:
 
 
         # Unpacking is needed as ufuncify only take ArrayTypes
-        the_param_keys = [x for x in self.parameters]
+        parameters = [x for x in self.parameters]
         variables = [x for x in variables]
 
 
-        sym_vars = list(symbols(variables+the_param_keys))
+        sym_vars = list(symbols(variables+parameters))
 
 
         # Awsome sympy magic
@@ -69,27 +68,12 @@ class ElasticityFunction:
             self.coordinates.append(coord)
 
 
-    @property
-    def parameters(self):
-        return self._parameters
-
-    @parameters.setter
-    def parameters(self,value):
+    def __call__(self, variables, parameters):
         """
-        Would-be optimization hack to avoid looking up thr whole dict at each
-        iteration step in __call__
-        :param value:
-        :return:
-
-        """
-        self._parameters = value
-        self.parameter_values = [x for x in self.parameters.values()]
-
-    def __call__(self,
-                 variables,
-                 parameters):
-        """
-        Return a sparse matrix type of elasticites
+        Return a sparse matrix type with elasticity values
         """
 
-        pass
+        elasticiy_matrix = []
+
+        return elasticiy_matrix
+

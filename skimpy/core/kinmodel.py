@@ -26,6 +26,7 @@ limitations under the License.
 """
 
 from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
+from skimpy.analysis.mca.utils import make_mca_functions
 from .solution import Solution
 from ..utils import TabDict, iterable_to_tabdict
 
@@ -138,8 +139,17 @@ class KineticModel(object):
         return Solution(self,t_sol,y_sol)
 
 
-    def compile_mca(self,):
+    def compile_mca(self, mca_type = 'vmax'):
         """Compile MCA expressions for """
-        pass
 
+        indepdendent_elasticity_fun, \
+        depdendent_elasticity_fun, \
+        parameter_elasticities_fun, \
+        relative_weights,\
+        absolute_weights = make_mca_functions(self, mca_type=mca_type )
 
+        self.indepdendent_elasticity_fun = indepdendent_elasticity_fun
+        self.depdendent_elasticity_fun = depdendent_elasticity_fun
+        self.parameter_elasticities_fun = parameter_elasticities_fun
+        self.relative_weights = relative_weights
+        self.absolute_weights = absolute_weights

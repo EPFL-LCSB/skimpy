@@ -25,40 +25,70 @@ limitations under the License.
 
 """
 
-from sympy import diff,sympify
+from sympy import diff, sympify, simplify
 
 from .elasticity_fun import ElasticityFunction
 from ..ode.flux_fun import FluxFunction
 
 
-def make_mca_functions(kinmodel):
+def make_mca_functions(kinmodel,mca_type = 'vmax'):
     """"Create the elasticity and flux functions for MCA"""
 
-    # Get flux expressions for forward an backward fluxes
-    all_fluxes = [this_reaction.mechanism.reaction_rates \
-                    for this_reaction in kinmodel.reactions]
+    # Get flux expressions for the net
+    all_flux_expressions = [this_reaction.mechanism.reaction_rates['v_net'] \
+                           for this_reaction in kinmodel.reactions]
 
-    #Split forward and backward fluxes
+    all_variables = []
 
+    all_parameters = []
 
     #TODO handle depedent variables (i.e. concentrations)
+    relative_weights = []
+    absolute_weights = []
+
+    #######
+
+    all_independent_variables = []
+
+    all_dependent_variables = []
+
+    if type == 'vmax':
+        # Get all vmax parameters
+        this_parameters = []
+
+    elif type == 'kms':
+        raise (NotImplementedError)
+    else:
+        raise(NotImplementedError)
 
     #parameter elasticitiesfunction
-    parameter_elasticities_fun = make_elasticity_fun(fluxes, parameters, all_parameters)
-
+    parameter_elasticities_fun = make_elasticity_fun(all_flux_expressions,
+                                                     this_parameters,
+                                                     all_variables,
+                                                     all_parameters)
 
     #concentration elasticity functions
-    concentration_elasticities_fun = make_elasticity_fun(fluxes, concentrations, all_parameters)
+    indepdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
+                                                      all_independent_variables,
+                                                      all_variables,
+                                                      all_parameters)
+
+    depdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
+                                                    all_dependent_variables,
+                                                    all_variables,
+                                                    all_parameters)
 
 
-    # Fluxes
-    flux_fun = FluxFunction(concentrations, fluxes, all_parameters)
+    return indepdendent_elasticity_fun, \
+           depdendent_elasticity_fun, \
+           parameter_elasticities_fun,
+           relative_weights,
+           absolute_weights
 
 
-
-def make_elasticity_fun(expressions, variables, all_parameters):
+def make_elasticity_fun(expressions,respective_variables ,variables, parameters):
     """
-    Create an ElasticityFunction with elasticity = dlog(expression)/dlog(variable)
+    Create an ElasticityFunction with elasticity = dlog(expression)/dlog(respective_variable)
     :param expressions  tab_dict of expressions (e.g. forward and backward fluxes)
     :param variables    list of variables as string (e.g. concentrations or parameters)
     
@@ -69,7 +99,7 @@ def make_elasticity_fun(expressions, variables, all_parameters):
     column = 0
     row = 0
     for this_expression in expressions.values():
-        for this_variable in variables:
+        for this_variable in respective_variables:
             row += 1
             column += 1
             this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
@@ -78,7 +108,7 @@ def make_elasticity_fun(expressions, variables, all_parameters):
                 elasticity_expressions[(row, column)] = this_elasticity
 
     # Create the elasticity function
-    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, all_parameters)
+    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, parameters)
 
     return elasticity_fun
 
@@ -90,5 +120,7 @@ def get_dlogx_dlogy(sympy_expression, string_variable):
     variable = sympify(string_variable)
     partial_derivative = diff(sympy_expression, variable)
 
-    return partial_derivative/sympy_expression*variable
+    expression = simplify(partial_derivative / sympy_expression * variable)
+
+    return
 
