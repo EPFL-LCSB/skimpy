@@ -36,6 +36,7 @@ from skimpy.utils.general import join_dicts
 def make_ode_fun(kinetic_model, sim_type):
 
     # Get all variables and expressions (Better solution with types?)
+    # TODO This should be a method in KineticModel that stores the expressions
     if sim_type == 'QSSA':
         all_data = [this_reaction.mechanism.get_qssa_rate_expression() \
                     for this_reaction in kinetic_model.reactions.values()]
@@ -101,7 +102,6 @@ def make_flux_fun(kinetic_model):
                                       for item in sublist]
 
     variables = kinetic_model.ode_fun.variables
-
     expr = {}
 
     # Mass balance

@@ -52,9 +52,7 @@ class ElasticityFunction:
         parameters = [x for x in self.parameters]
         variables = [x for x in variables]
 
-
         sym_vars = list(symbols(variables+parameters))
-
 
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot variables is interpreted as interger
@@ -62,7 +60,7 @@ class ElasticityFunction:
         self.function = []
         self.coordinates = []
         for coord,exp in expressions.items():
-           self.function.append(ufuncify(tuple(sym_vars),
+            self.function.append(ufuncify(tuple(sym_vars),
                                          exp,
                                          backend='Cython'))
             self.coordinates.append(coord)

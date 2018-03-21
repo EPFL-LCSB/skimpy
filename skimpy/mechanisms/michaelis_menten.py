@@ -38,13 +38,13 @@ class ReversibleMichaelisMenten(KineticMechanism):
     Substrates = namedtuple('Substrates', ['substrate', 'product'])
 
     Parameters = namedtuple('Parameters', ['vmax_forward',
-                                           'vmax_backward',
+                                           'k_equilibrium',
                                            'km_substrate',
                                            'km_product',
-                                           'thermo_displacement',
-                                           'k_equilibrium',
+                                           'vmax_backward',
                                            'total_enzyme_concentration',
                                            ])
+
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
     RateConstants = namedtuple('RateConstants',['k1_fwd',
@@ -67,25 +67,27 @@ class ReversibleMichaelisMenten(KineticMechanism):
     def get_qssa_rate_expression(self):
         subs = self.substrates
 
-        common_denominator = sympify('1'                           \
-                                    + '+'+subs.substrate+'/'      \
-                                    +'km_substrate'+'_'+self.name \
-                                    + '+'+subs.product+'/'        \
-                                    +'km_product'+'_'+self.name  \
-                                    )
-        bwd_nominator = sympify( 'vmax_backward'+'_'+self.name    \
-                                  +'*'+subs.product               \
-                                  +'/'+'km_product'+'_'+self.name)
+        common_denominator = sympify('1'
+                                      +'+'+subs.substrate+'/'
+                                      +'km_substrate'+'_'+self.name
+                                      + '+'+subs.product+'/'
+                                      +'km_product'+'_'+self.name
+                                     )
 
-        fwd_nominator = sympify( 'vmax_forward'+'_'+self.name    \
-                                  +'*'+subs.substrate             \
+        bwd_nominator = sympify( 'vmax_forward'+'_'+self.name
+                                  +'/k_equilibrium'+'_'+self.name
+                                  +'*'+subs.product
+                                  +'/'+'km_substrate'+'_'+self.name)
+
+        fwd_nominator = sympify( 'vmax_forward'+'_'+self.name
+                                  +'*'+subs.substrate
                                   +'/'+'km_substrate'+'_'+self.name)
 
         forward_rate_expression = fwd_nominator/common_denominator
         backward_rate_expression = bwd_nominator/common_denominator
         rate_expression = forward_rate_expression-backward_rate_expression
 
-        self.reaction_rates = TabDict([('v_net',rate_expression),
+        self.reaction_rates = TabDict([('v_net', rate_expression),
                                        ('v_fwd', forward_rate_expression),
                                        ('v_bwd', backward_rate_expression),
                                        ])

@@ -48,6 +48,7 @@ class KineticModel(object):
         self.boundary_conditions = iterable_to_tabdict(boundary_conditions)
         self.constraints = iterable_to_tabdict(constraints)
         self.initial_conditions = iterable_to_tabdict([])
+        self._sim_type = None
         self._modified = True
 
     # TODO : Implement
@@ -106,8 +107,8 @@ class KineticModel(object):
 
         self.sim_type = sim_type
 
-        # Recompile only if modified
-        if self._modified:
+        # Recompile only if modified or simulation
+        if self._modified or self.sim_type != sim_type:
             # Compile ode function
             ode_fun, variables = make_ode_fun(self, sim_type)
             # TODO define the init properly
@@ -138,18 +139,29 @@ class KineticModel(object):
 
         return Solution(self,t_sol,y_sol)
 
+    def compile_mca(self, parameter_list, sim_type = 'QSSA'):
+            """
+            Compile MCA expressions: elasticities, jacobian
+            and control coeffcients
+            """
 
-    def compile_mca(self, mca_type = 'vmax'):
-        """Compile MCA expressions for """
+            # Recompile only if modified or simulation
+            if self._modified or self.sim_type != sim_type:
 
-        indepdendent_elasticity_fun, \
-        depdendent_elasticity_fun, \
-        parameter_elasticities_fun, \
-        relative_weights,\
-        absolute_weights = make_mca_functions(self, mca_type=mca_type )
+                # Get the model expressions
+                independent_elasticity_fun, \
+                dependent_elasticity_fun, \
+                parameter_elasticities_fun, \
+                relative_weights,\
+                absolute_weights, \
+                all_variables, \
+                all_parameters  = make_mca_functions(self,
+                                                     parameter_list,
+                                                     sim_type=sim_type)
 
-        self.indepdendent_elasticity_fun = indepdendent_elasticity_fun
-        self.depdendent_elasticity_fun = depdendent_elasticity_fun
-        self.parameter_elasticities_fun = parameter_elasticities_fun
-        self.relative_weights = relative_weights
-        self.absolute_weights = absolute_weights
+                self.independent_elasticity_fun = independent_elasticity_fun
+                self.dependent_elasticity_fun = dependent_elasticity_fun
+                self.parameter_elasticities_fun = parameter_elasticities_fun
+                self.relative_weights = relative_weights
+                self.absolute_weights = absolute_weights
+

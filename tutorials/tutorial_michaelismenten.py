@@ -69,13 +69,13 @@ this_sol_qssa.plot('output/base_out_qssa.html')
 
 ## Full rate method
 
-
-this_model.compile_ode(sim_type = 'full')
-
-this_model.initial_conditions.A = 10.0
-this_model.initial_conditions.B = 1.0
-this_model.initial_conditions.pfk = 1.0
-
-this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
-
-this_sol_full.plot('output/base_out_full.html')
+#
+# this_model.compile_ode(sim_type = 'full')
+#
+# this_model.initial_conditions.A = 10.0
+# this_model.initial_conditions.B = 1.0
+# this_model.initial_conditions.pfk = 1.0
+#
+# this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
+#
+# this_sol_full.plot('output/base_out_full.html')
