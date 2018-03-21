@@ -41,8 +41,8 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                            'k_equilibrium',
                                            'km_substrate',
                                            'km_product',
-                                           'vmax_backward',
-                                           'total_enzyme_concentration',
+                                           #'vmax_backward',
+                                           #'total_enzyme_concentration',
                                            ])
 
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)

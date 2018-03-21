@@ -88,8 +88,9 @@ class KineticMechanism(ABC):
 
         for the_param in values_from_kind._fields:
             param_value = getattr(values_from_kind,the_param)
-            if param_value is None:
-                continue
+            #Todo we need a proper fix for this!!
+            #if param_value is None:
+            #    continue
             param_name = the_param + '_' + self.name
             parameters[param_name] = param_value
 

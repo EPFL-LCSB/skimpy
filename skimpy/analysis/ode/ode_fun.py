@@ -25,8 +25,8 @@ limitations under the License.
 
 """
 
-import numpy as np
-from sympy import symbols, Array
+from numpy import array, double
+from sympy import symbols
 from sympy.utilities.autowrap import ufuncify
 
 
@@ -81,6 +81,6 @@ class ODEFunction:
     def __call__(self,t,y):
         input_vars = list(y)+self.parameter_values
         #result = self.functin
-        array_input = [np.array([input_var])  for input_var in  input_vars  ]
-        results = [f(*array_input) for f in self.function ]
-        return np.array(results)
+        array_input = [array([input_var], dtype=double) for input_var in  input_vars  ]
+        results = [f(*array_input)[0] for f in self.function ]
+        return array(results)

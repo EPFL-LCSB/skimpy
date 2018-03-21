@@ -28,8 +28,9 @@ limitations under the License.
 from sympy import diff, sympify, simplify
 
 from .elasticity_fun import ElasticityFunction
-from ..ode.flux_fun import FluxFunction
 
+from skimpy.utils.general import get_stoichiometry, join_dicts
+from skimpy.utils.tabdict import iterable_to_tabdict
 
 def make_mca_functions(kinetic_model,parameter_list,sim_type):
     """ Create the elasticity and flux functions for MCA
@@ -56,7 +57,7 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
     # Get flux expressions for the net
     all_flux_expressions = [this_reaction.mechanism.reaction_rates['v_net'] \
-                           for this_reaction in kinetic_model.reactions]
+                           for this_reaction in kinetic_model.reactions.values()]
 
     all_expr, all_parameters = list(zip(*all_data))
 
@@ -76,20 +77,24 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
     all_variables = iterable_to_tabdict(all_variables, use_name=False)
 
     #TODO handle depedent variables (i.e. concentrations)
-    relative_weights = []
-    absolute_weights = []
+    reduced_stoichiometry, dependent_weights = get_reduced_stoichiometry(kinetic_model,
+                                                                         all_variables)
+
 
     #######
 
-    all_independent_variables = []
+    all_independent_variables = all_variables
 
     all_dependent_variables = []
 
     #parameter elasticity function
-    parameter_elasticities_fun = make_elasticity_fun(all_flux_expressions,
-                                                     parameter_list,
-                                                     all_variables,
-                                                     all_parameters)
+    if parameter_list:
+        parameter_elasticities_fun = make_elasticity_fun(all_flux_expressions,
+                                                         parameter_list,
+                                                         all_variables,
+                                                         all_parameters)
+    else:
+        parameter_elasticities_fun = None
 
     #concentration elasticity functions
     indepdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
@@ -97,19 +102,23 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
                                                       all_variables,
                                                       all_parameters)
 
-    depdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
-                                                    all_dependent_variables,
-                                                    all_variables,
-                                                    all_parameters)
+    if all_dependent_variables:
+        depdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
+                                                        all_dependent_variables,
+                                                        all_variables,
+                                                        all_parameters)
+    else:
+        depdendent_elasticity_fun = None
 
 
-    return indepdendent_elasticity_fun, \
+    return reduced_stoichiometry,\
+           indepdendent_elasticity_fun, \
            depdendent_elasticity_fun, \
-           parameter_elasticities_fun,\
-           relative_weights,\
-           absolute_weights, \
+           parameter_elasticities_fun, \
+           dependent_weights,\
            all_variables, \
            all_parameters
+
 
 
 
@@ -125,17 +134,24 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
     elasticity_expressions = {}
     column = 0
     row = 0
-    for this_expression in expressions.values():
+
+    for this_expression in expressions:
+
+        column = 0
         for this_variable in respective_variables:
-            row += 1
-            column += 1
+
             this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
 
             if this_elasticity != 0:
                 elasticity_expressions[(row, column)] = this_elasticity
+            column += 1
+        row += 1
+
+    # Shape of the matrix
+    shape = (len(expressions), len(respective_variables))
 
     # Create the elasticity function
-    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, parameters)
+    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, parameters, shape)
 
     return elasticity_fun
 
@@ -149,5 +165,17 @@ def get_dlogx_dlogy(sympy_expression, string_variable):
 
     expression = simplify(partial_derivative / sympy_expression * variable)
 
-    return
+    return expression
+
+
+def get_reduced_stoichiometry(kinetic_model, all_variables):
+
+    #TODO IMPLEMENT THE MOIJETY DETECTION
+    dependent_weights = []
+    reduced_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
+
+    return reduced_stoichiometry,dependent_weights
+
+
+
 

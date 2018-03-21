@@ -24,13 +24,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
-from sympy import symbols, Array
+from numpy import array, double
+from scipy.sparse import coo_matrix
+from sympy import symbols
 from sympy.utilities.autowrap import ufuncify
 
 
 class ElasticityFunction:
-    def __init__(self, expressions, variables,  parameters):
+    def __init__(self, expressions, variables,  parameters, shape):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
@@ -40,13 +41,14 @@ class ElasticityFunction:
                             change of a variable indexed by a tuple of the matrix position
                             e.g: (1,1)
         :param parameters:  list of parameter names
+        :param shape: Tuple defining the over all matrix size e.g (10,30)
 
         """
 
         self.variables = variables
         self.expressions = expressions
         self.parameters = parameters
-
+        self.shape = shape
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         parameters = [x for x in self.parameters]
@@ -70,8 +72,17 @@ class ElasticityFunction:
         """
         Return a sparse matrix type with elasticity values
         """
+        parameter_values = [x for x in parameters.values()]
 
-        elasticiy_matrix = []
+        input_vars = variables + parameter_values
+        array_input = [array([input_var], dtype=double) for input_var in input_vars]
+
+        values = [function(*array_input)[0] for function in self.function]
+        rows, columns = zip(*self.coordinates)
+
+        elasticiy_matrix = coo_matrix((values,
+                                      (rows, columns)),
+                                       shape=self.shape).tocsr()
 
         return elasticiy_matrix
 

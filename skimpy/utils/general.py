@@ -24,7 +24,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
+from scipy.sparse import coo_matrix
+from numpy import array
 
 def join_dicts(dicts):
     joined_dict = {}
@@ -32,3 +33,34 @@ def join_dicts(dicts):
         joined_dict.update(dictionary)
 
     return joined_dict
+
+
+def get_stoichiometry(kinetic_model, variables):
+    # get stoichometriy
+
+    rows = []
+    columns = []
+    values = []
+
+    row = 0
+    for this_variable in variables:
+        column = 0
+        for this_reaction in kinetic_model.reactions.values():
+            substrate_names = this_reaction.mechanism.substrates._asdict().values()
+            definitions = this_reaction.mechanism.substrates._asdict().keys()
+            if this_variable.__str__() in substrate_names:
+                N_substrate = len([1 for this_def, this_var in zip(definitions, substrate_names)
+                                      if ('substrate' in this_def) and (this_variable.__str__() in this_var)])
+                N_product = len([1 for this_def, this_var in zip(definitions, substrate_names)
+                                      if ('product' in this_def) and (this_variable.__str__() in this_var)])
+                values.append(N_substrate+N_product)
+                rows.append(row)
+                columns.append(column)
+            column += 1
+        row += 1
+
+    shape = (len(variables), len(kinetic_model.reactions))
+
+    stoichiometric_matrix = coo_matrix((values, (rows, columns)), shape = shape ).tocsr()
+
+    return stoichiometric_matrix

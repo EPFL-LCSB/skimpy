@@ -25,14 +25,17 @@ limitations under the License.
 
 """
 
-from scipy.sparse import eye as sparse_eye
+from numpy import array
+
+from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
 
 
-class ElasticityFunction:
-    def __init__(self, reduced_stoichometry,
-                       independent_elasticity_function,
-                       depednent_elasticity_function,
+class JacobianFunction:
+    def __init__(self,
+                 reduced_stoichometry,
+                 independent_elasticity_function,
+                 depednent_elasticity_function,
                  weights_dependent_metabolites
                  ):
 
@@ -41,16 +44,16 @@ class ElasticityFunction:
         self.independent_elasticity_function = independent_elasticity_function
         self.weights_dependent_metabolites = weights_dependent_metabolites
 
-    def __call__(self,fluxes,concentrations,parameters):
+    def __call__(self, fluxes, concentrations, parameters):
 
         #Calculate the Jacobian
-        flux_matrix = sparse_eye(len(fluxes)).dot(fluxes)
+        flux_matrix = diags(array(fluxes), 0)
+        concentration_matrix = diags(array(concentrations), 0)
 
-        concentration_matrix = sparse_eye(len(fluxes)).dot(concentrations)
         inv_concentration_matrix = sparse_inv(concentration_matrix)
 
-        # Elaticity matrix
-        if len(weights_depednet_metabolites) == 0 :
+        # Elasticity matrix
+        if len(self.weights_dependent_metabolites) == 0:
             elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
         else:
             elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)

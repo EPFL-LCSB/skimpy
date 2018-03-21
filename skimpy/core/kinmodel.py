@@ -27,7 +27,9 @@ limitations under the License.
 
 from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
 from skimpy.analysis.mca.utils import make_mca_functions
+from skimpy.analysis.mca.jacobian_fun import JacobianFunction
 from .solution import Solution
+
 from ..utils import TabDict, iterable_to_tabdict
 
 
@@ -121,9 +123,9 @@ class KineticModel(object):
 
     def solve_ode(self,
                   time_int,
-                  solver_type = 'vode',
-                  reltol = 1e-8,
-                  abstol = 1e-8):
+                  solver_type='vode',
+                  reltol=1e-8,
+                  abstol=1e-8):
 
         # Choose a solver
         self.solver = get_ode_solver(self.ode_fun, solver_type, reltol, abstol)
@@ -139,7 +141,7 @@ class KineticModel(object):
 
         return Solution(self,t_sol,y_sol)
 
-    def compile_mca(self, parameter_list, sim_type = 'QSSA'):
+    def compile_mca(self, parameter_list=[], sim_type='QSSA'):
             """
             Compile MCA expressions: elasticities, jacobian
             and control coeffcients
@@ -149,11 +151,11 @@ class KineticModel(object):
             if self._modified or self.sim_type != sim_type:
 
                 # Get the model expressions
+                reduced_stoichometriy,\
                 independent_elasticity_fun, \
                 dependent_elasticity_fun, \
                 parameter_elasticities_fun, \
-                relative_weights,\
-                absolute_weights, \
+                dependent_weights, \
                 all_variables, \
                 all_parameters  = make_mca_functions(self,
                                                      parameter_list,
@@ -162,6 +164,12 @@ class KineticModel(object):
                 self.independent_elasticity_fun = independent_elasticity_fun
                 self.dependent_elasticity_fun = dependent_elasticity_fun
                 self.parameter_elasticities_fun = parameter_elasticities_fun
-                self.relative_weights = relative_weights
-                self.absolute_weights = absolute_weights
+                self.dependent_weights = dependent_weights
+                self.variables = all_variables
+                self.paramerters = all_parameters
+
+                self.jacobian_fun = JacobianFunction(reduced_stoichometriy,
+                                                     independent_elasticity_fun,
+                                                     dependent_elasticity_fun,
+                                                     dependent_weights)
 
