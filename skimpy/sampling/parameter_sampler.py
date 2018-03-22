@@ -88,12 +88,15 @@ class SimpleParameterSampler(ParameterSampler):
                                    'vmax_forward_'+this_reaction.name: 1.0}
 
                 # Loop over the named tuple
-                for this_name, this_reactant in this_reaction.mechanism.substrates._asdict().items():
+                for this_name, this_parameter in this_reaction.mechanism.parameters._asdict().items():
                     # Sample a saturation
-                    this_saturation = sample()
-                    this_concentration = concentration_dict[this_reactant]
-                    this_km_name = 'km_'+this_name+'_'+this_reaction.name
-                    this_parameters[this_km_name] = (1.0-this_saturation) * this_concentration / this_saturation
+                    # TODO This should be class based
+                    if this_parameter.startswith('km'):
+                        this_saturation = sample()
+                        # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
+                        this_reactant = this_parameter.split(str='_')[1]
+                        this_concentration = concentration_dict[this_reactant]
+                        this_parameters[this_parameter] = (1.0-this_saturation) * this_concentration / this_saturation
 
 
                 # Calculate the vmax
