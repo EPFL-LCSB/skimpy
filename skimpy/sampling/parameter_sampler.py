@@ -45,7 +45,7 @@ class ParameterSampler(ABC):
     @abstractmethod
     def Parameters(self):
         """
-        Parameter type specified for the parmeters samples
+        Parameter type specified for the parameters samples
         :return:
         """
 
