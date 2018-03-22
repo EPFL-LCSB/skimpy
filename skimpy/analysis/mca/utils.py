@@ -25,12 +25,18 @@ limitations under the License.
 
 """
 
-from sympy import diff, sympify, simplify
+from sympy import diff, sympify, simplify, Matrix, eye, zeros
+import numpy as np
+from scipy.sparse import csr_matrix
 
 from .elasticity_fun import ElasticityFunction
 
 from skimpy.utils.general import get_stoichiometry, join_dicts
 from skimpy.utils.tabdict import iterable_to_tabdict
+
+from skimpy.utils.moieties import rational_left_basis
+
+sparse_matrix = csr_matrix
 
 def make_mca_functions(kinetic_model,parameter_list,sim_type):
     """ Create the elasticity and flux functions for MCA
@@ -97,23 +103,23 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
         parameter_elasticities_fun = None
 
     #concentration elasticity functions
-    indepdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
+    independent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
                                                       all_independent_variables,
                                                       all_variables,
                                                       all_parameters)
 
     if all_dependent_variables:
-        depdendent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
+        dependent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
                                                         all_dependent_variables,
                                                         all_variables,
                                                         all_parameters)
     else:
-        depdendent_elasticity_fun = None
+        dependent_elasticity_fun = None
 
 
     return reduced_stoichiometry,\
-           indepdendent_elasticity_fun, \
-           depdendent_elasticity_fun, \
+           independent_elasticity_fun, \
+           dependent_elasticity_fun, \
            parameter_elasticities_fun, \
            dependent_weights,\
            all_variables, \
@@ -171,8 +177,45 @@ def get_dlogx_dlogy(sympy_expression, string_variable):
 def get_reduced_stoichiometry(kinetic_model, all_variables):
 
     #TODO IMPLEMENT THE MOIJETY DETECTION
-    dependent_weights = []
-    reduced_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
+    full_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
+
+    S = Matrix(full_stoichiometry.todense())
+
+    # Left basis dimensions: rows are metabolites, columns are moieties
+    # L0*S = 0 -> L0 is the left null space matrix
+    left_basis = rational_left_basis(S)
+    L0 = Matrix([x.transpose() for x in left_basis])
+
+    # Getting the reduced Stoichiometry:
+    # S is the full stoichiometric matrix
+    # N  is the full rank reduced stoichiometric matrix
+    # N0 is the remainder
+    #
+    #     [ I_n (nxn) | 0_r (rxr) ]
+    # L = [      L0 (n+r)xr       ]
+    #
+    #     [ N  ]
+    # S = [ N0 ]
+    #
+    # Then:
+    #          [ I_n (nxn) | 0_r (rxr) ] * [ N  ]
+    # L * S  = [      L0 (n+r)xr       ]   [ N0 ]
+    #
+    #          [ I_n*N + 0_r * N0 ]   [ N ]
+    # L * S  = [      L0 * S      ] = [ 0 ]
+
+    r,n_plus_r = L0.shape
+    n = n_plus_r - r
+
+    # Upper block
+    U = Matrix([eye(n), zeros(r,r)]).transpose()
+    L = Matrix([U,L0])
+
+    N_ = L*S
+    N  = N_[:n,:] # the rows after n are 0s
+
+    reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
+    dependent_weights       = sparse_matrix(np.array(L0),dtype=np.float)
 
     return reduced_stoichiometry,dependent_weights
 
