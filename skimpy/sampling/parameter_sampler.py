@@ -32,6 +32,7 @@ from numpy.random import sample
 from scipy.sparse.linalg import eigs as eigenvalues
 from sympy import sympify
 
+
 class ParameterSampler(ABC):
     def __init__(self, parameters=None):
         """
@@ -47,7 +48,6 @@ class ParameterSampler(ABC):
         Parameter type specified for the parmeters samples
         :return:
         """
-
 
     @abstractmethod
     def sample(self):
@@ -68,70 +68,76 @@ class SimpleParameterSampler(ParameterSampler):
     # if parameters are not defined put default values
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
-
-    def sample(self,compiled_model,flux_dict,concentration_dict):
+    def sample(self, compiled_model, flux_dict, concentration_dict):
 
         parameter_population = []
 
         # Unpack fluxes and concentration into arrays consitent with the
         # compiled functions
 
-        fluxes = [flux_dict[this_reaction.name] for this_reaction in compiled_model.reactions.values()]
-        concentrations = [concentration_dict[this_variable] for this_variable in compiled_model.variables.keys()]
+        fluxes = [flux_dict[this_reaction.name] for this_reaction in
+                  compiled_model.reactions.values()]
+        concentrations = [concentration_dict[this_variable] for this_variable in
+                          compiled_model.variables.keys()]
         trials = 0
-        while (len(parameter_population) < self.parameters.n_samples) \
-                or trials > 1e4:
+        while (len(
+                parameter_population) < self.parameters.n_samples) or trials > 1e4:
             parameter_sample = {}
             # Sample parameters for every reaction
             for this_reaction in compiled_model.reactions.values():
-                this_parameters = {'k_equilibrium_'+this_reaction.name: this_reaction.mechanism.parameters.k_equilibrium,
-                                   'vmax_forward_'+this_reaction.name: 1.0}
+                this_parameters = {
+                    'k_equilibrium_' + this_reaction.name: this_reaction.mechanism.parameters.k_equilibrium,
+                    'vmax_forward_' + this_reaction.name: 1.0}
 
                 # Loop over the named tuple
-                for this_name, this_parameter in this_reaction.mechanism.parameters._asdict().items():
+                for this_parameter in this_reaction.mechanism.parameters._asdict():
                     # Sample a saturation
                     # TODO This should be class based
                     if this_parameter.startswith('km'):
                         this_saturation = sample()
                         # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
-                        this_reactant = this_parameter.split(str='_')[1]
+                        this_id = this_parameter.split('_')[1]
+                        this_reactant = getattr(this_reaction.substrates,
+                                                this_id)
                         this_concentration = concentration_dict[this_reactant]
-                        this_parameters[this_parameter] = (1.0-this_saturation) * this_concentration / this_saturation
-
+                        this_reaction_parameter = this_parameter + '_' + this_reaction.name
+                        this_parameters[this_reaction_parameter] = ((
+                                                                    1.0 - this_saturation) * this_concentration) / this_saturation
 
                 # Calculate the vmax
-                this_net_reaction_rate = this_reaction.mechanism.reaction_rates['v_net']
+                this_net_reaction_rate = this_reaction.mechanism.reaction_rates[
+                    'v_net']
                 this_parameter_subs = concentration_dict.copy()
                 this_parameter_subs.update(this_parameters.copy())
 
-                normed_net_reaction_rate = this_net_reaction_rate.evalf(subs=this_parameter_subs)
-                this_vmax = flux_dict[this_reaction.name]/normed_net_reaction_rate
+                normed_net_reaction_rate = this_net_reaction_rate.evalf(
+                    subs=this_parameter_subs)
+                this_vmax = flux_dict[
+                                this_reaction.name] / normed_net_reaction_rate
 
-                this_parameters['vmax_forward_'+this_reaction.name] = this_vmax
+                this_parameters[
+                    'vmax_forward_' + this_reaction.name] = this_vmax
 
                 # Update the dict with explicit model parameters
                 parameter_sample.update(this_parameters)
 
-            concentrations = [concentration_dict[this_variable] for this_variable in compiled_model.variables.keys()]
+            concentrations = [concentration_dict[this_variable] for
+                              this_variable in compiled_model.variables.keys()]
 
             # Check stability: real part of all eigenvalues of the jacobian is <= 0
 
-            this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations, parameter_sample)
-            largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',  return_eigenvectors=False)
+            this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
+                                                        parameter_sample)
+            largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
+                                             return_eigenvectors=False)
             is_stable = largest_eigenvalue <= 0
 
-            #print(largest_eigenvalue)
+            # print(largest_eigenvalue)
 
             if is_stable:
                 parameter_population.append(parameter_sample)
 
             # Count the trials
-            trials +=1
+            trials += 1
 
         return parameter_population
-
-
-
-
-
-
