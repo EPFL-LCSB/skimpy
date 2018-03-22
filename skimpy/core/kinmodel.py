@@ -157,12 +157,17 @@ class KineticModel(object):
                 parameter_elasticities_fun, \
                 dependent_weights, \
                 all_variables, \
-                all_parameters  = make_mca_functions(self,
+                all_parameters,\
+                independent_variables_ix,\
+                dependent_variables_ix,\
+                    = make_mca_functions(self,
                                                      parameter_list,
                                                      sim_type=sim_type)
 
                 self.independent_elasticity_fun = independent_elasticity_fun
                 self.dependent_elasticity_fun = dependent_elasticity_fun
+                self.dependent_variables_ix = dependent_variables_ix
+                self.independent_variables_ix = independent_variables_ix
                 self.parameter_elasticities_fun = parameter_elasticities_fun
                 self.dependent_weights = dependent_weights
                 self.variables = all_variables
@@ -172,5 +177,7 @@ class KineticModel(object):
                 self.jacobian_fun = JacobianFunction(reduced_stoichometriy,
                                                      independent_elasticity_fun,
                                                      dependent_elasticity_fun,
-                                                     dependent_weights)
+                                                     dependent_weights,
+                                                     independent_variables_ix,
+                                                     dependent_variables_ix)
 

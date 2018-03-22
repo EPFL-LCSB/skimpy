@@ -25,9 +25,11 @@ limitations under the License.
 
 """
 
-from sympy import diff, sympify, simplify, Matrix, eye, zeros
+from collections import defaultdict
 import numpy as np
+
 from scipy.sparse import csr_matrix
+from sympy import diff, sympify, simplify, Matrix, eye, zeros
 
 from .elasticity_fun import ElasticityFunction
 
@@ -83,15 +85,22 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
     all_variables = iterable_to_tabdict(all_variables, use_name=False)
 
     #TODO handle depedent variables (i.e. concentrations)
-    reduced_stoichiometry, dependent_weights = get_reduced_stoichiometry(kinetic_model,
-                                                                         all_variables)
+    reduced_stoichiometry, dependent_weights, independent_ix, dependent_ix = \
+        get_reduced_stoichiometry(kinetic_model, all_variables)
 
 
     #######
 
-    all_independent_variables = all_variables
 
-    all_dependent_variables = []
+
+    all_independent_variables = {k:v
+                                 for e,(k,v) in enumerate(all_variables.items())
+                                 if e in independent_ix}
+
+    all_dependent_variables = {k:v
+                                 for e,(k,v) in enumerate(all_variables.items())
+                                 if e in dependent_ix}
+
 
     #parameter elasticity function
     if parameter_list:
@@ -123,7 +132,9 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
            parameter_elasticities_fun, \
            dependent_weights,\
            all_variables, \
-           all_parameters
+           all_parameters, \
+           independent_ix, \
+           dependent_ix
 
 
 
@@ -186,6 +197,45 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     left_basis = rational_left_basis(S)
     L0 = Matrix([x.transpose() for x in left_basis])
 
+    ## We need to separate N and N0 beforehand
+
+    # Per moiety, select one variable that has not been selected before
+    dependent_weights = sparse_matrix(np.array(L0),dtype=np.float)
+
+    nonzero_rows, nonzero_cols = dependent_weights.nonzero()
+    row_dict = defaultdict(list)
+
+    # Put the ixs in a dict indexed by row number (moiety index)
+    for k, v in zip(nonzero_rows, nonzero_cols):
+        row_dict[k].append(v)
+
+    # The first independant varables are those involved in no moieties
+    all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
+
+    # For each line, get an exclusive representative.
+    # There should be at least as many exclusive representatives as lines
+    # Each representative will be independant from the non-moiety metabolites
+    for row, candidate_vars in row_dict.items():
+        for e, the_var in enumerate(candidate_vars):
+            if the_var not in all_independent_ix:
+                all_independent_ix.append(the_var)
+                break
+
+            # Throw an error if we could not find an independent var not already used
+            if e == len(candidate_vars) - 1:
+                raise Error('Could not find an independant var '
+                            'in {}'.format(all_independent_ix))
+
+    # Dependant ix are variables not shown to be independent
+
+    all_dependent_ix = [x for x in
+                               set(range(L0.shape[1])).difference(
+                                   all_independent_ix)]
+
+    # Reindex S in N, N0
+    S = S[all_independent_ix+all_dependent_ix,:]
+
+
     # Getting the reduced Stoichiometry:
     # S is the full stoichiometric matrix
     # N  is the full rank reduced stoichiometric matrix
@@ -215,9 +265,8 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     N  = N_[:n,:] # the rows after n are 0s
 
     reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
-    dependent_weights       = sparse_matrix(np.array(L0),dtype=np.float)
 
-    return reduced_stoichiometry,dependent_weights
+    return reduced_stoichiometry,dependent_weights, all_independent_ix, all_dependent_ix
 
 
 

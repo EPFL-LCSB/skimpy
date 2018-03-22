@@ -35,13 +35,17 @@ class JacobianFunction:
     def __init__(self,
                  reduced_stoichometry,
                  independent_elasticity_function,
-                 depednent_elasticity_function,
-                 weights_dependent_metabolites
+                 dependent_elasticity_function,
+                 weights_dependent_metabolites,
+                 independent_variable_ix,
+                 dependent_variable_ix,
                  ):
 
         self.reduced_stoichometry = reduced_stoichometry
-        self.depednent_elasticity_function  = depednent_elasticity_function
+        self.dependent_elasticity_function  = dependent_elasticity_function
         self.independent_elasticity_function = independent_elasticity_function
+        self.independent_variable_ix = independent_variable_ix
+        self.dependent_variable_ix = dependent_variable_ix
         self.weights_dependent_metabolites = weights_dependent_metabolites
 
     def __call__(self, fluxes, concentrations, parameters):
@@ -50,15 +54,19 @@ class JacobianFunction:
         flux_matrix = diags(array(fluxes), 0)
         concentration_matrix = diags(array(concentrations), 0)
 
-        inv_concentration_matrix = sparse_inv(concentration_matrix)
 
         # Elasticity matrix
         if self.weights_dependent_metabolites.nnz == 0:
+            inv_concentration_matrix = sparse_inv(concentration_matrix)
             elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
         else:
+            # We need to get only the concentrations of the independant metabolites
+            ix = self.independent_variable_ix
+            concentration_matrix_ = concentration_matrix.tocsr()[ix,:][:,ix]
+            inv_concentration_matrix = sparse_inv(concentration_matrix_)
+
             elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
-            elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
-                                 .dot(self.weights_dependent_metabolites)
+            elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)
 
         jacobian = self.reduced_stoichometry.dot(flux_matrix)\
                     .dot(elasticity_matrix)\
