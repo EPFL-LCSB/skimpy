@@ -166,7 +166,8 @@ class KineticModel(object):
                 self.parameter_elasticities_fun = parameter_elasticities_fun
                 self.dependent_weights = dependent_weights
                 self.variables = all_variables
-                self.paramerters = all_parameters
+                self.parameters = all_parameters
+                self.reduced_stoichiometry = reduced_stoichometriy
 
                 self.jacobian_fun = JacobianFunction(reduced_stoichometriy,
                                                      independent_elasticity_fun,
