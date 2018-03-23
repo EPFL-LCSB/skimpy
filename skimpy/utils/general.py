@@ -50,12 +50,14 @@ def get_stoichiometry(kinetic_model, variables):
             definitions = this_reaction.mechanism.substrates._asdict().keys()
             if this_variable.__str__() in substrate_names:
                 N_substrate = -1*len([1 for this_def, this_var in zip(definitions, substrate_names)
-                                      if ('substrate' in this_def) and (this_variable.__str__() in this_var)])
+                                      if ('substrate' in this_def) and (this_variable.__str__() is this_var)])
                 N_product = len([1 for this_def, this_var in zip(definitions, substrate_names)
-                                      if ('product' in this_def) and (this_variable.__str__() in this_var)])
+                                      if ('product' in this_def) and (this_variable.__str__() is this_var)])
+
                 values.append(N_substrate+N_product)
                 rows.append(row)
                 columns.append(column)
+
             column += 1
         row += 1
 
