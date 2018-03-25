@@ -200,9 +200,14 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     ## We need to separate N and N0 beforehand
 
     # Per moiety, select one variable that has not been selected before
-    dependent_weights = sparse_matrix(np.array(L0),dtype=np.float)
+    # TODO L0 are not the dependent weights yet
+    # The dependent weights have dimensions of moieties x independent metabolites
+    # The current L0 gives the relation L0*(xi,xd) = const
+    # The dependent weights are Qd = dln(xd)/dln(xi) = xi/xd * dxd/dxi
+    # Thus I(indep)*x_i = Qd*xd + const
+    conservation_relations = sparse_matrix(np.array(L0), dtype=np.float)
 
-    nonzero_rows, nonzero_cols = dependent_weights.nonzero()
+    nonzero_rows, nonzero_cols = conservation_relations.nonzero()
     row_dict = defaultdict(list)
 
     # Put the ixs in a dict indexed by row number (moiety index)

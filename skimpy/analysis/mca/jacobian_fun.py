@@ -66,7 +66,8 @@ class JacobianFunction:
             inv_concentration_matrix = sparse_inv(concentration_matrix_)
 
             elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
-            elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)
+            elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
+                                 .dot(self.weights_dependent_metabolites)
 
         jacobian = self.reduced_stoichometry.dot(flux_matrix)\
                     .dot(elasticity_matrix)\
