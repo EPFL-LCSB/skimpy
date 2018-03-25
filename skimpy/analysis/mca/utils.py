@@ -28,7 +28,8 @@ limitations under the License.
 from collections import defaultdict
 import numpy as np
 
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, csc_matrix
+from scipy.sparse.linalg import inv as sparse_inv
 from sympy import diff, sympify, simplify, Matrix, eye, zeros
 
 from .elasticity_fun import ElasticityFunction
@@ -38,7 +39,7 @@ from skimpy.utils.tabdict import iterable_to_tabdict
 
 from skimpy.utils.moieties import rational_left_basis
 
-sparse_matrix = csr_matrix
+sparse_matrix = csc_matrix
 
 def make_mca_functions(kinetic_model,parameter_list,sim_type):
     """ Create the elasticity and flux functions for MCA
@@ -200,11 +201,6 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     ## We need to separate N and N0 beforehand
 
     # Per moiety, select one variable that has not been selected before
-    # TODO L0 are not the dependent weights yet
-    # The dependent weights have dimensions of moieties x independent metabolites
-    # The current L0 gives the relation L0*(xi,xd) = const
-    # The dependent weights are Qd = dln(xd)/dln(xi) = xi/xd * dxd/dxi
-    # Thus I(indep)*x_i = Qd*xd + const
     conservation_relations = sparse_matrix(np.array(L0), dtype=np.float)
 
     nonzero_rows, nonzero_cols = conservation_relations.nonzero()
@@ -214,16 +210,21 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     for k, v in zip(nonzero_rows, nonzero_cols):
         row_dict[k].append(v)
 
-    # The first independant varables are those involved in no moieties
+    # The first independent variables are those involved in no moieties
     all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
-
     # For each line, get an exclusive representative.
     # There should be at least as many exclusive representatives as lines
-    # Each representative will be independant from the non-moiety metabolites
+    # Each representative will be independent from the non-moiety metabolites
     for row, candidate_vars in row_dict.items():
         for e, the_var in enumerate(candidate_vars):
             if the_var not in all_independent_ix:
                 all_independent_ix.append(the_var)
+                #break
+            # Append all entries participating in a mojetie and that are not already
+            # an independent variable except one
+            # Since A*x1 + B*x2 + C*x3 ... = const for every row
+            # TODO How is this in general ...
+            if e == len(candidate_vars) - 2:
                 break
 
             # Throw an error if we could not find an independent var not already used
@@ -236,6 +237,14 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     all_dependent_ix = [x for x in
                                set(range(L0.shape[1])).difference(
                                    all_independent_ix)]
+
+    # The dependent weights have dimensions of moieties x independent metabolites
+    # The current L0 gives the relation L0*(xi,xd) = const
+    # The dependent weights are Qd = dln(xd)/dln(xi) = xi/xd * dxd/dxi
+    # Thus Qi*x_d = Qd*xi + const
+    factors_dep = conservation_relations[:,all_dependent_ix]
+    factors_indep = conservation_relations[:, all_independent_ix]
+    dependent_weights = factors_indep.dot(sparse_inv(factors_dep))
 
     # Reindex S in N, N0
     S = S[all_independent_ix+all_dependent_ix,:]
