@@ -82,7 +82,7 @@ class ElasticityFunction:
 
         elasticiy_matrix = coo_matrix((values,
                                       (rows, columns)),
-                                       shape=self.shape).tocsr()
+                                       shape=self.shape).tocsc()
 
         return elasticiy_matrix
 

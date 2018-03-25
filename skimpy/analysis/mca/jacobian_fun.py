@@ -51,8 +51,8 @@ class JacobianFunction:
     def __call__(self, fluxes, concentrations, parameters):
 
         #Calculate the Jacobian
-        flux_matrix = diags(array(fluxes), 0)
-        concentration_matrix = diags(array(concentrations), 0)
+        flux_matrix = diags(array(fluxes), 0).tocsc()
+        concentration_matrix = diags(array(concentrations), 0).tocsc()
 
 
         # Elasticity matrix
@@ -62,7 +62,7 @@ class JacobianFunction:
         else:
             # We need to get only the concentrations of the independant metabolites
             ix = self.independent_variable_ix
-            concentration_matrix_ = concentration_matrix.tocsr()[ix,:][:,ix]
+            concentration_matrix_ = concentration_matrix.tocsc()[ix,:][:,ix]
             inv_concentration_matrix = sparse_inv(concentration_matrix_)
 
             elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
