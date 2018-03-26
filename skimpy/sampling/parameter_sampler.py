@@ -78,8 +78,9 @@ class SimpleParameterSampler(ParameterSampler):
 
         fluxes = [flux_dict[this_reaction.name] for this_reaction in
                   compiled_model.reactions.values()]
-        concentrations = [concentration_dict[this_variable] for this_variable in
-                          compiled_model.variables.keys()]
+        concentrations = np.array([concentration_dict[this_variable] for
+                  this_variable in compiled_model.variables.keys()])
+
         trials = 0
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e4:
@@ -121,9 +122,6 @@ class SimpleParameterSampler(ParameterSampler):
 
                 # Update the dict with explicit model parameters
                 parameter_sample.update(this_parameters)
-
-            concentrations = np.array([concentration_dict[this_variable] for
-                              this_variable in compiled_model.variables.keys()])
 
             # Check stability: real part of all eigenvalues of the jacobian is <= 0
 
