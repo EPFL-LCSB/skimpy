@@ -28,6 +28,7 @@ limitations under the License.
 from sympy import sympify
 from .mechanism import KineticMechanism,ElementrayReactionStep
 from ..core.reactions import Reaction
+from ..core.parameters import make_parameter_set
 from ..utils.tabdict import TabDict
 from collections import namedtuple
 
@@ -37,13 +38,14 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
     Substrates = namedtuple('Substrates', ['substrate', 'product'])
 
-    Parameters = namedtuple('Parameters', ['vmax_forward',
-                                           'k_equilibrium',
-                                           'km_substrate',
-                                           'km_product',
-                                           #'vmax_backward',
-                                           #'total_enzyme_concentration',
-                                           ])
+    Parameters = make_parameter_set(    __name__,
+                                       ['vmax_forward',
+                                        'k_equilibrium',
+                                        'km_substrate',
+                                        'km_product',
+                                        #'vmax_backward',
+                                        #'total_enzyme_concentration',
+                                        ])
 
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
