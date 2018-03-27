@@ -28,6 +28,7 @@ limitations under the License.
 from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
 from skimpy.analysis.mca.utils import make_mca_functions
 from skimpy.analysis.mca.jacobian_fun import JacobianFunction
+from ..utils.logger import get_bistream_logger
 from .solution import Solution
 
 from ..utils import TabDict, iterable_to_tabdict
@@ -45,11 +46,14 @@ class KineticModel(object):
     def __init__(self,
                  reactions=None,
                  boundary_conditions=None,
-                 constraints=None):
+                 constraints=None,
+                 name='Unnamed'):
+        self.name = name
         self.reactions = iterable_to_tabdict(reactions)
         self.boundary_conditions = iterable_to_tabdict(boundary_conditions)
         self.constraints = iterable_to_tabdict(constraints)
         self.initial_conditions = iterable_to_tabdict([])
+        self.logger = get_bistream_logger(name)
         self._sim_type = None
         self._modified = True
 
@@ -155,7 +159,7 @@ class KineticModel(object):
                 independent_elasticity_fun, \
                 dependent_elasticity_fun, \
                 parameter_elasticities_fun, \
-                dependent_weights, \
+                conservation_relation, \
                 all_variables, \
                 all_parameters,\
                 independent_variables_ix,\
@@ -169,7 +173,7 @@ class KineticModel(object):
                 self.dependent_variables_ix = dependent_variables_ix
                 self.independent_variables_ix = independent_variables_ix
                 self.parameter_elasticities_fun = parameter_elasticities_fun
-                self.dependent_weights = dependent_weights
+                self.conservation_relation = conservation_relation
                 self.variables = all_variables
                 self.parameters = all_parameters
                 self.reduced_stoichiometry = reduced_stoichometriy
@@ -177,7 +181,7 @@ class KineticModel(object):
                 self.jacobian_fun = JacobianFunction(reduced_stoichometriy,
                                                      independent_elasticity_fun,
                                                      dependent_elasticity_fun,
-                                                     dependent_weights,
+                                                     conservation_relation,
                                                      independent_variables_ix,
                                                      dependent_variables_ix)
 

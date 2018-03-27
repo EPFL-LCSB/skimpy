@@ -25,7 +25,7 @@ limitations under the License.
 
 """
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import numpy as np
 
 from scipy.sparse import csr_matrix, csc_matrix
@@ -94,13 +94,13 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
 
 
-    all_independent_variables = {k:v
+    all_independent_variables = OrderedDict([(k,v)
                                  for e,(k,v) in enumerate(all_variables.items())
-                                 if e in independent_ix}
+                                 if e in independent_ix])
 
-    all_dependent_variables = {k:v
+    all_dependent_variables = OrderedDict([(k,v)
                                  for e,(k,v) in enumerate(all_variables.items())
-                                 if e in dependent_ix}
+                                 if e in dependent_ix])
 
 
     #parameter elasticity function
@@ -201,10 +201,12 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     ## We need to separate N and N0 beforehand
 
     # Per moiety, select one variable that has not been selected before
-    conservation_relations = sparse_matrix(np.array(L0), dtype=np.float)
+    # L0
+    L0_sparse = sparse_matrix(np.array(L0), dtype=np.float)
 
-    nonzero_rows, nonzero_cols = conservation_relations.nonzero()
+    nonzero_rows, nonzero_cols = L0_sparse.nonzero()
     row_dict = defaultdict(list)
+
 
     # Put the ixs in a dict indexed by row number (moiety index)
     for k, v in zip(nonzero_rows, nonzero_cols):
@@ -219,7 +221,8 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         for e, the_var in enumerate(candidate_vars):
             if the_var not in all_independent_ix:
                 all_independent_ix.append(the_var)
-                #break
+            #      break
+
             # Append all entries participating in a mojetie and that are not already
             # an independent variable except one
             # Since A*x1 + B*x2 + C*x3 ... = const for every row
@@ -238,17 +241,11 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
                                set(range(L0.shape[1])).difference(
                                    all_independent_ix)]
 
-    # The dependent weights have dimensions of moieties x independent metabolites
-    # The current L0 gives the relation L0*(xi,xd) = const
-    # The dependent weights are Qd = dln(xd)/dln(xi) = xi/xd * dxd/dxi
-    # Thus Qi*x_d = Qd*xi + const
-    factors_dep = conservation_relations[:,all_dependent_ix]
-    factors_indep = conservation_relations[:, all_independent_ix]
-    dependent_weights = factors_indep.dot(sparse_inv(factors_dep))
 
     # Reindex S in N, N0
     S = S[all_independent_ix+all_dependent_ix,:]
-
+    # If we reindex S, then so should be L0
+    L0 = L0[:,all_independent_ix+all_dependent_ix]
 
     # Getting the reduced Stoichiometry:
     # S is the full stoichiometric matrix
@@ -256,14 +253,14 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     # N0 is the remainder
     #
     #     [ I_n (nxn) | 0_r (rxr) ]
-    # L = [      L0 (n+r)xr       ]
+    # L = [     L0 ((r)x(n+r))    ]
     #
     #     [ N  ]
     # S = [ N0 ]
     #
     # Then:
     #          [ I_n (nxn) | 0_r (rxr) ] * [ N  ]
-    # L * S  = [      L0 (n+r)xr       ]   [ N0 ]
+    # L * S  = [     L0 ((r)x(n+r))    ]   [ N0 ]
     #
     #          [ I_n*N + 0_r * N0 ]   [ N ]
     # L * S  = [      L0 * S      ] = [ 0 ]
@@ -279,8 +276,9 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     N  = N_[:n,:] # the rows after n are 0s
 
     reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
+    conservation_relation = L0_sparse
 
-    return reduced_stoichiometry,dependent_weights, all_independent_ix, all_dependent_ix
+    return reduced_stoichiometry,conservation_relation, all_independent_ix, all_dependent_ix
 
 
 

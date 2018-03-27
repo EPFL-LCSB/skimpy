@@ -119,8 +119,12 @@ class AdditiveConcentrationRate(ExpressionModifier):
 
     prefix = 'ADDCR'
 
-    def __init__(self, substrate, flux_value):
-        ExpressionModifier.__init__(self)
+    def __init__(self, substrate, flux_value, name=None):
+
+        if name is None:
+            name = substrate.__str__()
+
+        ExpressionModifier.__init__(self, name=name)
 
         self.substrate = substrate
         self.flux_value = flux_value

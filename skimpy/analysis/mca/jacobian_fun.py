@@ -36,7 +36,7 @@ class JacobianFunction:
                  reduced_stoichometry,
                  independent_elasticity_function,
                  dependent_elasticity_function,
-                 weights_dependent_metabolites,
+                 conservation_relation,
                  independent_variable_ix,
                  dependent_variable_ix,
                  ):
@@ -46,7 +46,7 @@ class JacobianFunction:
         self.independent_elasticity_function = independent_elasticity_function
         self.independent_variable_ix = independent_variable_ix
         self.dependent_variable_ix = dependent_variable_ix
-        self.weights_dependent_metabolites = weights_dependent_metabolites
+        self.conservation_relation = conservation_relation
 
     def __call__(self, fluxes, concentrations, parameters):
 
@@ -56,7 +56,7 @@ class JacobianFunction:
 
 
         # Elasticity matrix
-        if self.weights_dependent_metabolites.nnz == 0:
+        if self.conservation_relation.nnz == 0:
             inv_concentration_matrix = sparse_inv(concentration_matrix)
             elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
         else:
@@ -66,8 +66,17 @@ class JacobianFunction:
             inv_concentration_matrix = sparse_inv(concentration_matrix_)
 
             elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
+
+            dependent_weights = self.dependent_elasticity_function.\
+                get_dependent_weights(
+                                concentration_vector=concentrations,
+                                L0=self.conservation_relation,
+                                all_dependent_ix=self.dependent_variable_ix,
+                                all_independent_ix=self.independent_variable_ix,
+                            )
+
             elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
-                                 .dot(self.weights_dependent_metabolites)
+                                 .dot(dependent_weights)
 
         jacobian = self.reduced_stoichometry.dot(flux_matrix)\
                     .dot(elasticity_matrix)\

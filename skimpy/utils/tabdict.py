@@ -52,6 +52,9 @@ class TabDict(OrderedDict):
         except KeyError:
             raise AttributeError("TabDict has no attribute or entry %s" %
                                  attr)
+    def iloc(self,ix):
+        return list(self.items())[ix]
+
 
 
 def iterable_to_tabdict(iterable, use_name = True):

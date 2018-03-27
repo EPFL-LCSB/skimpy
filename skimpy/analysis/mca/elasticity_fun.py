@@ -24,8 +24,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from numpy import array, double
+from numpy import array, double, reciprocal
+from numpy import append as append_array
 from scipy.sparse import coo_matrix
+from scipy.sparse.linalg import inv as sparse_inv
 from sympy import symbols
 from sympy.utilities.autowrap import ufuncify
 
@@ -72,9 +74,9 @@ class ElasticityFunction:
         """
         Return a sparse matrix type with elasticity values
         """
-        parameter_values = [x for x in parameters.values()]
+        parameter_values = array([x for x in parameters.values()], dtype=double)
 
-        input_vars = variables + parameter_values
+        input_vars = append_array(variables , parameter_values)
         array_input = [array([input_var], dtype=double) for input_var in input_vars]
 
         values = [function(*array_input)[0] for function in self.function]
@@ -85,4 +87,33 @@ class ElasticityFunction:
                                        shape=self.shape).tocsc()
 
         return elasticiy_matrix
+
+    def get_dependent_weights(self, concentration_vector, L0, all_independent_ix, all_dependent_ix):
+
+        # The dependent weights have dimensions of moieties x independent metabolites
+        # The current L0 gives the relation L0*[xi|xd] = C
+
+        # Concentrations
+        X = concentration_vector
+        Xi = X[all_independent_ix]
+        Xd = X[all_dependent_ix]
+
+        # L0 = [Fd | Fi]
+        # Thus Fd*x_d = -Fi*xi + C
+        # xd = (Fd^-1).(-Fi*xi + C)
+        # dxd/dxi = (Fd^-1).(-Fi)
+        # The dependent weights are Qd :
+        # Qd = dln(xd)/dln(xi)
+        # Qd = dxd / xd * xi / dxi
+        # Qd = ( xd^-1 ) * dxd/dxi * xi
+
+        # Fi Factors for in dependent concentrations
+        Fi = L0[:, all_independent_ix]
+        # Fd Factors for dependent concentrations
+        Fd = L0[:, all_dependent_ix]
+        # Qd the scaling matrix
+        dxd_dxi = sparse_inv(Fd).dot(-1*Fi)
+        Qd = reciprocal(Xd).dot(dxd_dxi).dot(Xi)
+
+        return Qd
 

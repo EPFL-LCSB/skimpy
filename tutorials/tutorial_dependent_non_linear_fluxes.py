@@ -25,10 +25,44 @@ limitations under the License.
 
 """
 
+import numpy as np
+
 # Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.sampling import SimpleParameterSampler
+
+# 'DM_13dpg'        10
+# 'DM_2h3oppan'     -2
+# 'DM_pep'          -8
+# 'DM_atp'         -12
+# 'DM_adp'          12
+# 'DM_nadh'         -2
+# 'DM_nad'           2
+# 'DM_h'           -12
+# 'DM_h2o'          -8
+# 'PGK'             10
+# 'PGK'             10
+# 'GLYCK'            9
+# 'PGM'              1
+# 'GLYCK2'           7
+# 'TRSARr'           2
+# 'ENO'              8
+
+flux_dict = {'PGK'          : 10.0,
+             'PGM'          : 1.0,
+             'GLYCK'        : 9.0,
+             'GLYCK2'       : 7.0,
+             'TRSARr'       : 2.0,
+             'ENO'          : 8.0,
+             'DM_13dpg'     : 10,
+             'DM_2h3oppan'  :-2,
+             'DM_pep'       :-8,
+             'DM_atp'       :-12,
+             'DM_adp'       :12,
+             'DM_nadh'      :-2,
+             'DM_nad'       :2,
+             }
 
 # Build linear Pathway model
 metabolites_pgk    =  RandBiBiReversibleMichaelisMenten.Substrates(
@@ -59,13 +93,16 @@ metabolites_eno    = ReversibleMichaelisMenten.Substrates(
     product        = 'pep')
 
 
+def keq(deltag):
+    return np.exp(-deltag*4184/(8.31*298.15))
+
 ## QSSA Method
-parameters_pgk    = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=1.5)
-parameters_pgm    = ReversibleMichaelisMenten.Parameters(k_equilibrium=2.0)
-parameters_glyck  = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=1.5)
-parameters_glyck2 = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=1.5)
-parameters_trsarr = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=1.5)
-parameters_eno    = ReversibleMichaelisMenten.Parameters(k_equilibrium=2.0)
+parameters_pgm    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.0))
+parameters_pgk    = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-0.7996))
+parameters_glyck  = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(5.4833))
+parameters_glyck2 = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-5.3603))
+parameters_trsarr = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(3.7509))
+parameters_eno    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.6601))
 
 pgk     =   Reaction(name='PGK',
                mechanism=RandBiBiReversibleMichaelisMenten,
@@ -101,8 +138,27 @@ this_model.add_reaction(glyck2)
 this_model.add_reaction(trsarr)
 this_model.add_reaction(eno)
 
-the_boundary_condition = ConstantConcentration("_13dpg")
+the_boundary_condition = BoundaryFlux("_13dpg", flux_dict['DM_13dpg'])
 this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("pep", flux_dict['DM_pep'])
+this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("_2h3oppan", flux_dict['DM_2h3oppan'])
+this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("atp", flux_dict['DM_atp'])
+this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("adp", flux_dict['DM_adp'])
+this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("nad", flux_dict['DM_nad'])
+this_model.add_boundary_condition(the_boundary_condition)
+
+the_boundary_condition = BoundaryFlux("nadh", flux_dict['DM_nadh'])
+this_model.add_boundary_condition(the_boundary_condition)
+
 
 this_model.parametrize({'PGK'   : parameters_pgk,
                         'PGM'   : parameters_pgm,
@@ -114,36 +170,13 @@ this_model.parametrize({'PGK'   : parameters_pgk,
 
 this_model.compile_mca()
 
-# 'DM_13dpg'        10
-# 'DM_2h3oppan'     -2
-# 'DM_pep'          -8
-# 'DM_atp'         -12
-# 'DM_adp'          12
-# 'DM_nadh'         -2
-# 'DM_nad'           2
-# 'DM_h'           -12
-# 'DM_h2o'          -8
-# 'PGK'             10
-# 'GLYCK'            9
-# 'PGM'              1
-# 'GLYCK2'           7
-# 'TRSARr'           2
-# 'ENO'              8
 
-flux_dict = {'PGK': 10,
-             'PGM': 1,
-             'GLYCK': 9,
-             'GLYCK2': 7,
-             'TRSARr': 2,
-             'ENO': 8}
-
-
-concentration_dict = {'_13dpg'    : 3.0,
-                      '_2pg'      : 2.0,
+concentration_dict = {'_13dpg'    : 1.0,
+                      '_2pg'      : 1.0,
                       '_3pg'      : 1.0,
                       'glyc'      : 1.0,
                       'pep'       : 1.0,
-                      '_2h3oppan' : 0.5,
+                      '_2h3oppan' : 1.0,
                       'atp'       : 1.0,
                       'adp'       : 1.0,
                       'nad'       : 1.0,
@@ -159,16 +192,18 @@ parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 this_model.compile_ode(sim_type = 'QSSA')
 
 #
-this_model.initial_conditions['_13dpg']     = 5.0
-this_model.initial_conditions['_2pg']       = 0.0
-this_model.initial_conditions['_3pg']       = 0.0
-this_model.initial_conditions['glyc']       = 0.0
-this_model.initial_conditions['pep']        = 0.0
-this_model.initial_conditions['_2h3oppan']  = 0.0
-this_model.initial_conditions['atp']        = 0.0
-this_model.initial_conditions['adp']        = 2.0
-this_model.initial_conditions['nad']        = 10.0
-this_model.initial_conditions['nadh']       = 0.0
+this_model.initial_conditions['_13dpg']     = 1.0
+this_model.initial_conditions['_2pg']       = 1.0
+this_model.initial_conditions['_3pg']       = 1.0
+this_model.initial_conditions['glyc']       = 1.0
+this_model.initial_conditions['pep']        = 1.0
+this_model.initial_conditions['_2h3oppan']  = 1.0
+this_model.initial_conditions['atp']        = 1.0
+this_model.initial_conditions['adp']        = 1.0
+this_model.initial_conditions['nad']        = 1.0
+this_model.initial_conditions['nadh']       = 1.0
+
+this_model.logger.setLevel('INFO')
 
 solutions = []
 for parameters in parameter_population:
