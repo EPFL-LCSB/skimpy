@@ -26,6 +26,7 @@ limitations under the License.
 """
 from scipy.sparse import coo_matrix
 from numpy import array
+from sympy import Symbol
 
 def join_dicts(dicts):
     joined_dict = {}
@@ -70,3 +71,9 @@ def get_stoichiometry(kinetic_model, variables):
     stoichiometric_matrix = coo_matrix((values, (rows, columns)), shape = shape ).tocsr()
 
     return stoichiometric_matrix
+
+def check_is_symbol(s_in):
+    if not isinstance(s_in, Symbol):
+        return Symbol(s_in)
+    else:
+        return s_in

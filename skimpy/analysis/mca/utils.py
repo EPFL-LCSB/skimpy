@@ -138,7 +138,6 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
            parameter_elasticities_fun, \
            dependent_weights,\
            all_variables, \
-           all_parameters, \
            independent_ix, \
            dependent_ix
 

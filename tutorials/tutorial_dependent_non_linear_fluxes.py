@@ -99,9 +99,9 @@ def keq(deltag):
 ## QSSA Method
 parameters_pgm    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.0))
 parameters_pgk    = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-0.7996))
-parameters_glyck  = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(5.4833))
+parameters_glyck  = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-5.4833))
 parameters_glyck2 = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-5.3603))
-parameters_trsarr = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(3.7509))
+parameters_trsarr = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-3.7509))
 parameters_eno    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.6601))
 
 pgk     =   Reaction(name='PGK',
@@ -207,7 +207,7 @@ this_model.logger.setLevel('INFO')
 
 solutions = []
 for parameters in parameter_population:
-    this_model.ode_fun.parameters = parameter_population[0]
+    this_model.ode_fun.parameter_values = parameter_population[0]
     #
     this_sol_qssa = this_model.solve_ode([0.0, 100.0], solver_type='vode')
     solutions.append(this_sol_qssa)

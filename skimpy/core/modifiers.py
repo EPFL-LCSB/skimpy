@@ -26,6 +26,7 @@ limitations under the License.
 """
 
 from sympy import sympify
+from ..utils.general import check_is_symbol
 
 class ExpressionModifier(object):
     """
@@ -94,14 +95,16 @@ class ConstantConcentration(BoundaryCondition):
 
     prefix = 'CC'
 
-    def __init__(self, substrate, name = None):
+    def __init__(self, reactant, name = None):
+
+        reactant = check_is_symbol(reactant)
 
         if name is None:
-            name = substrate.__str__()
+            name = reactant.__str__()
 
         BoundaryCondition.__init__(self, name = name)
 
-        self.substrate = substrate
+        self.reactant = reactant
 
     def modifier(self, expressions):
         """
@@ -109,7 +112,7 @@ class ConstantConcentration(BoundaryCondition):
         :param expressions:
         :return:
         """
-        expressions[self.substrate] = expressions[self.substrate] * 0.0
+        expressions[self.reactant] = expressions[self.reactant] * 0.0
 
 class AdditiveConcentrationRate(ExpressionModifier):
     """
@@ -119,14 +122,16 @@ class AdditiveConcentrationRate(ExpressionModifier):
 
     prefix = 'ADDCR'
 
-    def __init__(self, substrate, flux_value, name=None):
+    def __init__(self, reactant, flux_value, name=None):
+
+        reactant = check_is_symbol(reactant)
 
         if name is None:
-            name = substrate.__str__()
+            name = reactant.__str__()
 
         ExpressionModifier.__init__(self, name=name)
 
-        self.substrate = substrate
+        self.reactant = reactant
         self.flux_value = flux_value
 
     def modifier(self, expressions):
@@ -136,17 +141,17 @@ class AdditiveConcentrationRate(ExpressionModifier):
         :return:
         """
         sym_value = sympify(self.flux_value)
-        expressions[self.substrate] = expressions[self.substrate] + sym_value
+        expressions[self.reactant] = expressions[self.reactant] + sym_value
 
 class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
 
     prefix = "BF"
 
-    def __init__(self, substrate, flux_value):
+    def __init__(self, reactant, flux_value):
         # TODO: Find a way to make sure the flux_value does not depend on an
         # inner variable
         self.check_dependency(flux_value)
-        AdditiveConcentrationRate.__init__(self, substrate, flux_value)
+        AdditiveConcentrationRate.__init__(self, reactant, flux_value)
 
     def check_dependency(self, expression):
         # TODO: Implement

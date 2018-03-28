@@ -31,7 +31,7 @@ from collections import namedtuple
 import numpy as np
 from numpy.random import sample
 from scipy.sparse.linalg import eigs as eigenvalues
-from sympy import sympify
+from sympy import sympify, Symbol
 
 
 class ParameterSampler(ABC):
@@ -69,9 +69,12 @@ class SimpleParameterSampler(ParameterSampler):
     # if parameters are not defined put default values
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
-    def sample(self, compiled_model, flux_dict, concentration_dict):
+    def sample(self, compiled_model, flux_dict, concentration_dict, seed=123):
 
         parameter_population = []
+
+        self.seed = seed
+        np.random.seed(self.seed)
 
         # Unpack fluxes and concentration into arrays consitent with the
         # compiled functions
@@ -81,6 +84,9 @@ class SimpleParameterSampler(ParameterSampler):
         concentrations = np.array([concentration_dict[this_variable] for
                   this_variable in compiled_model.variables.keys()])
 
+        symbolic_concentrations_dict = {Symbol(k):v
+                                        for k,v in concentration_dict.items()}
+
         trials = 0
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
@@ -89,7 +95,7 @@ class SimpleParameterSampler(ParameterSampler):
             try:
 
                 parameter_sample = self._sample_saturations_step(compiled_model,
-                                                                 concentration_dict,
+                                                                 symbolic_concentrations_dict,
                                                                  flux_dict)
             except ValueError:
                 continue
@@ -117,7 +123,7 @@ class SimpleParameterSampler(ParameterSampler):
 
     def _sample_saturations_step(self, compiled_model, concentration_dict,
                                  flux_dict):
-        parameter_sample = compiled_model.parameters.copy()
+        parameter_sample = {v:v.value for k,v in compiled_model.parameters.items()}
         # Sample parameters for every reaction
         for this_reaction in compiled_model.reactions.values():
 
@@ -138,7 +144,7 @@ class SimpleParameterSampler(ParameterSampler):
                     this_saturation = sample()
                     # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
                     # TODO - OK, removed.
-                    this_reactant = this_parameter.hook.name
+                    this_reactant = this_parameter.hook.symbol
                     this_concentration = concentration_dict[this_reactant]
                     this_param_symbol = this_parameter.symbol
                     this_parameters[this_param_symbol] = \
@@ -153,14 +159,15 @@ class SimpleParameterSampler(ParameterSampler):
             normed_net_reaction_rate = this_net_reaction_rate.evalf(
                 subs=this_parameter_subs)
             this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
-            if 1:#this_vmax < 0:
+            if this_vmax < 0:
                 msg = 'Vmax for reaction {} is negative {}'.format(this_reaction.name,
                                                           this_vmax)
                 compiled_model.logger.error(msg)
-                # raise ValueError(msg)
-            # print('Vmax of %s is %0.1f',this_reaction.name,this_vmax)
+                raise ValueError(msg)
+
             this_parameters[vmax_param.symbol] = this_vmax
 
             # Update the dict with explicit model parameters
             parameter_sample.update(this_parameters)
+        #1/0
         return parameter_sample

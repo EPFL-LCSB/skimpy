@@ -44,6 +44,7 @@ class ODEFunction:
         self.variables = variables
         self.expr = expr
         self.parameters = parameters
+        self._parameter_values = []
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self.parameters]
@@ -51,10 +52,9 @@ class ODEFunction:
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
         # Sort the expressions
-        the_expressions = [self.expr[x] for x in self.variables]
+        the_expressions = [self.expr[x] for x in self.variables.values()]
 
         # Awsome sympy magic
-        # TODO problem with typs if any parameter ot vairabls is interpreted as interger
         self.function = []
         for exp in the_expressions:
            self.function.append(ufuncify(tuple(sym_vars),
@@ -62,11 +62,14 @@ class ODEFunction:
                                          backend='Cython'))
 
     @property
-    def parameters(self):
-        return self._parameters
+    def parameter_values(self):
+        if not self._parameter_values:
+            raise ArgumentError('No parameters have been set')
+        else:
+            return self._parameter_values
 
-    @parameters.setter
-    def parameters(self,value):
+    @parameter_values.setter
+    def parameter_values(self,value):
         """
         Would-be optimization hack to avoid looking up thr whole dict at each
         iteration step in __call__
@@ -74,8 +77,8 @@ class ODEFunction:
         :param value:
         :return:
         """
-        self._parameters = value
-        self.parameter_values = [x for x in self.parameters.values()]
+        #self._parameters = value
+        self._parameter_values = [value[x] for x in self.parameters.values()]
 
 
     def __call__(self,t,y):

@@ -50,7 +50,7 @@ def make_ode_fun(kinetic_model, sim_type):
         all_data = [this_reaction.mechanism.get_full_rate_expression() \
                     for this_reaction in kinetic_model.reactions.values()]
 
-    all_expr, all_param = list(zip(*all_data))
+    all_expr, all_parameters = list(zip(*all_data))
 
     # Flatten all the lists
     flatten_list = lambda this_list: [item for sublist in this_list \
@@ -58,13 +58,15 @@ def make_ode_fun(kinetic_model, sim_type):
 
     all_rates = flatten_list([these_expressions.keys()
                               for these_expressions in all_expr])
-    all_param = join_dicts(all_param)
+
+    all_parameters = flatten_list(all_parameters)
+    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
     # Get unique set of all the variables
     variables = [sympify(x) for x in set(all_rates)]
     variables = iterable_to_tabdict(variables, use_name=False)
 
-    expr = dict.fromkeys(variables, 0.0)
+    expr = dict.fromkeys(variables.values(), 0.0)
 
     # Mass balance
     # Sum up all rate expressions
@@ -83,7 +85,7 @@ def make_ode_fun(kinetic_model, sim_type):
         this_boundary_condition(expr)
 
     # Make vector function from expressions
-    ode_fun = ODEFunction(variables, expr, all_param)
+    ode_fun = ODEFunction(variables, expr, all_parameters)
 
     return ode_fun, variables
 

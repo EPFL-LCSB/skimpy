@@ -58,6 +58,8 @@ class KineticModel(object):
         self._sim_type = None
         self._modified = True
 
+        self.parameters = TabDict()
+
     # TODO : Implement
     @property
     def metabolites(self):
@@ -99,6 +101,12 @@ class KineticModel(object):
         for reaction_name, the_params in param_dict.items():
             the_reaction = self.reactions[reaction_name]
             the_reaction.parametrize(the_params)
+
+        self.update()
+
+    def update(self):
+        for r in self.reactions.values():
+            self.parameters.update(r.parameters)
 
     @property
     def sim_type(self):
@@ -162,7 +170,6 @@ class KineticModel(object):
                 parameter_elasticities_fun, \
                 conservation_relation, \
                 all_variables, \
-                all_parameters,\
                 independent_variables_ix,\
                 dependent_variables_ix,\
                     = make_mca_functions(self,
@@ -176,7 +183,6 @@ class KineticModel(object):
                 self.parameter_elasticities_fun = parameter_elasticities_fun
                 self.conservation_relation = conservation_relation
                 self.variables = all_variables
-                self.parameters = all_parameters
                 self.reduced_stoichiometry = reduced_stoichometriy
 
                 self.jacobian_fun = JacobianFunction(reduced_stoichometriy,

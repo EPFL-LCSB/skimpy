@@ -74,7 +74,7 @@ class ElasticityFunction:
         """
         Return a sparse matrix type with elasticity values
         """
-        parameter_values = array([x for x in parameters.values()], dtype=double)
+        parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
         input_vars = append_array(variables , parameter_values)
         array_input = [array([input_var], dtype=double) for input_var in input_vars]

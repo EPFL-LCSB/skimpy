@@ -97,8 +97,8 @@ class ItemSet(ABC, TabDict):
 
 class Parameter(Item):
     def __init__(self, name, required_for=None, value=None, model=None, suffix=''):
-        Item.__init__(self, name, value=None, model=None, suffix=suffix)
-        
+        Item.__init__(self, name, value=value, model=model, suffix=suffix)
+
         if required_for is not None:
             self._required_for = set(required_for)
         else:
