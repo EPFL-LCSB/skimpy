@@ -37,7 +37,7 @@ from ..utils.namespace import *
 class RandBiBiReversibleMichaelisMenten(KineticMechanism):
     """A reversible random ordered bi bi reaction enzmye class"""
 
-    Reactants = make_reactant_set(__name__, ['substrate1',
+    Reactants = make_reactant_set(__name__, [ 'substrate1',
                                               'substrate2',
                                               'product1',
                                               'product2'])

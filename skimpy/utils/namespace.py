@@ -26,6 +26,7 @@ limitations under the License.
 """
 
 QSSA = 'qssa'
+TQSSA = 'tqssa'
 MCA  = 'mca'
 ODE  = 'ode'
 ELEMENTARY = 'elementary'

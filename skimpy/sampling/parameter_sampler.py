@@ -120,23 +120,29 @@ class SimpleParameterSampler(ParameterSampler):
         parameter_sample = compiled_model.parameters.copy()
         # Sample parameters for every reaction
         for this_reaction in compiled_model.reactions.values():
+
+            keq_param = this_reaction.parameters.k_equilibrium
+            vmax_param = this_reaction.parameters.vmax_forward
+
             this_parameters = {
-                'k_equilibrium_' + this_reaction.name: this_reaction.mechanism.parameters.k_equilibrium,
-                'vmax_forward_' + this_reaction.name: 1.0}
+                keq_param.symbol: keq_param.value,
+                vmax_param.symbol: 1.0}
 
             # Loop over the named tuple
-            for this_parameter in this_reaction.mechanism.parameters._asdict():
+            for this_p_name, this_parameter in this_reaction.parameters.items():
                 # Sample a saturation
-                # TODO This should be class based
-                if this_parameter.startswith('km'):
+                # The parameters that have to be sampled are attached to
+                # reactants. hence, their .hook attribute shall not be None
+
+                if this_parameter.hook is not None:
                     this_saturation = sample()
                     # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
-                    this_id = this_parameter.split('_')[1]
-                    this_reactant = getattr(this_reaction.substrates, this_id)
+                    # TODO - OK, removed.
+                    this_reactant = this_parameter.hook.name
                     this_concentration = concentration_dict[this_reactant]
-                    this_reaction_parameter = this_parameter + '_' + this_reaction.name
-                    this_parameters[this_reaction_parameter] = ((
-                                                                1.0 - this_saturation) * this_concentration) / this_saturation
+                    this_param_symbol = this_parameter.symbol
+                    this_parameters[this_param_symbol] = \
+                        ((1.0 - this_saturation) * this_concentration) / this_saturation
 
             # Calculate the vmax
             this_net_reaction_rate = this_reaction.mechanism.reaction_rates[
@@ -147,14 +153,13 @@ class SimpleParameterSampler(ParameterSampler):
             normed_net_reaction_rate = this_net_reaction_rate.evalf(
                 subs=this_parameter_subs)
             this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
-            if this_vmax < 0:
+            if 1:#this_vmax < 0:
                 msg = 'Vmax for reaction {} is negative {}'.format(this_reaction.name,
                                                           this_vmax)
                 compiled_model.logger.error(msg)
-                raise ValueError(msg)
+                # raise ValueError(msg)
             # print('Vmax of %s is %0.1f',this_reaction.name,this_vmax)
-
-            this_parameters['vmax_forward_' + this_reaction.name] = this_vmax
+            this_parameters[vmax_param.symbol] = this_vmax
 
             # Update the dict with explicit model parameters
             parameter_sample.update(this_parameters)

@@ -32,6 +32,7 @@ from ..utils.logger import get_bistream_logger
 from .solution import Solution
 
 from ..utils import TabDict, iterable_to_tabdict
+from ..utils.namespace import *
 
 
 class KineticModel(object):
@@ -109,7 +110,7 @@ class KineticModel(object):
         self._modified = True
 
     def compile_ode(self,
-                    sim_type='QSSA',):
+                    sim_type=QSSA,):
 
         self.sim_type = sim_type
 
@@ -145,7 +146,7 @@ class KineticModel(object):
 
         return Solution(self,t_sol,y_sol)
 
-    def compile_mca(self, parameter_list=[], sim_type='QSSA'):
+    def compile_mca(self, parameter_list=[], sim_type=QSSA):
             """
             Compile MCA expressions: elasticities, jacobian
             and control coeffcients

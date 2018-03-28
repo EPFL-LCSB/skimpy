@@ -39,6 +39,8 @@ from skimpy.utils.tabdict import iterable_to_tabdict
 
 from skimpy.utils.moieties import rational_left_basis
 
+from ...utils.namespace import *
+
 sparse_matrix = csc_matrix
 
 def make_mca_functions(kinetic_model,parameter_list,sim_type):
@@ -50,18 +52,21 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
-    if sim_type == 'QSSA':
+    if sim_type == QSSA:
         all_data = [this_reaction.mechanism.get_qssa_rate_expression() \
                     for this_reaction in kinetic_model.reactions.values()]
 
-    elif sim_type == 'tQSSA':
+    elif sim_type == TQSSA:
         raise(NotImplementedError)
         all_data = [this_reaction.mechanism.get_tqssa_rate_expression() \
                     for this_reaction in kinetic_model.reactions.values()]
 
-    elif sim_type == 'full':
+    elif sim_type == ELEMENTARY:
+        raise(NotImplementedError)
         all_data = [this_reaction.mechanism.get_full_rate_expression() \
                     for this_reaction in kinetic_model.reactions.values()]
+    else:
+        raise ArgumentError('{} is not recognized as a simulation type'.format(sim_type))
 
 
     # Get flux expressions for the net
@@ -78,7 +83,7 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
                               for these_expressions in all_expr])
 
     # Sort into an ordered list
-    #all_parameters = [sympify(x) for x in join_dicts(all_parameters).keys()]
+    all_parameters = flatten_list(all_parameters)
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
     # Get unique set of all the variables
@@ -232,7 +237,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
 
             # Throw an error if we could not find an independent var not already used
             if e == len(candidate_vars) - 1:
-                raise Error('Could not find an independant var '
+                raise Exception('Could not find an independant var '
                             'in {}'.format(all_independent_ix))
 
     # Dependant ix are variables not shown to be independent

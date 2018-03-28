@@ -80,6 +80,12 @@ class Item(object):
     def __str__(self):
         return self.symbol
 
+    def __repr__(self):
+        repr = "{} object {} with symbol {}".format(self.__class__.__name__,
+                                                    self.name,
+                                                    self.symbol)
+        return repr
+
 
 class ItemSet(ABC, TabDict):
     def __init__(self, mechanism):
