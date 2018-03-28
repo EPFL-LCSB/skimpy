@@ -53,7 +53,7 @@ parameters = ReversibleMichaelisMenten.Parameters(
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
-               substrates=metabolites,
+               reactants=metabolites,
                )
 
 this_model = KineticModel()
@@ -103,7 +103,7 @@ parameters = RandBiBiReversibleMichaelisMenten.Parameters(
 )
 hxk = Reaction(name=name,
                mechanism=RandBiBiReversibleMichaelisMenten,
-               substrates=metabolites,
+               reactants=metabolites,
                )
 
 this_model = KineticModel()

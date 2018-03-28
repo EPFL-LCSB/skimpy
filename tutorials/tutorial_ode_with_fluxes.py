@@ -45,7 +45,7 @@ parameters = ReversibleMichaelisMenten.Parameters(
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
-               substrates=metabolites,
+               reactants=metabolites,
                )
 
 this_model = KineticModel()

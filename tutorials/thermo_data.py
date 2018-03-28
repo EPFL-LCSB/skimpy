@@ -47,7 +47,7 @@ parameters = reversible_michaelis_menten_from_thermo_data(thermo_data_pfk)
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
-               substrates=metabolites,
+               reactants=metabolites,
                )
 
 this_model = KineticModel()

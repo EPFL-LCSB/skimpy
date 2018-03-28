@@ -44,7 +44,7 @@ parameters = ReversibleMichaelisMenten.Parameters(
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
-               substrates=metabolites,
+               reactants=metabolites,
                )
 
 this_model = KineticModel()
@@ -54,7 +54,7 @@ this_model.parametrize({pfk.name:parameters})
 ## Make the Boundary Condition
 
 the_boundary_condition = ConstantConcentration("A")
-# -- OR -- substrates ?
+# -- OR -- reactants ?
 # TODO
 
 this_model.add_boundary_condition(the_boundary_condition)

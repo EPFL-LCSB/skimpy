@@ -42,17 +42,17 @@ parameters_3 = ReversibleMichaelisMenten.Parameters(k_equilibrium=3.0)
 
 reaction1 = Reaction(name='E1',
                      mechanism=ReversibleMichaelisMenten,
-                     substrates=metabolites_1,
+                     reactants=metabolites_1,
                      )
 
 reaction2 = Reaction(name='E2',
                      mechanism=ReversibleMichaelisMenten,
-                     substrates=metabolites_2,
+                     reactants=metabolites_2,
                      )
 
 reaction3 = Reaction(name='E3',
                      mechanism=ReversibleMichaelisMenten,
-                     substrates=metabolites_3,
+                     reactants=metabolites_3,
                      )
 
 this_model = KineticModel()

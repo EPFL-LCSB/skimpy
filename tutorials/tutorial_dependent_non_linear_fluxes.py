@@ -65,30 +65,30 @@ flux_dict = {'PGK'          : 10.0,
              }
 
 # Build linear Pathway model
-metabolites_pgk    =  RandBiBiReversibleMichaelisMenten.Substrates(
+metabolites_pgk    =  RandBiBiReversibleMichaelisMenten.Reactants(
     substrate1     = '_13dpg',
     substrate2     = 'adp',
     product1       = '_3pg',
     product2       = 'atp')
-metabolites_pgm    = ReversibleMichaelisMenten.Substrates(
+metabolites_pgm    = ReversibleMichaelisMenten.Reactants(
     substrate      = '_3pg',
     product        = '_2pg')
-metabolites_glyck  = RandBiBiReversibleMichaelisMenten.Substrates(
+metabolites_glyck  = RandBiBiReversibleMichaelisMenten.Reactants(
     substrate1     = '_3pg',
     substrate2     = 'adp',
     product1       = 'glyc',
     product2       = 'atp')
-metabolites_glyck2 = RandBiBiReversibleMichaelisMenten.Substrates(
+metabolites_glyck2 = RandBiBiReversibleMichaelisMenten.Reactants(
     substrate1     = 'glyc',
     substrate2     = 'atp',
     product1       = '_2pg',
     product2       = 'adp')
-metabolites_trsarr = RandBiBiReversibleMichaelisMenten.Substrates(
+metabolites_trsarr = RandBiBiReversibleMichaelisMenten.Reactants(
     substrate1     = 'glyc',
     substrate2     = 'nad',
     product1       = '_2h3oppan',
     product2       = 'nadh')
-metabolites_eno    = ReversibleMichaelisMenten.Substrates(
+metabolites_eno    = ReversibleMichaelisMenten.Reactants(
     substrate      = '_2pg',
     product        = 'pep')
 
@@ -106,27 +106,27 @@ parameters_eno    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.66
 
 pgk     =   Reaction(name='PGK',
                mechanism=RandBiBiReversibleMichaelisMenten,
-               substrates=metabolites_pgk,
+               reactants=metabolites_pgk,
              )
 pgm     =   Reaction(name='PGM',
                mechanism=ReversibleMichaelisMenten,
-               substrates=metabolites_pgm,
+               reactants=metabolites_pgm,
                )
 glyck   =   Reaction(name='GLYCK',
                mechanism=RandBiBiReversibleMichaelisMenten,
-               substrates=metabolites_glyck,
+               reactants=metabolites_glyck,
                )
 glyck2  =   Reaction(name='GLYCK2',
                mechanism=RandBiBiReversibleMichaelisMenten,
-               substrates=metabolites_glyck2,
+               reactants=metabolites_glyck2,
                )
 trsarr  =   Reaction(name='TRSARr',
                mechanism=RandBiBiReversibleMichaelisMenten,
-               substrates=metabolites_trsarr,
+               reactants=metabolites_trsarr,
                )
 eno     =   Reaction(name='ENO',
                mechanism=ReversibleMichaelisMenten,
-               substrates=metabolites_eno,
+               reactants=metabolites_eno,
                )
 
 
