@@ -28,32 +28,36 @@ limitations under the License.
 from sympy import sympify
 from .mechanism import KineticMechanism,ElementrayReactionStep
 from ..core.reactions import Reaction
-from ..core.parameters import make_parameter_set
+from ..core.itemsets import make_parameter_set, make_reactant_set
 from ..utils.tabdict import TabDict
 from collections import namedtuple
+from ..utils.namespace import *
 
 
 class ReversibleMichaelisMenten(KineticMechanism):
     """A reversible uni uni reaction enzmye class"""
 
-    Substrates = namedtuple('Substrates', ['substrate', 'product'])
+    Reactants = make_reactant_set(__name__, ['substrate', 'product'])
 
     Parameters = make_parameter_set(    __name__,
-                                       ['vmax_forward',
-                                        'k_equilibrium',
-                                        'km_substrate',
-                                        'km_product',
-                                        #'vmax_backward',
-                                        #'total_enzyme_concentration',
-                                        ])
+                                        {
+                                        'vmax_forward':[ODE,MCA,QSSA],
+                                        'k_equilibrium':[ODE,MCA,QSSA],
+                                        'km_substrate':[ODE,MCA,QSSA],
+                                        'km_product':[ODE,MCA,QSSA],
+                                        'vmax_backward':[ODE,QSSA],
+                                        'total_enzyme_concentration':[ODE,ELEMENTARY],
+                                        'k1_fwd':[ODE,ELEMENTARY],
+                                        'k1_bwd':[ODE,ELEMENTARY],
+                                        'k2_fwd':[ODE,ELEMENTARY],
+                                        'k2_bwd':[ODE,ELEMENTARY],
+                                        })
 
-    Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
+    parameter_reactant_links = {
+        'km_substrate':'substrate',
+        'km_product':'product',
+    }
 
-    RateConstants = namedtuple('RateConstants',['k1_fwd',
-                                                'k1_bwd',
-                                                'k2_fwd',
-                                                'k2_bwd',
-                                                ])
     ElementaryReactions = namedtuple('ElementaryReactions',['r1f',
                                                             'r1b',
                                                             'r2f',
@@ -61,29 +65,26 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                                             ])
 
 
-    def __init__(self, name, substrates, parameters=None):
+    def __init__(self, name, reactants, parameters=None):
         # FIXME dynamic linking, separaret parametrizations from model init
         # FIXME Reaction has a mechanism, and this is a mechanism
-        KineticMechanism.__init__(self,name, substrates, parameters)
+        KineticMechanism.__init__(self, name, reactants, parameters)
 
     def get_qssa_rate_expression(self):
-        subs = self.substrates
+        s = self.reactants.substrate.symbol
+        p = self.reactants.product.symbol
 
-        common_denominator = sympify('1'
-                                      +'+'+subs.substrate+'/'
-                                      +'km_substrate'+'_'+self.name
-                                      + '+'+subs.product+'/'
-                                      +'km_product'+'_'+self.name
-                                     )
+        kms = self.parameters.km_substrate.symbol
+        kmp = self.parameters.km_product.symbol
 
-        bwd_nominator = sympify( 'vmax_forward'+'_'+self.name
-                                  +'/k_equilibrium'+'_'+self.name
-                                  +'*'+subs.product
-                                  +'/'+'km_substrate'+'_'+self.name)
+        keq = self.parameters.k_equilibrium.symbol
+        vmaxf = self.parameters.vmax_forward.symbol
 
-        fwd_nominator = sympify( 'vmax_forward'+'_'+self.name
-                                  +'*'+subs.substrate
-                                  +'/'+'km_substrate'+'_'+self.name)
+        common_denominator = 1 + s/kms + p/kmp
+
+        bwd_nominator = vmaxf/keq * p/kms
+
+        fwd_nominator = vmaxf     * s/kms
 
         forward_rate_expression = fwd_nominator/common_denominator
         backward_rate_expression = bwd_nominator/common_denominator
@@ -94,11 +95,11 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                        ('v_bwd', backward_rate_expression),
                                        ])
 
-        expressions = {subs.substrate: -rate_expression,
-                       subs.product:    rate_expression}
+        expressions = {s: -rate_expression,
+                       p:    rate_expression}
 
 
-        parameters = self.get_expression_parameters_from('parameters')
+        parameters = self.get_parameters_from_expression(rate_expression)
 
         return expressions, parameters
 
@@ -108,7 +109,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
         if not hasattr(self,'rate_constants'):
             self.calculate_rate_constants()
 
-        subs = self.substrates
+        subs = self.reactants
 
         enzyme_complex = 'EC_'+self.name
 
@@ -128,7 +129,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
                        enzyme_complex: r1f - r1b - r2f + r2b,
                        self.name: r1b - r1f - r2b + r2f}
 
-        parameters = self.get_expression_parameters_from('rate_constants')
+        parameters = self.get_parameters_from_expression('rate_constants')
         return expressions, parameters
 
 
@@ -152,7 +153,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                                   )
 
         # self.set_dynamic_attribute_links(self._rates)
-        subs = self.substrates
+        subs = self.reactants
         enzyme_complex = 'EC_'+self.name
 
         r1f = ElementrayReactionStep([self.name,subs.substrate],

@@ -27,26 +27,37 @@ limitations under the License.
 from abc import ABC, abstractmethod
 
 class KineticMechanism(ABC):
-    def __init__(self, name, substrates, parameters = None):
+
+    parameter_reactant_links = {}
+
+    def __init__(self, name, reactants, parameters = None):
         # ABC.__init__()
         self.name = name
-        self.substrates = substrates
-        # self.set_dynamic_attribute_links(self._substrates)
+        self.reactants = reactants
+        self._parameters = None
 
         if parameters is not None:
-            self.parameters = parameters
+            self._parameters = parameters
             # self.set_dynamic_attribute_links(self._parameters)
 
-    #
-    # def set_dynamic_attribute_links(self, metafield):
-    #     for field in metafield.__dict__.keys():
-    #         setattr(self, field) = property(
-    #             lambda self: getattr(metafield, field))
+    def link_parameters_and_reactants(self):
+        for p,r in self.parameter_reactant_links.items():
+            reactant = self.reactants[r]
+            parameter = self.parameters[p]
+            parameter.hook = reactant
 
+    @property
+    def parameters(self):
+        return self._parameters
+
+    @parameters.setter
+    def parameters(self, value):
+        self._parameters = value
+        self.link_parameters_and_reactants()
 
     @property
     @abstractmethod
-    def Substrates(self):
+    def Reactants(self):
         """
         Class to define metabolites and their roles in the reaction
         :return:
@@ -61,14 +72,6 @@ class KineticMechanism(ABC):
         """
         pass
 
-    @property
-    @abstractmethod
-    def RateConstants(self):
-        """
-        Class to define rates and their roles in the reaction
-        :return:
-        """
-        pass
 
     @abstractmethod
     def get_qssa_rate_expression(self):
@@ -82,21 +85,14 @@ class KineticMechanism(ABC):
     def calculate_rate_constants(self):
         pass
 
-    def get_expression_parameters_from(self,kind):
-        parameters = {}
-        values_from_kind = getattr(self,kind)
+    def get_parameters_from_expression(self, expr):
 
-        for the_param in values_from_kind._fields:
-            param_value = getattr(values_from_kind,the_param)
-            #Todo we need a proper fix for this!!
-            #if param_value is None:
-            #    continue
-            param_name = the_param + '_' + self.name
-            parameters[param_name] = param_value
+        reactants = [x.symbol for x in self.reactants.values()]
+
+        parameters = set(expr.free_symbols).difference(reactants)
+
 
         return parameters
-
-
 
 
 class ElementrayReactionStep(object):
