@@ -78,11 +78,11 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
                               for these_expressions in all_expr])
 
     # Sort into an ordered list
-    all_parameters = [sympify(x) for x in join_dicts(all_parameters).keys()]
+    #all_parameters = [sympify(x) for x in join_dicts(all_parameters).keys()]
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
     # Get unique set of all the variables
-    all_variables = [sympify(x) for x in set(all_rates)]
+    all_variables = set(all_rates)
     all_variables = iterable_to_tabdict(all_variables, use_name=False)
 
     #TODO handle depedent variables (i.e. concentrations)
