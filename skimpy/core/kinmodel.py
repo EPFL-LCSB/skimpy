@@ -29,7 +29,7 @@ from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
 from skimpy.analysis.mca.utils import make_mca_functions
 from skimpy.analysis.mca.jacobian_fun import JacobianFunction
 from ..utils.logger import get_bistream_logger
-from .solution import Solution
+from .solution import ODESolution
 
 from ..utils import TabDict, iterable_to_tabdict
 from ..utils.namespace import *
@@ -152,7 +152,7 @@ class KineticModel(object):
                                  time_int,
                                  ordered_initial_conditions)
 
-        return Solution(self,t_sol,y_sol)
+        return ODESolution(self, t_sol, y_sol)
 
     def compile_mca(self, parameter_list=[], sim_type=QSSA):
             """

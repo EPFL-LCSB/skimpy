@@ -24,9 +24,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
+from collections import OrderedDict
 from bokeh.plotting import figure, output_file, show
-from bokeh.palettes import Spectral11
+from bokeh.layouts import column
+from bokeh.palettes import Spectral11, viridis
 
 def timetrace_plot(time,data,filename='out.html', legend = None):
     # Make cool plot functions maype there is also a cooler way?
@@ -54,3 +55,30 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
 
         # show the results
         show(p)
+
+
+def plot_population_per_variable(data, filename):
+
+    plots = OrderedDict()
+
+    grouped = data.groupby('solution_id')
+    colors = viridis(len(grouped))
+
+    for var in data.columns:
+        if var in ['solution_id','time']:
+            continue
+
+        p = figure(x_axis_type = 'datetime')
+
+        for group,this_data in grouped:
+            p.line(this_data['time'], this_data[var],
+                   line_color = colors[group],
+                   line_alpha = 0.5)
+
+        p.title = var
+
+        plots[var] = p
+
+    c = column([p for p in plots.values()])
+    output_file(filename)
+    show(c)

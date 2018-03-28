@@ -26,11 +26,15 @@ limitations under the License.
 """
 
 import numpy as np
-from ..viz.plotting import timetrace_plot
+from ..viz.plotting import timetrace_plot, plot_population_per_variable
 from ..utils import TabDict,iterable_to_tabdict
 
+from copy import deepcopy
+
+import pandas as pd
+
 # Class for ode solutions
-class Solution:
+class ODESolution:
     def __init__(self,model,t,y):
         self.time    = np.array(t)
 
@@ -45,3 +49,25 @@ class Solution:
 
     def plot(self, filename = ''):
         timetrace_plot(self.time,self.species,filename,legend = self.names)
+
+    def copy(self):
+        return deepcopy(self)
+
+
+class ODESolutionPopulation:
+
+    def __init__(self, list_of_solutions):
+
+        sol_cols = list(list_of_solutions[0].concentrations.keys())
+        self.data = pd.DataFrame(columns = ['solution_id','time']+sol_cols)
+
+        for e,td in enumerate(list_of_solutions):
+            new_block = pd.DataFrame.from_dict(td.concentrations.copy())
+            new_block['time'] = td.time
+            new_block['solution_id'] = e
+
+            self.data = pd.concat([self.data, new_block])
+
+
+    def plot(self, filename):
+        plot_population_per_variable(self.data, filename)

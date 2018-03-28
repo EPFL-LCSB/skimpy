@@ -31,6 +31,7 @@ import numpy as np
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.sampling import SimpleParameterSampler
+from skimpy.core.solution import ODESolutionPopulation
 
 # 'DM_13dpg'        10
 # 'DM_2h3oppan'     -2
@@ -184,7 +185,7 @@ concentration_dict = {'_13dpg'    : 1.0,
                       }
 
 
-parameters = SimpleParameterSampler.Parameters(n_samples=10)
+parameters = SimpleParameterSampler.Parameters(n_samples=1000)
 sampler = SimpleParameterSampler(parameters)
 
 parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
@@ -192,14 +193,14 @@ parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 this_model.compile_ode(sim_type = 'QSSA')
 
 #
-this_model.initial_conditions['_13dpg']     = 1.0
+this_model.initial_conditions['_13dpg']     = 5.0
 this_model.initial_conditions['_2pg']       = 1.0
 this_model.initial_conditions['_3pg']       = 1.0
 this_model.initial_conditions['glyc']       = 1.0
 this_model.initial_conditions['pep']        = 1.0
 this_model.initial_conditions['_2h3oppan']  = 1.0
 this_model.initial_conditions['atp']        = 1.0
-this_model.initial_conditions['adp']        = 1.0
+this_model.initial_conditions['adp']        = 2.0
 this_model.initial_conditions['nad']        = 1.0
 this_model.initial_conditions['nadh']       = 1.0
 
@@ -207,11 +208,14 @@ this_model.logger.setLevel('INFO')
 
 solutions = []
 for parameters in parameter_population:
-    this_model.ode_fun.parameter_values = parameter_population[0]
+    this_model.ode_fun.parameter_values = parameters
     #
     this_sol_qssa = this_model.solve_ode([0.0, 100.0], solver_type='vode')
-    solutions.append(this_sol_qssa)
+    solutions.append(deepcopy(this_sol_qssa))
 
 this_sol_qssa.plot('output/non_linear_qssa.html')
 
+
+solpop = ODESolutionPopulation(solutions)
+solpop.plot('output/non_linear_ode_pop.html')
 
