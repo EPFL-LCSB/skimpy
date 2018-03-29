@@ -123,7 +123,7 @@ class SimpleParameterSampler(ParameterSampler):
 
     def _sample_saturations_step(self, compiled_model, concentration_dict,
                                  flux_dict):
-        parameter_sample = {v:v.value for k,v in compiled_model.parameters.items()}
+        parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
         # Sample parameters for every reaction
         for this_reaction in compiled_model.reactions.values():
 
