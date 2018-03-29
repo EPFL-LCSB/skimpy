@@ -150,7 +150,7 @@ class SimpleParameterSampler(ParameterSampler):
                     this_parameters[this_param_symbol] = \
                         ((1.0 - this_saturation) * this_concentration) / this_saturation
 
-            # Calculate the vmax
+            # Calculate the effective saturation
             this_net_reaction_rate = this_reaction.mechanism.reaction_rates[
                 'v_net']
             this_parameter_subs = concentration_dict.copy()
@@ -158,13 +158,15 @@ class SimpleParameterSampler(ParameterSampler):
 
             normed_net_reaction_rate = this_net_reaction_rate.evalf(
                 subs=this_parameter_subs)
-            this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
-            if this_vmax < 0:
-                msg = 'Vmax for reaction {} is negative {}'.format(this_reaction.name,
-                                                          this_vmax)
+
+            if (normed_net_reaction_rate > 0) and (normed_net_reaction_rate < 1.0):
+                msg = 'Overall saturation for reaction {} is not 0 < {} < 1 '.format(this_reaction.name,
+                                                                         normed_net_reaction_rate)
                 compiled_model.logger.error(msg)
                 raise ValueError(msg)
 
+            # Calculate the effective VMax
+            this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
             this_parameters[vmax_param.symbol] = this_vmax
 
             # Update the dict with explicit model parameters
