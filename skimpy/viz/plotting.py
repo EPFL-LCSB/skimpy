@@ -25,7 +25,7 @@ limitations under the License.
 
 """
 from collections import OrderedDict
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure, output_file, show, curdoc
 from bokeh.layouts import column
 from bokeh.palettes import Spectral11, viridis
 
@@ -57,12 +57,12 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
         show(p)
 
 
-def plot_population_per_variable(data, filename):
+def plot_population_per_variable(data, filename, stride = 1):
 
     plots = OrderedDict()
 
     grouped = data.groupby('solution_id')
-    colors = viridis(len(grouped))
+    # colors = viridis(len(grouped))
 
     for var in data.columns:
         if var in ['solution_id','time']:
@@ -71,14 +71,18 @@ def plot_population_per_variable(data, filename):
         p = figure(x_axis_type = 'datetime')
 
         for group,this_data in grouped:
+            this_data = this_data.iloc[::stride]
             p.line(this_data['time'], this_data[var],
-                   line_color = colors[group],
-                   line_alpha = 0.5)
+                   # line_color = colors[group],
+                   line_alpha = 0.2)
 
-        p.title = var
+        p.title.text = var
 
         plots[var] = p
 
-    c = column([p for p in plots.values()])
-    output_file(filename)
-    show(c)
+        output_file(filename.format(var))
+        show(p)
+        curdoc().clear()
+
+    # c = column([p for p in plots.values()])
+    # show(c)

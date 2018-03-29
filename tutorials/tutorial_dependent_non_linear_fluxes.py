@@ -217,5 +217,5 @@ this_sol_qssa.plot('output/non_linear_qssa.html')
 
 
 solpop = ODESolutionPopulation(solutions)
-solpop.plot('output/non_linear_ode_pop.html')
+solpop.plot('output/non_linear_ode_pop_{}.html')
 
