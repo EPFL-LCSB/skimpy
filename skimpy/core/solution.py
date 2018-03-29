@@ -35,20 +35,20 @@ import pandas as pd
 
 # Class for ode solutions
 class ODESolution:
-    def __init__(self,model,t,y):
-        self.time    = np.array(t)
+    def __init__(self, model, solution):
+        self.ode_solution = solution
 
-        self.species = np.array(y)
+        self.time    = np.array(solution.values.t)
+
+        self.species = np.array(solution.values.y)
         self.names = [x for x in model.ode_fun.variables]
 
         self.concentrations = iterable_to_tabdict([])
-        for this_species, this_name in zip(self.species.T,self.names):
+        for this_species, this_name in zip(self.species.T, self.names):
             self.concentrations[this_name] = this_species
 
-
-
-    def plot(self, filename = ''):
-        timetrace_plot(self.time,self.species,filename,legend = self.names)
+    def plot(self, filename=''):
+        timetrace_plot(self.time, self.species, filename, legend=self.names)
 
     def copy(self):
         return deepcopy(self)

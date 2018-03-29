@@ -25,7 +25,8 @@ limitations under the License.
 
 """
 
-from skimpy.analysis.ode.utils import get_ode_solver, _solve_ode, make_ode_fun
+from scikits.odes import ode
+from skimpy.analysis.ode.utils import make_ode_fun
 from skimpy.analysis.mca.utils import make_mca_functions
 from skimpy.analysis.mca.jacobian_fun import JacobianFunction
 from ..utils.logger import get_bistream_logger
@@ -135,24 +136,23 @@ class KineticModel(object):
             self.initial_conditions = TabDict([(x,0.0) for x in self.variables])
 
     def solve_ode(self,
-                  time_int,
-                  solver_type='vode',
-                  reltol=1e-8,
-                  abstol=1e-8):
-
+                  time_out,
+                  solver_type='cvode',
+                  **kwargs):
+        extra_options = {'old_api': False}
+        kwargs.update(extra_options)
         # Choose a solver
-        self.solver = get_ode_solver(self.ode_fun, solver_type, reltol, abstol)
+        if not hasattr(self, 'solver'):
+            self.solver = ode(solver_type, self.ode_fun, **kwargs)
 
         # Order the initial conditions according to variables
         ordered_initial_conditions = [self.initial_conditions[variable]
                                     for variable in self.variables]
 
         # solve the ode
-        t_sol,y_sol = _solve_ode(self.solver,
-                                 time_int,
-                                 ordered_initial_conditions)
+        solution = self.solver.solve(time_out, ordered_initial_conditions)
 
-        return ODESolution(self, t_sol, y_sol)
+        return ODESolution(self, solution)
 
     def compile_mca(self, parameter_list=[], sim_type=QSSA):
             """

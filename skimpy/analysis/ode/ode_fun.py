@@ -80,10 +80,11 @@ class ODEFunction:
         #self._parameters = value
         self._parameter_values = [value[x] for x in self.parameters.values()]
 
-
-    def __call__(self,t,y):
+    def __call__(self, t, y, ydot):
         input_vars = list(y)+self.parameter_values
-        #result = self.functin
         array_input = [array([input_var], dtype=double) for input_var in  input_vars  ]
-        results = [f(*array_input)[0] for f in self.function ]
-        return array(results)
+        results = [f(*array_input)[0] for f in self.function]
+        # Needed by SUNDIALS solver
+        for ix,e in enumerate(results):
+            ydot[ix] = e
+

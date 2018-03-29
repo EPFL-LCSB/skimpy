@@ -6,6 +6,8 @@ lxml
 openpyxl
 pytest
 scipy
+numpy
 tabulate
-sphinx
+sphinx>=1.4
 sphinx-rtd-theme
+Cython
