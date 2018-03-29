@@ -159,7 +159,7 @@ class SimpleParameterSampler(ParameterSampler):
             normed_net_reaction_rate = this_net_reaction_rate.evalf(
                 subs=this_parameter_subs)
 
-            if (normed_net_reaction_rate > 0) and (normed_net_reaction_rate < 1.0):
+            if (normed_net_reaction_rate < 0) or (normed_net_reaction_rate > 1.0):
                 msg = 'Overall saturation for reaction {} is not 0 < {} < 1 '.format(this_reaction.name,
                                                                          normed_net_reaction_rate)
                 compiled_model.logger.error(msg)
