@@ -107,7 +107,8 @@ class KineticModel(object):
 
     def update(self):
         for r in self.reactions.values():
-            self.parameters.update(r.parameters)
+            reaction_params = TabDict({str(p.symbol): p for p in r.parameters.values()})
+            self.parameters.update(reaction_params)
 
     @property
     def sim_type(self):
