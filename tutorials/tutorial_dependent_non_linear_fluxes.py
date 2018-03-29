@@ -185,7 +185,7 @@ concentration_dict = {'_13dpg'    : 1.0,
                       }
 
 
-parameters = SimpleParameterSampler.Parameters(n_samples=1000)
+parameters = SimpleParameterSampler.Parameters(n_samples=100)
 sampler = SimpleParameterSampler(parameters)
 
 parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
@@ -210,8 +210,8 @@ solutions = []
 for parameters in parameter_population:
     this_model.ode_fun.parameter_values = parameters
     #
-    this_sol_qssa = this_model.solve_ode([0.0, 100.0], solver_type='vode')
-    solutions.append(deepcopy(this_sol_qssa))
+    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
+    solutions.append(this_sol_qssa)
 
 this_sol_qssa.plot('output/non_linear_qssa.html')
 
