@@ -28,6 +28,7 @@ limitations under the License.
 
 import numpy as np
 from scipy.sparse import eye as speye
+from scipy.sparse import find as sfind
 from scipy.sparse import hstack, vstack
 
 from sympy import Matrix, nsimplify
@@ -58,8 +59,8 @@ def integer_left_basis_semipos(S):
         zero_rows,_ = T[:,j].nonzero()
         zero_ix = list(set(range(T.shape[0])).difference(zero_rows))
         Tnew = T[zero_ix, 0:j]
-        posinds,_,_ = scipy.sparse.find(T[:,j]>0)
-        neginds,_,_ = scipy.sparse.find(T[:,j]<0)
+        posinds,_,_ = sfind(T[:,j]>0)
+        neginds,_,_ = sfind(T[:,j]<0)
 
         lni = len(neginds)
 
