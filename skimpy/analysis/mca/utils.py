@@ -211,40 +211,34 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     nonzero_rows, nonzero_cols = L0_sparse.nonzero()
     row_dict = defaultdict(list)
 
-
     # Put the ixs in a dict indexed by row number (moiety index)
     for k, v in zip(nonzero_rows, nonzero_cols):
         row_dict[k].append(v)
 
     # The first independent variables are those involved in no moieties
     all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
+    # Indices for dependent metabolites indices
+    all_dependent_ix = []
+
     # For each line, get an exclusive representative.
     # There should be at least as many exclusive representatives as lines
-    # Each representative will be independent from the non-moiety metabolites
-    for row, candidate_vars in row_dict.items():
-        for e, the_var in enumerate(candidate_vars):
-            if the_var not in all_independent_ix:
-                all_independent_ix.append(the_var)
-            #      break
 
-            # Append all entries participating in a mojetie and that are not already
-            # an independent variable except one
-            # Since A*x1 + B*x2 + C*x3 ... = const for every row
-            # TODO How is this in general ...
-            if e == len(candidate_vars) - 2:
-                break
+    # Iterate over mojeties and start with the ones with least members
+    for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
+        mojetie_vars = row_dict[row]
+        # Get all unassigned metabolites participating in this mojetie
+        unassigned_vars = [x for x in set(mojetie_vars)
+            .difference(all_independent_ix+all_dependent_ix)]
+        # Choose a representative dependent metabolite:
+        if unassigned_vars:
+            all_dependent_ix.append(unassigned_vars[-1])
+        else:
+            raise Exception('Could not find an dependent var that is not already used'
+                            ' in {}'.format(mojetie_vars))
 
-            # Throw an error if we could not find an independent var not already used
-            if e == len(candidate_vars) - 1:
-                raise Exception('Could not find an independant var '
-                            'in {}'.format(all_independent_ix))
-
-    # Dependant ix are variables not shown to be independent
-
-    all_dependent_ix = [x for x in
-                               set(range(L0.shape[1])).difference(
-                                   all_independent_ix)]
-
+    # The independent mets is the set difference from the dependent
+    all_independent_ix = [x for x in set(range(L0.shape[1]))
+        .difference(all_dependent_ix)]
 
     # Reindex S in N, N0
     S = S[all_independent_ix+all_dependent_ix,:]
