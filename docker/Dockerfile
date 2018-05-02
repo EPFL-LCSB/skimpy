@@ -59,5 +59,5 @@ WORKDIR ./work
 
 ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
 # Load your package in development mode on startup
-ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy && $0 $*"]
+ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && $0 $*"]
 CMD /bin/bash

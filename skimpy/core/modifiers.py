@@ -27,6 +27,8 @@ limitations under the License.
 
 from sympy import sympify
 from ..utils.general import check_is_symbol
+from ..mechanisms.mechanism import KineticMechanism
+from ..core.itemsets import make_parameter_set, make_reactant_set
 
 class ExpressionModifier(object):
     """
@@ -157,6 +159,59 @@ class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
         # TODO: Implement
         pass
 
+
+"""
+Reaction modifiers 
+"""
+
+class HyperbolicSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "HSM"
+
+    Reactants = make_reactant_set(__name__, ['small_molecule'])
+
+    Parameters = make_parameter_set(    __name__,
+                                        {
+                                        'km_small_molecule':[ODE,MCA,QSSA],
+                                        })
+
+    parameter_reactant_links = {
+        'km_small_molecule':'small_molecule',
+    }
+
+    def __init__(self, reaction, reactant, name=None):
+
+        if name is None:
+            name = reaction.__str__()+"_"+reactant.__str__()
+
+        reactants = Reactants(small_molecule=reactant)
+        parameters = Parameters()
+
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+    def modifier(self, expressions):
+        """
+        change a reaction rate expressions by a constant factor
+        :param expression:
+        :return:
+        """
+        # Hyperbolic modification of the rate
+
+        for k,exp in expressions.items():
+            # TODO : Implement in more general fashion
+            # to work for all kind
+            expressions[k] = exp*get_qssa_rate_expression()
+
+    def get_qssa_rate_expression(self):
+        sm = self.reactants.small_molecule.symbol
+        km = self.parameters.km_small_molecule.symbol
+        return sm/(km_+ sm)
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
 
 
 

@@ -134,8 +134,15 @@ class SimpleParameterSampler(ParameterSampler):
                 keq_param.symbol: keq_param.value,
                 vmax_param.symbol: 1.0}
 
+            # Get parameters from mechanism
+            this_reaction_parameters = this_reaction.parameters
+
+            # Get parameters from modifiers
+            for this_modifier in this_reaction.modifiers:
+                this_reaction_parameters.update(this_modifier.parameters)
+
             # Loop over the named tuple
-            for this_p_name, this_parameter in this_reaction.parameters.items():
+            for this_p_name, this_parameter in this_reaction_parameters.items():
                 # Sample a saturation
                 # The parameters that have to be sampled are attached to
                 # reactants. hence, their .hook attribute shall not be None

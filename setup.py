@@ -28,6 +28,7 @@ setup(name='skimpy',
       python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
       description='SKiMPy adds Thermodynamics-based Flux Analysis',
       keywords=['skimpy','kinetic','models'],
+      extras_require={ 'ORACLE':  ["pytfa"], },
 
       license='Apache2',
 

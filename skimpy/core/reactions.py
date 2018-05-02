@@ -34,6 +34,7 @@ class Reaction(object):
         self.name = name
         self.mechanism = mechanism(name = name, reactants = reactants,
                                    parameters = parameters)
+        self.modifiers = TabDict([])
 
 
     # Hooks to the mechanism attributes for convenience

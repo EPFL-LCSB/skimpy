@@ -69,6 +69,7 @@ def make_ode_fun(kinetic_model, sim_type):
     # Mass balance
     # Sum up all rate expressions
     for this_reaction in all_expr:
+        # Mo
         for this_variable_key in this_reaction:
             expr[this_variable_key] += this_reaction[this_variable_key]
 
