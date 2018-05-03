@@ -38,7 +38,7 @@ class ODEFunction:
         :param variables: a list of strings with variables names
         :param expr: dict of sympy expressions for the rate of
                      change of a variable indexed by the variable name
-        :param parameters: dict of parameters with parameter values
+        :param parameters: dict of parameters
 
         """
         self.variables = variables

@@ -45,6 +45,7 @@ class KineticMechanism(ABC):
             reactant = self.reactants[r]
             parameter = self.parameters[p]
             parameter.hook = reactant
+            reactant.hook = parameter
 
     @property
     def parameters(self):

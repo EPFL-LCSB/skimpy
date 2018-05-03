@@ -29,6 +29,7 @@ from sympy import sympify
 from ..utils.general import check_is_symbol
 from ..mechanisms.mechanism import KineticMechanism
 from ..core.itemsets import make_parameter_set, make_reactant_set
+from ..utils.namespace import *
 
 class ExpressionModifier(object):
     """

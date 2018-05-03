@@ -25,6 +25,7 @@ limitations under the License.
 
 """
 
+from skimpy.utils.tabdict import TabDict
 
 class Reaction(object):
     """
@@ -40,7 +41,10 @@ class Reaction(object):
     # Hooks to the mechanism attributes for convenience
     @property
     def reactants(self):
-        return self.mechanism.reactants
+        reactants = self.mechanism.reactants
+        for this_modifier in self.modifiers:
+            reactants.update(this_modifier.reatants)
+        return reactants
 
     @reactants.setter
     def reactants(self, value):
@@ -48,8 +52,12 @@ class Reaction(object):
 
     @property
     def parameters(self):
-        return self.mechanism.parameters
+        parameters = self.mechanism.parameters
+        for this_modifier in self.modifiers:
+            parameters.update(this_modifier.parameters)
+        return parameters
 
+    # TODO implement the setter
     @parameters.setter
     def parameters(self, value):
         for name,p in value.items():
