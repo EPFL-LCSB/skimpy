@@ -45,21 +45,22 @@ def create_reaction_from_stoich(name,
     """
 
     for this_met, stoich in met_stoich_dict.items():
-        this_name = this_met.name
-        is_small_molecule = any([this_name.startswith(s) for s in small_molecules])
+        is_small_molecule = any([this_met.startswith(s) for s in small_molecules])
 
-        if not this_met.name.startswith(water + '_') \
+        if not this_met.startswith(water + '_') \
            and is_small_molecule:
             this_reaction_small_molecules[this_met] = stoich
 
-        elif not this_met.name.startswith(water + '_') \
+        elif not this_met.startswith(water + '_') \
              and not is_small_molecule:
             this_reaction_reactatns[this_met] = stoich
 
     # Determine mechanism
     mechanism = guess_mechanism(this_reaction_reactatns)
     # Determine reactant order
-    reactants = guess_reactant_order(mechanism,this_reaction_reactatns,reactant_relations)
+    reactants = make_reactant_set(mechanism,
+                                  this_reaction_reactatns,
+                                  reactant_relations)
 
     skimpy_reaction = Reaction(name=name,
                                 reactants=reactants,
@@ -67,9 +68,9 @@ def create_reaction_from_stoich(name,
 
     # Add small molecules modifiers
     small_molecule_modifier = model_generator.small_molecule_modifier
-    for this_sm in small_molecules:
-        small_molecule_mod = small_molecule_modifier(kinetic_reaction, this_sm.name)
-        skimpy_reaction.modifiers.append(small_molecule_mod)
+    for this_sm, stoich in this_reaction_small_molecules.items():
+        small_molecule_mod = small_molecule_modifier(skimpy_reaction, this_sm, stoich)
+        skimpy_reaction.modifiers[small_molecule_mod.name] = small_molecule_mod
 
     return skimpy_reaction
 
@@ -88,23 +89,48 @@ def create_reaction_from_data(name,
 
 def guess_mechanism(reactants):
     # 1) Reversible Michaelis Menten kinetics
-    # 2) Convenience kinetics
     mechanism = check_rev_michaelis_menten(reactants)
     if mechanism is not None:
         return mechanism
 
+    # 2) Convenience kinetics
     else:
-        return None
+        stoich = [i for i in reactants.values()]
+        stoich.sort()
+        return make_convenience(stoich)
 
 
 def check_rev_michaelis_menten(reactants):
-    stoich = set([i for i in this_reaction_reactants.values()])
-    if stoich is set([-1,-1,1,1]):
+    stoich = [i for i in reactants.values()]
+    stoich.sort()
+
+    if stoich == [-1,-1,1,1]:
         return RandBiBiReversibleMichaelisMenten
 
-    elif stoich is set([-1,1]):
+    if stoich == [-1,1]:
         return ReversibleMichaelisMenten
 
-    else:
-        return None
+    return None
+
+
+def make_reactant_set(mechanism,
+                      reactants,
+                      reactant_relations):
+
+    reactants_sorted = TabDict([(k,v) for k,v in reactants.items()])
+    reactant_list = [k for k in mechanism.reactant_stoichiometry.keys()]
+    # ToDo Sort the reactants to match the reactant list
+    # using the reactant_relations
+
+    reactants_resorted = {}
+    (mets, stoichiometries) = zip(*reactants_sorted.items())
+    reactants_sorted = zip(mets,stoichiometries,reactant_list)
+
+    for met, stoich, react in reactants_sorted:
+        if stoich < 0:
+            reactants_resorted[react] = met
+        if stoich > 0:
+            reactants_resorted[react] = met
+
+    return mechanism.Reactants(**reactants_resorted)
 

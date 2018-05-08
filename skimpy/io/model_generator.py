@@ -24,7 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from abc import ABC
+from abc import ABC, abstractmethod
 from skimpy.core import *
 
 class ModelGenerator(ABC):
@@ -50,10 +50,18 @@ class ModelGenerator(ABC):
         if small_molecules is None:
             self.small_molecules = \
                 ['h', 'co2', 'nh4', 'o2', 'pi', 'ppi', 'pppi', 'h2o2', 'hco3', 'h2s', 'so3', 'so4']
+        else:
+            self.small_molecules = small_molecules
+
         if small_molecule_modifier is None:
-            self.small_molecule_modifier = HyperbolicSmallMoleculeModifier
+            self.small_molecule_modifier = FirstOrderSmallMoleculeModifier
+        else:
+            self.small_molecule_modifier = small_molecule_modifier
+
         if water is None:
             self.water = 'h2o'
+        else:
+            self.water = water
 
 
 
