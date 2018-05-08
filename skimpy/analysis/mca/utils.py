@@ -30,7 +30,7 @@ import numpy as np
 
 from scipy.sparse import csr_matrix, csc_matrix
 from scipy.sparse.linalg import inv as sparse_inv
-from sympy import diff, sympify, simplify, Matrix, eye, zeros
+from sympy import diff, simplify, Matrix, eye, zeros
 
 from .elasticity_fun import ElasticityFunction
 
@@ -53,18 +53,32 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
     if sim_type == QSSA:
-        all_data = [this_reaction.mechanism.get_qssa_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
+        all_data = []
+
+        #TODO Modifiers sould be applicable for all simulation types
+        for this_reaction in kinetic_model.reactions.values():
+            this_reaction.mechanism.get_qssa_rate_expression()
+            # Update rate expressions
+            for this_mod in this_reaction.modifiers.values():
+                this_mod(this_reaction.mechanism.reaction_rates)
+            this_reaction.mechanism.update_qssa_rate_expression()
+
+            # Add modifier expressions
+            for this_mod in this_reaction.modifiers.values():
+                sm = this_mod.reactants['small_molecule'].symbol
+                flux = this_reaction.mechanism.reaction_rates['v_net']
+                flux_expression_sm = flux*this_mod.stoichiometry
+                this_reaction.mechanism.expressions[sm] = flux_expression_sm
+
+            all_data.append((this_reaction.mechanism.expressions,
+                             this_reaction.mechanism.expression_parameters))
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)
-        all_data = [this_reaction.mechanism.get_tqssa_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
 
     elif sim_type == ELEMENTARY:
         raise(NotImplementedError)
-        all_data = [this_reaction.mechanism.get_full_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
+
     else:
         raise ArgumentError('{} is not recognized as a simulation type'.format(sim_type))
 
@@ -90,14 +104,9 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
     all_variables = set(all_rates)
     all_variables = iterable_to_tabdict(all_variables, use_name=False)
 
-    #TODO handle depedent variables (i.e. concentrations)
+    #Get depedent variables (i.e. concentrations)
     reduced_stoichiometry, dependent_weights, independent_ix, dependent_ix = \
         get_reduced_stoichiometry(kinetic_model, all_variables)
-
-
-    #######
-
-
 
     all_independent_variables = OrderedDict([(k,v)
                                  for e,(k,v) in enumerate(all_variables.items())
@@ -160,7 +169,7 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
     for this_expression in expressions:
 
         column = 0
-        for this_variable in respective_variables:
+        for this_variable in respective_variables.values():
 
             this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
 
@@ -178,11 +187,10 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
     return elasticity_fun
 
 
-def get_dlogx_dlogy(sympy_expression, string_variable):
+def get_dlogx_dlogy(sympy_expression, variable):
     """
     Calc d_log_x/d_log_y = y/x*dx/dy
     """
-    variable = sympify(string_variable)
     partial_derivative = diff(sympy_expression, variable)
 
     expression = simplify(partial_derivative / sympy_expression * variable)
@@ -250,14 +258,14 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     # N  is the full rank reduced stoichiometric matrix
     # N0 is the remainder
     #
-    #     [ I_n (nxn) | 0_r (rxr) ]
+    #     [ I_n (nxn) | 0_r nxr) ]
     # L = [     L0 ((r)x(n+r))    ]
     #
     #     [ N  ]
     # S = [ N0 ]
     #
     # Then:
-    #          [ I_n (nxn) | 0_r (rxr) ] * [ N  ]
+    #          [ I_n (nxn) | 0_r (nxr) ] * [ N  ]
     # L * S  = [     L0 ((r)x(n+r))    ]   [ N0 ]
     #
     #          [ I_n*N + 0_r * N0 ]   [ N ]
@@ -267,7 +275,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     n = n_plus_r - r
 
     # Upper block
-    U = Matrix([eye(n), zeros(r,r)]).transpose()
+    U = Matrix([eye(n), zeros(r,n)]).transpose()
     L = Matrix([U,L0])
 
     N_ = L*S

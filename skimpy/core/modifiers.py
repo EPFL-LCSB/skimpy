@@ -165,48 +165,58 @@ class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
 Reaction modifiers 
 """
 
-class HyperbolicSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
+class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     prefix = "HSM"
 
     Reactants = make_reactant_set(__name__, ['small_molecule'])
 
     Parameters = make_parameter_set(    __name__,
-                                        {
-                                        'km_small_molecule':[ODE,MCA,QSSA],
-                                        })
+                                        { })
 
-    parameter_reactant_links = {
-        'km_small_molecule':'small_molecule',
-    }
+    parameter_reactant_links = {}
 
-    def __init__(self, reaction, reactant, name=None):
+    def __init__(self, reaction, reactant, stoichiometry, name=None):
 
         if name is None:
             name = reaction.__str__()+"_"+reactant.__str__()
 
-        reactants = Reactants(small_molecule=reactant)
-        parameters = Parameters()
-
+        reactants = self.Reactants(small_molecule=reactant)
+        parameters = self.Parameters()
         KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.stoichiometry = stoichiometry
 
     def modifier(self, expressions):
         """
-        change a reaction rate expressions by a constant factor
-        :param expression:
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
         :return:
         """
-        # Hyperbolic modification of the rate
+        # First oder modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
 
-        for k,exp in expressions.items():
-            # TODO : Implement in more general fashion
-            # to work for all kind
-            expressions[k] = exp*get_qssa_rate_expression()
+        if self.stoichiometry < 0:
+            expressions['v_fwd'] = expressions['v_fwd']\
+                                   *self.get_qssa_rate_expression()
+
+        if self.stoichiometry > 0:
+            expressions['v_fwd'] = expressions['v_fwd'] \
+                                   * self.get_qssa_rate_expression()
+
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
 
     def get_qssa_rate_expression(self):
         sm = self.reactants.small_molecule.symbol
-        km = self.parameters.km_small_molecule.symbol
-        return sm/(km_+ sm)
+        return sm
+
+    def update_qssa_rate_expression(self):
+        return None
+
 
     def get_full_rate_expression(self):
         raise NotImplementedError

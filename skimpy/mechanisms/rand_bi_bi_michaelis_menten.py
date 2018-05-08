@@ -55,6 +55,11 @@ class RandBiBiReversibleMichaelisMenten(KineticMechanism):
                                         'total_enzyme_concentration':[ODE,ELEMENTARY],
                                     })
 
+    reactant_stoichiometry= {'substrate1':-1,
+                             'substrate2':-1,
+                             'product1':1,
+                             'product2':1}
+
     parameter_reactant_links = {
         'ki_substrate1':'substrate1',
         'ki_substrate2':'substrate2',
@@ -108,16 +113,24 @@ class RandBiBiReversibleMichaelisMenten(KineticMechanism):
                                        ('v_bwd', backward_rate_expression),
                                        ])
 
-        expressions = {s1: -rate_expression,
-                       s2: -rate_expression,
-                       p1:    rate_expression,
-                       p2:    rate_expression
-                       }
+        self.expressions = {s1: -rate_expression,
+                            s2: -rate_expression,
+                            p1:    rate_expression,
+                            p2:    rate_expression
+                            }
 
-        # parameters = [kis1,kis2,kms2,kmp1,kip1,kip2,vmaxf,keq]
-        parameters = self.get_parameters_from_expression(rate_expression)
-        return expressions, parameters
+        self.expression_parameters = self.get_parameters_from_expression(rate_expression)
 
+    def update_qssa_rate_expression(self):
+        s1 = self.reactants.substrate1.symbol
+        s2 = self.reactants.substrate2.symbol
+        p1 = self.reactants.product1.symbol
+        p2 = self.reactants.product2.symbol
+
+        self.expressions = {s1: -self.reaction_rates['v_net'],
+                            s2: -self.reaction_rates['v_net'],
+                            p1: self.reaction_rates['v_net'],
+                            p2: self.reaction_rates['v_net']}
 
     def get_full_rate_expression(self):
         raise NotImplementedError

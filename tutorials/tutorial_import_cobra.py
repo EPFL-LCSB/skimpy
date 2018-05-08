@@ -27,13 +27,18 @@ limitations under the License.
 
 import numpy as np
 
-# Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.sampling import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
+from skimpy.io.generate_from_cobra import FromCobra
 
 import cobra
 from cobra.io.mat import load_matlab_model
 
 this_cobra_model = load_matlab_model('/skimpy/models/toy_model.mat','ToyModel_DP')
+
+
+model_gen = FromCobra()
+this_skimpy_model = model_gen.import_model(this_cobra_model)
+

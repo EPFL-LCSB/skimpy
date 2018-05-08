@@ -53,6 +53,9 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                         'k2_bwd':[ODE,ELEMENTARY],
                                         })
 
+    reactant_stoichiometry = {'substrate':-1,
+                              'product':1}
+
     parameter_reactant_links = {
         'km_substrate':'substrate',
         'km_product':'product',
@@ -95,13 +98,20 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                        ('v_bwd', backward_rate_expression),
                                        ])
 
-        expressions = {s: -rate_expression,
-                       p:    rate_expression}
+        self.expressions = {s: -rate_expression,
+                            p:    rate_expression}
 
 
-        parameters = self.get_parameters_from_expression(rate_expression)
+        self.expression_parameters = self.get_parameters_from_expression(rate_expression)
 
-        return expressions, parameters
+
+    def update_qssa_rate_expression(self):
+        s = self.reactants.substrate.symbol
+        p = self.reactants.product.symbol
+
+        self.expressions = {s: -self.reaction_rates['v_net'],
+                            p:  self.reaction_rates['v_net']}
+
 
 
     def get_full_rate_expression(self):
@@ -124,13 +134,14 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                        ('r2b', r2b),
                                        ])
 
-        expressions = {subs.substrate: r1b - r1f,
-                       subs.product: r2f - r2b,
-                       enzyme_complex: r1f - r1b - r2f + r2b,
-                       self.name: r1b - r1f - r2b + r2f}
+        self.expressions = {subs.substrate: r1b - r1f,
+                            subs.product: r2f - r2b,
+                            enzyme_complex: r1f - r1b - r2f + r2b,
+                            self.name: r1b - r1f - r2b + r2f}
 
-        parameters = self.get_parameters_from_expression('rate_constants')
-        return expressions, parameters
+        self.expression_parameters = self.get_parameters_from_expression('rate_constants')
+
+
 
 
     def calculate_rate_constants(self):

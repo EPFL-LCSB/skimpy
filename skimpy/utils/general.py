@@ -48,15 +48,16 @@ def get_stoichiometry(kinetic_model, variables):
         column_ix = 0
         for this_reaction in kinetic_model.reactions.values():
 
-            reaction_items = this_reaction.reactants.items()
-            reactant_names = [x.name for _,x in reaction_items]
+            reaction_items = this_reaction.reactant_stoichiometry.items()
+            reactant_names = [x.name for x,_ in reaction_items]
             if str(this_variable) in reactant_names:
 
-                N_substrate = -1*len([1 for this_def, this_var in reaction_items
-                                      if ('substrate' in this_def)
+                N_substrate = -1*len([1 for this_var, this_stoich in reaction_items
+                                      if (this_stoich < 0)
                                       and str(this_variable) == this_var.name])
-                N_product = 1*len([1 for this_def, this_var in reaction_items
-                                      if ('product' in this_def)
+
+                N_product = 1*len([1 for this_var, this_stoich in reaction_items
+                                      if (this_stoich > 0)
                                       and str(this_variable) == this_var.name])
 
                 values.append(N_substrate+N_product)

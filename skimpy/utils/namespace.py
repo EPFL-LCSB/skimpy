@@ -30,3 +30,7 @@ TQSSA = 'tqssa'
 MCA  = 'mca'
 ODE  = 'ode'
 ELEMENTARY = 'elementary'
+
+KCAL = 'kcal'
+KJ   = 'kJ'
+JOULE = 'JOULE'

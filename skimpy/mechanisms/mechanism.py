@@ -47,6 +47,7 @@ class KineticMechanism(ABC):
             parameter.hook = reactant
             reactant.hook = parameter
 
+
     @property
     def parameters(self):
         return self._parameters
@@ -76,6 +77,10 @@ class KineticMechanism(ABC):
 
     @abstractmethod
     def get_qssa_rate_expression(self):
+        pass
+
+    @abstractmethod
+    def update_qssa_rate_expression(self):
         pass
 
     @abstractmethod

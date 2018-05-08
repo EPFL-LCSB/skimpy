@@ -29,24 +29,47 @@ from sympy import sympify
 from skimpy.analysis.ode.ode_fun import ODEFunction
 from skimpy.analysis.ode.flux_fun import FluxFunction
 from skimpy.utils import iterable_to_tabdict
+from skimpy.utils.namespace import *
 
 
 def make_ode_fun(kinetic_model, sim_type):
 
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
-    if sim_type == 'QSSA':
-        all_data = [this_reaction.mechanism.get_qssa_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
+    if sim_type == QSSA:
+        all_data = []
+        # TODO Modifiers sould be applicable for all simulation types
+        for this_reaction in kinetic_model.reactions.values():
+            this_reaction.mechanism.get_qssa_rate_expression()
+            # Update rate expressions
+            for this_mod in this_reaction.modifiers.values():
+                this_mod(this_reaction.mechanism.reaction_rates)
+            this_reaction.mechanism.update_qssa_rate_expression()
 
-    elif sim_type == 'tQSSA':
+            # Add modifier expressions
+            for this_mod in this_reaction.modifiers.values():
+                sm = this_mod.reactants['small_molecule'].symbol
+                flux = this_reaction.mechanism.reaction_rates['v_net']
+                flux_expression_sm = flux * this_mod.stoichiometry
+                this_reaction.mechanism.expressions[sm] = flux_expression_sm
+
+            all_data.append((this_reaction.mechanism.expressions,
+                             this_reaction.mechanism.expression_parameters))
+
+
+    elif sim_type == TQSSA:
         raise(NotImplementedError)
-        all_data = [this_reaction.mechanism.get_tqssa_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
 
-    elif sim_type == 'full':
-        all_data = [this_reaction.mechanism.get_full_rate_expression() \
-                    for this_reaction in kinetic_model.reactions.values()]
+
+    elif sim_type == ELEMENTARY:
+        all_data = []
+        #TODO Modifiers sould be applicable for all simulation types
+        for this_reaction in kinetic_model.reactions.values():
+            this_reaction.mechanism.get_full_rate_expression()
+
+            all_data.append((this_reaction.mechanism.expressions,
+                             this_reaction.mechanism.expression_parameters)
+                            )
 
     all_expr, all_parameters = list(zip(*all_data))
 

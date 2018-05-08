@@ -57,7 +57,6 @@ class Item(object):
         self._generate_symbol()
         self.hook = None
 
-
     def _generate_symbol(self):
         if self.suffix:
             self._symbol = Symbol('{}_{}'.format(self.name, self.suffix))

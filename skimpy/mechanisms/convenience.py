@@ -153,8 +153,20 @@ def make_convenience(stoichioemtry):
                 stoich = self.reactant_stoichiometry[type]
                 expressions[p] = stoich * rate_expression
 
-            parameters = self.get_parameters_from_expression(rate_expression)
-            return expressions, parameters
+            self.expressions = expressions
+            self.expression_parameters = self.get_parameters_from_expression(rate_expression)
+
+        def update_qssa_rate_expression(self):
+            for type, this_substrate in substrates.items():
+                s = this_substrate.symbol
+                stoich = self.reactant_stoichiometry[type]
+                self.expressions[s] = stoich*self.reaction_rates['v_net']
+
+            for type, this_product in products.items():
+                p = this_product.symbol
+                stoich = self.reactant_stoichiometry[type]
+                self.expressions[p] = stoich*self.reaction_rates['v_net']
+
 
         """"
         Convenience kinetics has no detailed mechanism 

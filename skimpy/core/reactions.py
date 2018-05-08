@@ -42,8 +42,8 @@ class Reaction(object):
     @property
     def reactants(self):
         reactants = self.mechanism.reactants
-        for this_modifier in self.modifiers:
-            reactants.update(this_modifier.reatants)
+        for this_modifier in self.modifiers.values():
+            reactants.update(this_modifier.reactants)
         return reactants
 
     @reactants.setter
@@ -51,9 +51,19 @@ class Reaction(object):
         self.mechanism.reactants = value
 
     @property
+    def reactant_stoichiometry(self):
+        reactant_stoichiometry = TabDict( (self.mechanism.reactants[k],v)
+                            for k,v in self.mechanism.reactant_stoichiometry.items())
+
+        for this_modifier in self.modifiers.values():
+            this_mod_name = this_modifier.reactants.small_molecule
+            reactant_stoichiometry[this_mod_name] = this_modifier.stoichiometry
+        return reactant_stoichiometry
+
+    @property
     def parameters(self):
         parameters = self.mechanism.parameters
-        for this_modifier in self.modifiers:
+        for this_modifier in self.modifiers.values():
             parameters.update(this_modifier.parameters)
         return parameters
 
@@ -74,7 +84,7 @@ class Reaction(object):
 
 
     def __str__(self):
-        return "%s of with %s kinetics "%(self.name, self.type)
+        return "%s of with %s kinetics "%(self.name, self.mechanism)
 
     def parametrize(self, params):
         self.parameters = params
