@@ -33,6 +33,7 @@ from numpy.random import sample
 from scipy.sparse.linalg import eigs as eigenvalues
 from sympy import sympify, Symbol
 
+from skimpy.utils.namespace import *
 
 class ParameterSampler(ABC):
     def __init__(self, parameters=None):
@@ -90,8 +91,6 @@ class SimpleParameterSampler(ParameterSampler):
         trials = 0
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
-
-
             try:
 
                 parameter_sample = self._sample_saturations_step(compiled_model,
@@ -124,6 +123,10 @@ class SimpleParameterSampler(ParameterSampler):
     def _sample_saturations_step(self, compiled_model, concentration_dict,
                                  flux_dict):
         parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
+        # Update the concentrations which are parameters (Boundaries)
+        for k,v in concentration_dict.items():
+            parameter_sample[k] = v
+
         # Sample parameters for every reaction
         for this_reaction in compiled_model.reactions.values():
 
@@ -137,9 +140,12 @@ class SimpleParameterSampler(ParameterSampler):
             # Get parameters from mechanism
             this_reaction_parameters = this_reaction.parameters
 
-            # Get parameters from modifiers
-            for this_modifier in this_reaction.modifiers:
-                this_reaction_parameters.update(this_modifier.parameters)
+            # Add concentrations
+            for k, v in this_reaction_parameters.items():
+                try:
+                    this_reaction_parameters[k].value = concentration_dict[v.symbol]
+                except KeyError:
+                    pass
 
             # Loop over the named tuple
             for this_p_name, this_parameter in this_reaction_parameters.items():
@@ -147,10 +153,11 @@ class SimpleParameterSampler(ParameterSampler):
                 # The parameters that have to be sampled are attached to
                 # reactants. hence, their .hook attribute shall not be None
 
-                if this_parameter.hook is not None:
+                if (this_parameter.hook is not None) \
+                   and (this_parameter.value is None):
                     this_saturation = sample()
                     # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
-                    # TODO - OK, removed.
+                    # TODO - OK, removed
                     this_reactant = this_parameter.hook.symbol
                     this_concentration = concentration_dict[this_reactant]
                     this_param_symbol = this_parameter.symbol
@@ -166,12 +173,20 @@ class SimpleParameterSampler(ParameterSampler):
             normed_net_reaction_rate = this_net_reaction_rate.evalf(
                 subs=this_parameter_subs)
 
-            if (normed_net_reaction_rate < 0) or (normed_net_reaction_rate > 1.0):
-                msg = 'Overall saturation for reaction {}' \
-                      ' is not 0 < {} < 1 '.format(this_reaction.name,
-                                                   normed_net_reaction_rate)
-                compiled_model.logger.error(msg)
-                raise ValueError(msg)
+
+            if (flux_dict[this_reaction.name] > 0 and
+               ((normed_net_reaction_rate <= 0)
+                  or (normed_net_reaction_rate > 1.0))) \
+               or \
+               (flux_dict[this_reaction.name] < 0 and
+               ((normed_net_reaction_rate >= 0)
+               or (normed_net_reaction_rate < -1.0))):
+                    msg = 'Overall saturation for reaction {}' \
+                          ' is not 0 < {} < 1 '.format(this_reaction.name,
+                                                       normed_net_reaction_rate)
+                    compiled_model.logger.error(msg)
+                    raise ValueError(msg)
+
 
             # Calculate the effective VMax
             this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
@@ -179,5 +194,4 @@ class SimpleParameterSampler(ParameterSampler):
 
             # Update the dict with explicit model parameters
             parameter_sample.update(this_parameters)
-        #1/0
         return parameter_sample

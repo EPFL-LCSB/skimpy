@@ -27,6 +27,7 @@ limitations under the License.
 from scipy.sparse import coo_matrix
 from numpy import array
 from sympy import Symbol
+import re
 
 def join_dicts(dicts):
     joined_dict = {}
@@ -78,3 +79,11 @@ def check_is_symbol(s_in):
         return Symbol(s_in)
     else:
         return s_in
+
+
+def sanitize_cobra_vars(met_name):
+    # Remove dashes
+    clean_met_name = re.sub(r"([a-z])\-([a-z])", r"\1_\2", str(met_name), 0, re.IGNORECASE)
+    # Add underscore for variables names that start with a number
+    clean_met_name = re.sub(r"(^[0-9])", r"_\1", str(clean_met_name), 0, re.IGNORECASE)
+    return clean_met_name

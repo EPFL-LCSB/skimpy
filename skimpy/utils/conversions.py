@@ -30,14 +30,15 @@ from .constants import *
 
 def deltag0_to_keq(deltag0,temp,unit=KCAL,gas_constant=None):
     if gas_constant is not None:
-        return np.exp(deltag0/temp/gas_constant)
+        return np.exp(-1*deltag0/temp/gas_constant)
     if unit is KCAL:
-        return np.exp(deltag0*KCAL_IN_JOULE\
+        return np.exp(-1*deltag0*KCAL_IN_JOULE\
                       /GENERAL_GAS_CONSTANT/temp)
     if unit is KJ:
-        return np.exp(deltag0 * KJ_IN_JOULE\
+        return np.exp(-1*deltag0 * KJ_IN_JOULE\
                       /GENERAL_GAS_CONSTANT / temp)
     if unit is J:
-        return np.exp(deltag0 / GENERAL_GAS_CONSTANT / temp)
+        return np.exp(-1*deltag0 \
+                      /GENERAL_GAS_CONSTANT / temp)
     else:
         raise ValueError

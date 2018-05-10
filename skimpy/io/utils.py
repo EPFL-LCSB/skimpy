@@ -26,7 +26,8 @@ limitations under the License.
 """
 
 from skimpy.mechanisms import *
-
+from operator import itemgetter
+import re
 
 def create_reaction_from_stoich(name,
                                 met_stoich_dict,
@@ -37,7 +38,7 @@ def create_reaction_from_stoich(name,
     reactant_relations = model_generator.reactant_relations
 
     this_reaction_small_molecules = {}
-    this_reaction_reactatns = {}
+    this_reaction_reactants = {}
 
     """ 
     Split into small molecules and reactants
@@ -45,21 +46,33 @@ def create_reaction_from_stoich(name,
     """
 
     for this_met, stoich in met_stoich_dict.items():
+        # TODO the detection needs to be better !!!
         is_small_molecule = any([this_met.startswith(s) for s in small_molecules])
-
+        # TODO the detection needs to be better !!!
         if not this_met.startswith(water + '_') \
            and is_small_molecule:
             this_reaction_small_molecules[this_met] = stoich
 
         elif not this_met.startswith(water + '_') \
              and not is_small_molecule:
-            this_reaction_reactatns[this_met] = stoich
+            this_reaction_reactants[this_met] = stoich
+
+    # TODO this currently catches transport of small molecules
+    # create proper transports
+    if not this_reaction_reactants:
+        this_reaction_reactants = this_reaction_small_molecules
+        this_reaction_small_molecules = {}
+
+    # If there are no valid reactants
+    # do not consider the reactions
+    if not this_reaction_reactants:
+        return None
 
     # Determine mechanism
-    mechanism = guess_mechanism(this_reaction_reactatns)
+    mechanism = guess_mechanism(this_reaction_reactants)
     # Determine reactant order
     reactants = make_reactant_set(mechanism,
-                                  this_reaction_reactatns,
+                                  this_reaction_reactants,
                                   reactant_relations)
 
     skimpy_reaction = Reaction(name=name,
@@ -99,6 +112,13 @@ def guess_mechanism(reactants):
         stoich.sort()
         return make_convenience(stoich)
 
+def check_boundary_reaction(cobra_reaction):
+    stoich = [i for i in cobra_reaction.metabolites.values()]
+    if all([i < 0for i in stoich] ) or all([i > 0for i in stoich]):
+        return True
+    else:
+        return False
+
 
 def check_rev_michaelis_menten(reactants):
     stoich = [i for i in reactants.values()]
@@ -117,8 +137,13 @@ def make_reactant_set(mechanism,
                       reactants,
                       reactant_relations):
 
-    reactants_sorted = TabDict([(k,v) for k,v in reactants.items()])
+    reactants_sorted = TabDict(sorted(reactants.items(),
+                                      key=itemgetter(1),
+                                      reverse=True))
+
     reactant_list = [k for k in mechanism.reactant_stoichiometry.keys()]
+    reactant_list.sort()# Sort P,S / P1,P2,P3,S1,S2,S3 ...
+
     # ToDo Sort the reactants to match the reactant list
     # using the reactant_relations
 
@@ -127,10 +152,7 @@ def make_reactant_set(mechanism,
     reactants_sorted = zip(mets,stoichiometries,reactant_list)
 
     for met, stoich, react in reactants_sorted:
-        if stoich < 0:
-            reactants_resorted[react] = met
-        if stoich > 0:
-            reactants_resorted[react] = met
+        reactants_resorted[react] = met
 
     return mechanism.Reactants(**reactants_resorted)
 

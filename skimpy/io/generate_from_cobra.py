@@ -27,8 +27,8 @@ limitations under the License.
 
 from skimpy.core import *
 from .model_generator import ModelGenerator
-from .utils import create_reaction_from_stoich
-import re
+from .utils import create_reaction_from_stoich, check_boundary_reaction
+from skimpy.utils.general import sanitize_cobra_vars
 
 class FromCobra(ModelGenerator):
     """
@@ -55,18 +55,25 @@ class FromCobra(ModelGenerator):
         skimpy_model = KineticModel()
 
         """Read the reactions """
-        # DM_     Boundary reactions
         # By default the metabolites of boundary reactions
         # to be constant concentrations
         for this_reaction in cobra_model.reactions:
-
-            if this_reaction.name.startswith("DM_"):
-                for this_met in this_reaction.metabolites:
-                    this_const_met = ConstantConcentration(this_met.name)
-                    skimpy_model.add_boundary_condition(this_const_met)
-            else:
+           if not check_boundary_reaction(this_reaction):
                 this_kinetic_reaction = self.import_reaction(this_reaction)
-                skimpy_model.add_reaction(this_kinetic_reaction)
+                if this_kinetic_reaction is not None:
+                    skimpy_model.add_reaction(this_kinetic_reaction)
+
+        # Add Boundaries
+        for this_reaction in cobra_model.reactions:
+            if check_boundary_reaction(this_reaction):
+                met = sanitize_cobra_vars(this_met.name)
+
+                # If the metabolite does not correspond to water as water is
+                # omitted from the reactions
+                if not met.startswith("{}_".format(self.water)):
+                    this_reactant = skimpy_model.reactants[met]
+                    this_const_met = ConstantConcentration(this_reactant)
+                    skimpy_model.add_boundary_condition(this_const_met)
 
         return skimpy_model
 
@@ -83,10 +90,7 @@ class FromCobra(ModelGenerator):
         except KeyError:
             met_stoich_dict = {}
             for k,v in cobra_reaction.metabolites.items():
-                # Remove dashes
-                k = re.sub(r"([a-z])\-([a-z])", r"\1_\2", str(k), 0, re.IGNORECASE)
-                # Add underscore for variables names that start with a number
-                k = re.sub(r"([0-9])", r"_\1", str(k), 0, re.IGNORECASE)
+                k = sanitize_cobra_vars(k.name)
                 met_stoich_dict[k] = v
 
             skimpy_reaction = create_reaction_from_stoich(name,
