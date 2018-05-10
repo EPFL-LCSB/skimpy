@@ -72,7 +72,7 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
                 this_reaction.mechanism.expressions[sm] = flux_expression_sm
                 # Add small molecule parameters if they are
                 if small_mol.type == PARAMETER:
-                    this_reaction.mechanism.expression_parameters.update([small_mol.name])
+                    this_reaction.mechanism.expression_parameters.update([small_mol.symbol])
 
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))

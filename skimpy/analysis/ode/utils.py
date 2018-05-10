@@ -38,7 +38,7 @@ def make_ode_fun(kinetic_model, sim_type):
     # TODO This should be a method in KineticModel that stores the expressions
     if sim_type == QSSA:
         all_data = []
-        # TODO Modifiers sould be applicable for all simulation types
+        # TODO Modifiers should be applicable for all simulation types
         for this_reaction in kinetic_model.reactions.values():
             this_reaction.mechanism.get_qssa_rate_expression()
             # Update rate expressions
@@ -55,7 +55,7 @@ def make_ode_fun(kinetic_model, sim_type):
                 this_reaction.mechanism.expressions[sm] = flux_expression_sm
                 # Add small molecule parameters if they are
                 if small_mol.type == PARAMETER:
-                    this_reaction.mechanism.expression_parameters.update([small_mol.name])
+                    this_reaction.mechanism.expression_parameters.update([small_mol.symbol])
 
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))
@@ -150,7 +150,7 @@ def make_flux_fun(kinetic_model):
             expr[this_rate_key] = this_reaction[this_rate_key]
 
     # Make vector function from expressions in this case all_expressions
-    # are all the epxressions indexed by the
+    # are all the expressions indexed by the
     flux_fun = FluxFunction(variables, expr, all_param)
 
     return flux_fun
