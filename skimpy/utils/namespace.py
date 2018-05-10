@@ -24,13 +24,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
+""" Simulation types """
 QSSA = 'qssa'
 TQSSA = 'tqssa'
 MCA  = 'mca'
 ODE  = 'ode'
 ELEMENTARY = 'elementary'
 
+""" Item types """
+PARAMETER = 'parameter'
+VARIABLE  = 'variable'
+
+""" Units """
 KCAL = 'kcal'
 KJ   = 'kJ'
 JOULE = 'JOULE'

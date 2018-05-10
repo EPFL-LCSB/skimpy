@@ -35,8 +35,8 @@ from sympy import diff, simplify, Matrix, eye, zeros
 from .elasticity_fun import ElasticityFunction
 
 from skimpy.utils.general import get_stoichiometry, join_dicts
-from skimpy.utils.tabdict import iterable_to_tabdict
-
+from skimpy.utils.tabdict import iterable_to_tabdict, TabDict
+from skimpy.utils.namespace import *
 from skimpy.utils.moieties import rational_left_basis
 
 from ...utils.namespace import *
@@ -65,10 +65,14 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
             # Add modifier expressions
             for this_mod in this_reaction.modifiers.values():
-                sm = this_mod.reactants['small_molecule'].symbol
+                small_mol = this_mod.reactants['small_molecule']
+                sm = small_mol.symbol
                 flux = this_reaction.mechanism.reaction_rates['v_net']
                 flux_expression_sm = flux*this_mod.stoichiometry
                 this_reaction.mechanism.expressions[sm] = flux_expression_sm
+                # Add small molecule parameters if they are
+                if small_mol.type == PARAMETER:
+                    this_reaction.mechanism.expression_parameters.update([small_mol.name])
 
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))
@@ -98,11 +102,16 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
     # Sort into an ordered list
     all_parameters = flatten_list(all_parameters)
+    all_parameters = list(set(all_parameters))
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
-    # Get unique set of all the variables
-    all_variables = set(all_rates)
-    all_variables = iterable_to_tabdict(all_variables, use_name=False)
+
+    # # Get unique set of all the variables
+    # all_variables = set(all_rates)
+    # all_variables = iterable_to_tabdict(all_variables, use_name=False)
+
+    # Better since this is implemented now
+    all_variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
 
     #Get depedent variables (i.e. concentrations)
     reduced_stoichiometry, dependent_weights, independent_ix, dependent_ix = \
@@ -204,7 +213,6 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     full_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
 
     S = Matrix(full_stoichiometry.todense())
-
     # Left basis dimensions: rows are metabolites, columns are moieties
     # L0*S = 0 -> L0 is the left null space matrix
     left_basis = rational_left_basis(S)
@@ -284,7 +292,13 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
     conservation_relation = L0_sparse
 
-    return reduced_stoichiometry,conservation_relation, all_independent_ix, all_dependent_ix
+    # If the left hand null space is empty no mojeties
+    if not any(L0_sparse):
+        reduced_stoichiometry = full_stoichiometry
+        all_independent_ix = range(full_stoichiometry.shape[0])
+        all_dependent_ix = []
+
+    return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 
 
 

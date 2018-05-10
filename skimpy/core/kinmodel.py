@@ -61,12 +61,32 @@ class KineticModel(object):
 
         self.parameters = TabDict()
 
-    # TODO : Implement
     @property
-    def metabolites(self):
-        pass
+    def reactants(self):
+        reactants = TabDict([])
+        for this_reaction in self.reactions.values():
+            this_rectants = TabDict([(v.name,v) for v in this_reaction.reactants.values()])
+            reactants.update(this_rectants)
+        return reactants
 
     def add_reaction(self, reaction):
+        # If the variable name already exists substitute
+        # with the variable
+        for k,v in reaction.reactants.items():
+            if v.name in self.reactants.keys():
+
+                # TODO substitute by itemsetter in reactions.reactants
+                # UGLYYYYYYY
+                if k.startswith('small_molecule'):
+                    for this_mod in reaction.modifiers.values():
+                        if this_mod.reactants['small_molecule'].name \
+                           is v.name:
+
+                           this_mod.reactants['small_molecule'] = self.reactants[v.name]
+                else:
+                    reaction.mechanism.reactants[k] = self.reactants[v.name]
+
+
         self.add_to_tabdict(reaction, 'reactions')
 
     def add_constraint(self, constraint):

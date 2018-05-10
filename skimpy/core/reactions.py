@@ -26,6 +26,8 @@ limitations under the License.
 """
 
 from skimpy.utils.tabdict import TabDict
+from skimpy.utils.namespace import *
+
 
 class Reaction(object):
     """
@@ -33,17 +35,22 @@ class Reaction(object):
     """
     def __init__(self, name, reactants, mechanism, parameters=None):
         self.name = name
-        self.mechanism = mechanism(name = name, reactants = reactants,
-                                   parameters = parameters)
+        self.mechanism = mechanism(name=name, reactants=reactants,
+                                   parameters=parameters)
         self.modifiers = TabDict([])
-
 
     # Hooks to the mechanism attributes for convenience
     @property
     def reactants(self):
-        reactants = self.mechanism.reactants
+        reactants = TabDict( (k,r) for k,r in self.mechanism.reactants.items()
+                                    if r.type == VARIABLE)
+
         for this_modifier in self.modifiers.values():
-            reactants.update(this_modifier.reactants)
+            this_reactants = TabDict( ("{}_{}".format(k,r.name),r)
+                                     for k,r in this_modifier.reactants.items()
+                                     if r.type == VARIABLE)
+            reactants.update(this_reactants)
+
         return reactants
 
     @reactants.setter
@@ -53,18 +60,29 @@ class Reaction(object):
     @property
     def reactant_stoichiometry(self):
         reactant_stoichiometry = TabDict( (self.mechanism.reactants[k],v)
-                            for k,v in self.mechanism.reactant_stoichiometry.items())
+                                 for k,v in self.mechanism.reactant_stoichiometry.items()
+                                 if self.mechanism.reactants[k].type == VARIABLE )
 
         for this_modifier in self.modifiers.values():
-            this_mod_name = this_modifier.reactants.small_molecule
-            reactant_stoichiometry[this_mod_name] = this_modifier.stoichiometry
+            this_mod_sm = this_modifier.reactants.small_molecule
+            if this_mod_sm == VARIABLE:
+                reactant_stoichiometry[this_mod_sm] = this_modifier.stoichiometry
         return reactant_stoichiometry
 
     @property
     def parameters(self):
-        parameters = self.mechanism.parameters
+        parameters = TabDict( (k,r) for k,r in self.mechanism.parameters.items()
+                                    if r.type == PARAMETER)
+        parameters.update(TabDict((k, r) for k, r in self.mechanism.reactants.items()
+                             if r.type == PARAMETER))
+
         for this_modifier in self.modifiers.values():
-            parameters.update(this_modifier.parameters)
+            this_params = TabDict( (k,r) for k,r in this_modifier.parameters.items()
+                                     if r.type == PARAMETER)
+            this_params.update(TabDict((k, r) for k, r in this_modifier.reactants.items()
+                                  if r.type == PARAMETER))
+            parameters.update(this_params)
+
         return parameters
 
     # TODO implement the setter

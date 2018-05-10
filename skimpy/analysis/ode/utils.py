@@ -28,7 +28,7 @@ from sympy import sympify
 
 from skimpy.analysis.ode.ode_fun import ODEFunction
 from skimpy.analysis.ode.flux_fun import FluxFunction
-from skimpy.utils import iterable_to_tabdict
+from skimpy.utils import iterable_to_tabdict,TabDict
 from skimpy.utils.namespace import *
 
 
@@ -48,10 +48,14 @@ def make_ode_fun(kinetic_model, sim_type):
 
             # Add modifier expressions
             for this_mod in this_reaction.modifiers.values():
-                sm = this_mod.reactants['small_molecule'].symbol
+                small_mol = this_mod.reactants['small_molecule']
+                sm = small_mol.symbol
                 flux = this_reaction.mechanism.reaction_rates['v_net']
                 flux_expression_sm = flux * this_mod.stoichiometry
                 this_reaction.mechanism.expressions[sm] = flux_expression_sm
+                # Add small molecule parameters if they are
+                if small_mol.type == PARAMETER:
+                    this_reaction.mechanism.expression_parameters.update([small_mol.name])
 
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))
@@ -70,6 +74,8 @@ def make_ode_fun(kinetic_model, sim_type):
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters)
                             )
+    else:
+        raise(ArumentError)
 
     all_expr, all_parameters = list(zip(*all_data))
 
@@ -81,30 +87,39 @@ def make_ode_fun(kinetic_model, sim_type):
                               for these_expressions in all_expr])
 
     all_parameters = flatten_list(all_parameters)
+    all_parameters = list(set(all_parameters))
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
     # Get unique set of all the variables
-    variables = [sympify(x) for x in set(all_rates)]
-    variables = iterable_to_tabdict(variables, use_name=False)
+    # variables = [sympify(x) for x in set(all_rates)]
+    # variables = iterable_to_tabdict(variables, use_name=False)
+
+    # Better since this is implemented now
+    variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
+
+    #TODO If the model has mojeties only account for the independent vars
 
     expr = dict.fromkeys(variables.values(), 0.0)
 
     # Mass balance
     # Sum up all rate expressions
     for this_reaction in all_expr:
-        # Mo
         for this_variable_key in this_reaction:
-            expr[this_variable_key] += this_reaction[this_variable_key]
+            try:
+                expr[this_variable_key] += this_reaction[this_variable_key]
+            except KeyError:
+                pass
 
     # Apply constraints. Constraints are modifiers that act on
     # expressions
     for this_constraint in kinetic_model.constraints.values():
         this_constraint(expr)
 
+    # NEW: Boundary conditions are now handled as parameters
     # Apply boundary conditions. Boundaries are modifiers that act on
     # expressions
-    for this_boundary_condition in kinetic_model.boundary_conditions.values():
-        this_boundary_condition(expr)
+    # for this_boundary_condition in kinetic_model.boundary_conditions.values():
+    #     this_boundary_condition(expr)
 
     # Make vector function from expressions
     ode_fun = ODEFunction(variables, expr, all_parameters)

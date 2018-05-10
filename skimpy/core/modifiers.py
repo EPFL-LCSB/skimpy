@@ -100,13 +100,14 @@ class ConstantConcentration(BoundaryCondition):
 
     def __init__(self, reactant, name = None):
 
-        reactant = check_is_symbol(reactant)
-
+        # Is the reactant constant it is not a variable anymore
         if name is None:
-            name = reactant.__str__()
+            name = reactant.name
 
         BoundaryCondition.__init__(self, name = name)
 
+        # Modify the reactant
+        reactant.type = PARAMETER
         self.reactant = reactant
 
     def modifier(self, expressions):
@@ -115,7 +116,7 @@ class ConstantConcentration(BoundaryCondition):
         :param expressions:
         :return:
         """
-        expressions[self.reactant] = expressions[self.reactant] * 0.0
+        expressions[self.reactant.symbol] = expressions[self.reactant.symbol] * 0.0
 
 class AdditiveConcentrationRate(ExpressionModifier):
     """
@@ -126,8 +127,6 @@ class AdditiveConcentrationRate(ExpressionModifier):
     prefix = 'ADDCR'
 
     def __init__(self, reactant, flux_value, name=None):
-
-        reactant = check_is_symbol(reactant)
 
         if name is None:
             name = reactant.__str__()
@@ -144,7 +143,7 @@ class AdditiveConcentrationRate(ExpressionModifier):
         :return:
         """
         sym_value = sympify(self.flux_value)
-        expressions[self.reactant] = expressions[self.reactant] + sym_value
+        expressions[self.reactant.symbol] = expressions[self.reactant.symbol] + sym_value
 
 class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
 
@@ -201,14 +200,13 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
         if self.stoichiometry < 0:
             expressions['v_fwd'] = expressions['v_fwd']\
-                                   *self.get_qssa_rate_expression()
+                                   * self.get_qssa_rate_expression()
 
         if self.stoichiometry > 0:
-            expressions['v_fwd'] = expressions['v_fwd'] \
+            expressions['v_bwd'] = expressions['v_bwd'] \
                                    * self.get_qssa_rate_expression()
 
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
-
 
     def get_qssa_rate_expression(self):
         sm = self.reactants.small_molecule.symbol

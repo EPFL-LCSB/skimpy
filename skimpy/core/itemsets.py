@@ -30,6 +30,7 @@ from abc import ABC, abstractmethod
 from sympy import sympify, Symbol
 
 from ..utils.tabdict import TabDict
+from ..utils.namespace import *
 
 """
 
@@ -44,7 +45,6 @@ the set. The make_* functions return the custom classes constructors
 
 """
 
-
 class Item(object):
 
     def __init__(self, name, value = None, model=None, suffix = ''):
@@ -56,6 +56,7 @@ class Item(object):
         self._symbol = None
         self._generate_symbol()
         self.hook = None
+        self.type = None
 
     def _generate_symbol(self):
         if self.suffix:
@@ -97,6 +98,7 @@ class ItemSet(ABC, TabDict):
 class Parameter(Item):
     def __init__(self, name, required_for=None, value=None, model=None, suffix=''):
         Item.__init__(self, name, value=value, model=model, suffix=suffix)
+        self.type = PARAMETER
 
         if required_for is not None:
             self._required_for = set(required_for)
@@ -149,6 +151,8 @@ class ReactantSet(ItemSet):
 
         for s,v in reactant_values.items():
             self[s] = Reactant(v)
+            # TODO should this be in the Reactnat init? or in ItemsSet
+            self[s].type = VARIABLE
 
 
 def make_reactant_set(mechanism, reactant_declaration):

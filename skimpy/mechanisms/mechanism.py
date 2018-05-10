@@ -25,6 +25,7 @@ limitations under the License.
 
 """
 from abc import ABC, abstractmethod
+from skimpy.utils.namespace import *
 
 class KineticMechanism(ABC):
 
@@ -93,10 +94,10 @@ class KineticMechanism(ABC):
 
     def get_parameters_from_expression(self, expr):
 
-        reactants = [x.symbol for x in self.reactants.values()]
+        reactants = [x.symbol for x in self.reactants.values()
+                               if x.type == VARIABLE]
 
         parameters = set(expr.free_symbols).difference(reactants)
-
 
         return parameters
 
