@@ -58,6 +58,7 @@ class KineticModel(object):
         self.logger = get_bistream_logger(name)
         self._sim_type = None
         self._modified = True
+        self._recompiled = False
 
         self.parameters = TabDict()
 
@@ -153,6 +154,7 @@ class KineticModel(object):
             self.variables = variables
 
             self._modified = False
+            self._recompiled = True
             # Create initial_conditions from variables
             self.initial_conditions = TabDict([(x,0.0) for x in self.variables])
 
@@ -163,8 +165,10 @@ class KineticModel(object):
         extra_options = {'old_api': False}
         kwargs.update(extra_options)
         # Choose a solver
-        if not hasattr(self, 'solver'):
+        if not hasattr(self, 'solver')\
+           or self._recompiled:
             self.solver = ode(solver_type, self.ode_fun, **kwargs)
+            self._recompiled = False
 
         # Order the initial conditions according to variables
         ordered_initial_conditions = [self.initial_conditions[variable]

@@ -26,30 +26,23 @@ limitations under the License.
 """
 
 # Test models
+import numpy as np
 from skimpy.core import *
 from skimpy.mechanisms import *
 
 name = 'pfk'
-metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
+metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
                                                    product = 'B')
-
-# thermo_data = {'S':     1e-2,
-#                'P':     1e-2,
-#                'sig_S': 0.1,
-#                'sig_P': 0.1,
-#                'gamma': 0.1,
-#                'flux':  1.0,
-#                'E_tot': 1e-5}
 
 ## QSSA Method
 parameters = ReversibleMichaelisMenten.Parameters(
     vmax_forward = 1.0,
     k_equilibrium=2.0,
-    #vmax_backward = 0.5,
     km_substrate = 10.0,
     km_product = 10.0,
-    #total_enzyme_concentration = 1.0,
+    total_enzyme_concentration = 1.0,
 )
+
 
 pfk = Reaction(name=name,
                mechanism = ReversibleMichaelisMenten,
@@ -59,47 +52,47 @@ pfk = Reaction(name=name,
 this_model = KineticModel()
 this_model.add_reaction(pfk)
 this_model.parametrize({pfk.name:parameters})
-this_model.compile_ode(sim_type = 'QSSA')
+this_model.compile_ode(sim_type = QSSA)
 
-this_model.initial_conditions.A = 10.0
-this_model.initial_conditions.B = 1.0
+this_model.initial_conditions['A'] = 1.0
+this_model.initial_conditions['B'] = 1.0
 
-this_sol_qssa = this_model.solve_ode([0.0,100.0],solver_type = 'vode')
+this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-this_sol_qssa.plot('output/base_out_qssa.html')
+this_sol_qssa.plot('output/uni_uni_base_out_qssa.html')
 
 ## Full rate method
+this_model.compile_ode(sim_type = ELEMENTARY)
 
-#
-# this_model.compile_ode(sim_type = 'full')
-#
-# this_model.initial_conditions.A = 10.0
-# this_model.initial_conditions.B = 1.0
-# this_model.initial_conditions.pfk = 1.0
-#
-# this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
-#
-# this_sol_full.plot('output/base_out_full.html')
+this_model.initial_conditions['A'] = 1.0
+this_model.initial_conditions['B'] = 1.0
+this_model.initial_conditions['pfk'] = 0.8
+this_model.initial_conditions['EC_pfk'] = 0.2
+
+this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
+
+this_sol_full.plot('output/uni_uni_base_out_elemetary.html')
 
 
+"""
+BiBi Michaelis Menten Kinetics
+"""
 name = 'hxk'
-metabolites = RandBiBiReversibleMichaelisMenten.Substrates(substrate1 = 'A',
+metabolites = RandBiBiReversibleMichaelisMenten.Reactants(substrate1 = 'A',
                                                            substrate2 = 'C1',
                                                            product1 = 'B',
                                                            product2 = 'C2'
                                                           )
 
-## QSSA Method
-
 parameters = RandBiBiReversibleMichaelisMenten.Parameters(
     vmax_forward=1.0,
-    k_equilibrium=2.0,
-    kmi_substrate1=1.0,
-    kmi_substrate2=1.0,
+    k_equilibrium=5.0,
+    ki_substrate1=1.0,
+    ki_substrate2=1.0,
     km_substrate2=10,
-    kmi_product1=1.0,
-    kmi_product2=1.0,
-    km_product2=10.0,
+    ki_product1=1.0,
+    ki_product2=1.0,
+    km_product1=10.0,
 )
 hxk = Reaction(name=name,
                mechanism=RandBiBiReversibleMichaelisMenten,
@@ -109,13 +102,13 @@ hxk = Reaction(name=name,
 this_model = KineticModel()
 this_model.add_reaction(hxk)
 this_model.parametrize({hxk.name:parameters})
-this_model.compile_ode(sim_type = 'QSSA')
+this_model.compile_ode(sim_type = QSSA)
 
-this_model.initial_conditions.A = 10.0
-this_model.initial_conditions.B = 1.0
-this_model.initial_conditions.C1 = 3.0
-this_model.initial_conditions.C2 = 1.0
+this_model.initial_conditions['A'] = 100.0
+this_model.initial_conditions['B'] = 1.0
+this_model.initial_conditions['C1'] = 3.0
+this_model.initial_conditions['C2'] = 5.0
 
-this_sol_qssa = this_model.solve_ode([0.0,100.0],solver_type = 'vode')
+this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 10.0, 1000),solver_type = 'cvode')
 
-this_sol_qssa.plot('output/base_out_qssa.html')
+this_sol_qssa.plot('output/bi_bi_base_out_qssa.html')

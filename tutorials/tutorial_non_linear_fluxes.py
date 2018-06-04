@@ -31,9 +31,9 @@ from skimpy.mechanisms import *
 from skimpy.sampling import SimpleParameterSampler
 
 # Build linear Pathway model
-metabolites_1 = ReversibleMichaelisMenten.Substrates(substrate='A', product='B')
-metabolites_2 = ReversibleMichaelisMenten.Substrates(substrate='B', product='C')
-metabolites_3 = ReversibleMichaelisMenten.Substrates(substrate='C', product='D')
+metabolites_1 = ReversibleMichaelisMenten.Reactants(substrate='A', product='B')
+metabolites_2 = ReversibleMichaelisMenten.Reactants(substrate='B', product='C')
+metabolites_3 = ReversibleMichaelisMenten.Reactants(substrate='C', product='D')
 
 ## QSSA Method
 parameters_1 = ReversibleMichaelisMenten.Parameters(k_equilibrium=1.5)
@@ -60,10 +60,10 @@ this_model.add_reaction(reaction1)
 this_model.add_reaction(reaction2)
 this_model.add_reaction(reaction3)
 
-the_boundary_condition = ConstantConcentration("A")
+the_boundary_condition = ConstantConcentration(this_model.reactants['A'])
 this_model.add_boundary_condition(the_boundary_condition)
 
-the_boundary_condition = ConstantConcentration("D")
+the_boundary_condition = ConstantConcentration(this_model.reactants['D'])
 this_model.add_boundary_condition(the_boundary_condition)
 
 this_model.parametrize({'E1': parameters_1,
@@ -82,7 +82,7 @@ sampler = SimpleParameterSampler(parameters)
 
 parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 
-this_model.compile_ode(sim_type = 'QSSA')
+this_model.compile_ode(sim_type = QSSA)
 
 #
 this_model.initial_conditions.A = 3.0
@@ -92,9 +92,10 @@ this_model.initial_conditions.D = 0.5
 
 solutions = []
 for parameters in parameter_population:
+    # TODO system is too small for sparse eig handle properly
     this_model.ode_fun.parameters = parameter_population[0]
     #
-    this_sol_qssa = this_model.solve_ode([0.0, 100.0], solver_type='vode')
+    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
     solutions.append(this_sol_qssa)
 
 this_sol_qssa.plot('output/non_linear_qssa.html')

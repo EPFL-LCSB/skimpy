@@ -293,7 +293,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     conservation_relation = L0_sparse
 
     # If the left hand null space is empty no mojeties
-    if not any(L0_sparse):
+    if L0_sparse.shape[1] <= 1 :
         reduced_stoichiometry = full_stoichiometry
         all_independent_ix = range(full_stoichiometry.shape[0])
         all_dependent_ix = []

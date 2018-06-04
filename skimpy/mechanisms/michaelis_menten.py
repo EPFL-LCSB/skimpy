@@ -28,7 +28,7 @@ limitations under the License.
 from sympy import sympify
 from .mechanism import KineticMechanism,ElementrayReactionStep
 from ..core.reactions import Reaction
-from ..core.itemsets import make_parameter_set, make_reactant_set
+from ..core.itemsets import make_parameter_set, make_reactant_set, Reactant
 from ..utils.tabdict import TabDict
 from collections import namedtuple
 from ..utils.namespace import *
@@ -116,17 +116,29 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
     def get_full_rate_expression(self):
         # Calculate rates uppon initialization
-        if not hasattr(self,'rate_constants'):
+        rate_constants = [ 'k1_fwd','k1_bwd','k2_fwd','k2_bwd']
+        if any([self.parameters[x].value is None for x in rate_constants] ):
             self.calculate_rate_constants()
 
-        subs = self.reactants
+        #TODO Better solution ?
+        # Add enzyme and enzyme complex to the reactants of the mechanism
+        self.reactants['enzyme'] = Reactant(self.name)
+        self.reactants['enzyme_complex'] = Reactant('EC_'+self.name)
 
-        enzyme_complex = 'EC_'+self.name
+        s = self.reactants.substrate.symbol
+        p = self.reactants.product.symbol
+        e = self.reactants.enzyme.symbol
+        es = self.reactants.enzyme_complex.symbol
 
-        r1f = sympify(subs.substrate+"*"+self.name+'*'+'k1_fwd_'+self.name)
-        r1b = sympify(enzyme_complex+'*k1_bwd_'+self.name)
-        r2f = sympify(enzyme_complex+'*k2_fwd_'+self.name)
-        r2b = sympify(subs.product  +"*"+self.name+'*k2_bwd_'+self.name)
+        k1_fwd = self.parameters.k1_fwd.symbol
+        k1_bwd = self.parameters.k1_bwd.symbol
+        k2_fwd = self.parameters.k2_fwd.symbol
+        k2_bwd = self.parameters.k2_bwd.symbol
+
+        r1f = k1_fwd*e*s
+        r1b = k1_bwd*es
+        r2f = k2_fwd*es
+        r2b = k2_bwd*e*p
 
         self.reaction_rates = TabDict([('r1f', r1f),
                                        ('r1b', r1b),
@@ -134,34 +146,37 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                        ('r2b', r2b),
                                        ])
 
-        self.expressions = {subs.substrate: r1b - r1f,
-                            subs.product: r2f - r2b,
-                            enzyme_complex: r1f - r1b - r2f + r2b,
-                            self.name: r1b - r1f - r2b + r2f}
+        self.expressions = {s: r1b - r1f,
+                            p: r2f - r2b,
+                            es: r1f - r1b - r2f + r2b,
+                            e: r1b - r1f - r2b + r2f}
 
-        self.expression_parameters = self.get_parameters_from_expression('rate_constants')
+        parameters = [self.get_parameters_from_expression(expr)
+                      for expr in self.expressions.values()]
 
-
-
+        self.expression_parameters = set().union(*parameters)
 
     def calculate_rate_constants(self):
-        # Calcuate elementary rates
-
-        # TODO: Check that the not None params are compatible
-        # Param families/ set ?
 
         params = self.parameters
-        k1_bwd = params.vmax_backward / params.total_enzyme_concentration
-        k2_fwd = params.vmax_forward  / params.total_enzyme_concentration
+        # Calcuate elementary rates
+        #TODO Properly catch all possible parameter combinations that
+        # parametrize the kinetics fully
+        params.vmax_backward._symbol = params.vmax_forward.symbol \
+                                       * params.km_product.symbol \
+                                       / params.km_substrate.symbol \
+                                       / params.k_equilibrium.symbol
 
-        k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate
-        k2_bwd = (k1_bwd + k2_fwd ) / params.km_product
+        k1_bwd = params.vmax_backward.symbol / params.total_enzyme_concentration.symbol
+        k2_fwd = params.vmax_forward.symbol  / params.total_enzyme_concentration.symbol
 
-        self.rate_constants = self.RateConstants( k1_fwd = k1_fwd,
-                                                  k2_fwd = k2_fwd,
-                                                  k1_bwd = k1_bwd,
-                                                  k2_bwd = k2_bwd,
-                                                  )
+        k1_fwd = (k1_bwd + k2_fwd ) / params.km_substrate.symbol
+        k2_bwd = (k1_bwd + k2_fwd ) / params.km_product.symbol
+
+        self.parameters.k1_fwd._symbol = k1_fwd
+        self.parameters.k1_bwd._symbol = k1_bwd
+        self.parameters.k2_fwd._symbol = k2_fwd
+        self.parameters.k2_bwd._symbol = k2_bwd
 
         # self.set_dynamic_attribute_links(self._rates)
         subs = self.reactants

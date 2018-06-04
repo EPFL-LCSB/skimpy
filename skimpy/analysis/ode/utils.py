@@ -152,6 +152,7 @@ def make_flux_fun(kinetic_model):
     # Make vector function from expressions in this case all_expressions
     # are all the expressions indexed by the
     flux_fun = FluxFunction(variables, expr, all_param)
+    flux_fun._parameter_values = kinetic_model.ode_fun._parameter_values
 
     return flux_fun
 

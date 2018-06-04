@@ -185,12 +185,12 @@ concentration_dict = {'_13dpg'    : 1.0,
                       }
 
 
-parameters = SimpleParameterSampler.Parameters(n_samples=100)
+parameters = SimpleParameterSampler.Parameters(n_samples=10)
 sampler = SimpleParameterSampler(parameters)
 
 parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 
-this_model.compile_ode(sim_type = 'QSSA')
+this_model.compile_ode(sim_type = QSSA)
 
 #
 this_model.initial_conditions['_13dpg']     = 5.0

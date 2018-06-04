@@ -60,11 +60,14 @@ class FluxFunction:
                                          backend='Cython')
 
     @property
-    def parameters(self):
-        return self._parameters
+    def parameter_values(self):
+        if not self._parameter_values:
+            raise ArgumentError('No parameters have been set')
+        else:
+            return self._parameter_values
 
-    @parameters.setter
-    def parameters(self,value):
+    @parameter_values.setter
+    def parameter_values(self,value):
         """
         Would-be optimization hack to avoid looking up thr whole dict at each
         iteration step in __call__
@@ -72,9 +75,8 @@ class FluxFunction:
         :param value:
         :return:
         """
-        self._parameters = value
-        self.parameter_values = [x for x in self.parameters.values()]
-
+        #self._parameters = value
+        self._parameter_values = [value[x] for x in self.parameters.values()]
 
     def __call__(self,variables):
         input_vars = list(variables)+self.parameter_values

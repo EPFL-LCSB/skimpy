@@ -136,7 +136,10 @@ def make_parameter_set(mechanism, param_declaration):
 
 
 class Reactant(Item):
-    pass
+    def __init__(self, name, value = None, model=None, suffix = ''):
+        Item.__init__(self, name, value=value, model=model, suffix=suffix)
+        self.type = VARIABLE
+
 
 
 class ReactantSet(ItemSet):

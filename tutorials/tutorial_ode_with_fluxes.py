@@ -26,21 +26,23 @@ limitations under the License.
 """
 
 # Test models
+import numpy as np
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.analysis.ode.utils import make_flux_fun
+from skimpy.utils.namespace import *
 
 name = 'pfk'
-metabolites = ReversibleMichaelisMenten.Substrates(substrate = 'A',
+metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
                                                    product = 'B')
 
 ## QSSA Method
 parameters = ReversibleMichaelisMenten.Parameters(
-    vmax_forward = 1,
-    vmax_backward = 0.5,
-    km_substrate = 10,
-    km_product = 10,
-    total_enzyme_concentration = 1,
+    vmax_forward = 1.0,
+    k_equilibrium = 1.5,
+    km_substrate = 10.0,
+    km_product = 10.0,
+    total_enzyme_concentration = 1.0,
 )
 
 pfk = Reaction(name=name,
@@ -54,16 +56,15 @@ this_model.parametrize({pfk.name:parameters})
 
 
 ## Elementary rate method
-this_model.compile_ode(sim_type = 'full')
+this_model.compile_ode(sim_type = ELEMENTARY)
 
-this_model.initial_conditions.A = 10.0
-this_model.initial_conditions.B = 1.0
-this_model.initial_conditions.pfk = 1.0
+this_model.initial_conditions['A'] = 10.0
+this_model.initial_conditions['B']= 1.0
+this_model.initial_conditions['pfk'] = 1.0
 
-this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'vode')
+this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
 calc_fluxes = make_flux_fun(this_model)
 
 steady_state_fluxes = calc_fluxes(this_sol_full.species[-1])
 
-this_sol_full.plot('output/boundary_out_full.html')
