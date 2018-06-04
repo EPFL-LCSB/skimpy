@@ -35,10 +35,12 @@ from pytfa.analysis import  variability_analysis,           \
                             apply_generic_variability,       \
                             apply_directionality
 
+from pytfa.optim.variables import ReactionVariable, MetaboliteVariable
+from pytfa.io.viz import get_reaction_data
+
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.utils.namespace import *
-
 from skimpy.sampling import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
 from skimpy.io.generate_from_pytfa import FromPyTFA
@@ -89,8 +91,10 @@ this_skimpy_model.compile_mca(sim_type=QSSA)
 sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
 sampler = SimpleParameterSampler(sampling_parameters)
 
+# Map fluxes back to reaction variables
+this_flux_solution = get_reaction_data(this_pytfa_model, solution)
 # Create the flux dict
-flux_dict = solution[[i for i in this_skimpy_model.reactions.keys()]].to_dict()
+flux_dict = this_flux_solution[[i for i in this_skimpy_model.reactions.keys()]].to_dict()
 
 # Create a concentration dict with consistent names
 variable_names = this_pytfa_model.log_concentration.list_attr('name')
@@ -101,6 +105,7 @@ temp_concentration_dict = np.exp(solution[variable_names]).to_dict()
 # Map concentration names
 mapping_dict = {k:sanitize_cobra_vars(v)
                 for k,v in zip(variable_names,metabolite_ids)}
+
 concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items()}
 
 
