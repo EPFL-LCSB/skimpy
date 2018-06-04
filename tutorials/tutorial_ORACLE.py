@@ -45,12 +45,17 @@ from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
 
-""" Import an curate the model """
+""" 
+Import an curate the model
+"""
+
 #this_cobra_model = import_matlab_model('../models/toy_model.mat', 'ToyModel_DP')
 this_cobra_model = import_matlab_model('../models/toy_model_maria.mat', 'model')
+#this_cobra_model = import_matlab_model('../models/redGEM_glycolysis_Maria.mat', 'model')
 
-
-""" Make tfa analysis of the model """
+""" 
+Make tfa analysis of the model
+"""
 
 # Convert to a thermodynamics model
 thermo_data = load_thermoDB('../data/thermo_data.thermodb')
@@ -62,6 +67,30 @@ this_pytfa_model.solver = GLPK
 ## TFA conversion
 this_pytfa_model.prepare()
 this_pytfa_model.convert(add_displacement=True)
+
+# We choose an fdp
+this_bounds = {  'DM_13dpg': (-10.0, -2.0),
+                 'DM_2h3oppan': (1e-3, 100.0),
+                 'DM_adp':      (-100.0, -1e-3),
+                 'DM_atp':      (1e-3, 100.0),
+                 'DM_h':        (1e-3, 100.0),
+                 'DM_h2o':      (1e-3, 100.0),
+                 'DM_nad':      (-100.0, -1e-3),
+                 'DM_nadh':     (1e-3, 100.0),
+                 'DM_pep':      (1e-3, 100.0),
+                 'ENO':         (2.0, 100.0),
+                 'GLYCK':       (1e-3, 100.0),
+                 'GLYCK2':      (-100, -1e-3),
+                 'PGK':         (1e-3, 100.0),
+                 'PGM':         (1e-3, 100.0),
+                 'TRSARr':      (2.0, 10.0),
+                 'Trp_adp':     (-100.0, 100.0),
+                 'Trp_atp':     (-100.0, 100.0),
+                 'Trp_h':       (-100.0, 100.0),
+                 'Trp_h2o':     (-100.0, 100.0),
+                 'Trp_nad':     (-100.0, 100.0),
+                 'Trp_nadh':    (-100.0, 100.0)}
+
 solution = this_pytfa_model.optimize()
 
 min_log_displacement = 1e-3
@@ -74,13 +103,20 @@ for ln_gamma in this_pytfa_model.thermo_displacement:
 solution = this_pytfa_model.optimize()
 
 
-""" Get a Kinetic Model """
+""" 
+Get a Kinetic Model 
+"""
 # Generate the KineticModel
 # TODO This is really bad we need a better way
 small_molecules = ['h_c','h_e']
 
 model_gen = FromPyTFA(water='h2o')
 this_skimpy_model = model_gen.  import_model(this_pytfa_model,solution)
+
+
+"""
+Sample the kinetic parameters using MCA
+"""
 
 # Compile MCA functions
 this_skimpy_model.compile_mca(sim_type=QSSA)
@@ -100,12 +136,15 @@ temp_concentration_dict = np.exp(solution[variable_names]).to_dict()
 
 # Map concentration names
 mapping_dict = {k:sanitize_cobra_vars(v)
-                for k,v in zip(variable_names,metabolite_ids)}
-concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items()}
-
+                for k,v in zip(variable_names, metabolite_ids)}
+concentration_dict = {mapping_dict[k]: v for k, v in temp_concentration_dict.items()}
 
 parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentration_dict)
 
+
+"""
+Integrate the ODEs
+"""
 
 this_skimpy_model.compile_ode(sim_type=QSSA)
 this_skimpy_model.initial_conditions = TabDict([(k,v)for k,v in concentration_dict.items()])
@@ -113,7 +152,7 @@ this_skimpy_model.initial_conditions = TabDict([(k,v)for k,v in concentration_di
 solutions = []
 for parameters in parameter_population:
     this_skimpy_model.ode_fun.parameter_values = parameters
-    this_sol_qssa = this_skimpy_model.solve_ode(np.linspace(0.0, 10.0, 1000), solver_type='cvode')
+    this_sol_qssa = this_skimpy_model.solve_ode(np.linspace(0.0, 0.5, 1000), solver_type='cvode')
     solutions.append(this_sol_qssa)
 
 this_sol_qssa.plot('output/tutorial_oracle.html')
