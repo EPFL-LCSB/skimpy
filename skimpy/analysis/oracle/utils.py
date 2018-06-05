@@ -34,6 +34,8 @@ from pytfa.optim.constraints import SimultaneousUse, NegativeDeltaG, \
         ForwardDirectionCoupling, ReactionConstraint, MetaboliteConstraint, \
         DisplacementCoupling
 
+from math import log
+
 from pytfa.utils import numerics
 BIGM = numerics.BIGM
 BIGM_THERMO = numerics.BIGM_THERMO
