@@ -157,6 +157,13 @@ def make_convenience(stoichioemtry):
             self.expression_parameters = self.get_parameters_from_expression(rate_expression)
 
         def update_qssa_rate_expression(self):
+
+            substrates = {k:r for k,r in self.reactants.items()
+                          if k.startswith('substrate')}
+
+            products= {k:r for k,r in self.reactants.items()
+                          if k.startswith('product')}
+            
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 stoich = self.reactant_stoichiometry[type]
