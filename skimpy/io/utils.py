@@ -49,11 +49,11 @@ def create_reaction_from_stoich(name,
         # TODO the detection needs to be better !!!
         is_small_molecule = any([this_met.startswith(s) for s in small_molecules])
         # TODO the detection needs to be better !!!
-        if not this_met.startswith(water + '_') \
+        if not this_met.startswith(water) \
            and is_small_molecule:
             this_reaction_small_molecules[this_met] = stoich
 
-        elif not this_met.startswith(water + '_') \
+        elif not this_met.startswith(water) \
              and not is_small_molecule:
             this_reaction_reactants[this_met] = stoich
 

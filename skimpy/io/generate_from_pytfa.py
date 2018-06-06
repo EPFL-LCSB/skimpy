@@ -94,7 +94,7 @@ class FromPyTFA(FromCobra):
 
                     # If the metabolite does not correspond to water as water is
                     # omited from the reactions
-                    if not met.startswith("{}_".format(self.water)):
+                    if not met.startswith("{}".format(self.water)):
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
