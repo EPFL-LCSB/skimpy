@@ -82,11 +82,16 @@ class FromCobra(ModelGenerator):
         if name is None:
             name = cobra_reaction.name
 
+        # Ignore if only water is participating
+        is_water = all([met.startswith("{}_".format(self.water))
+                        for met in cobra_reaction.metabolites])
+        if is_water:
+            return None
+
         try:
             reaction_data = self.reaction_to_mechanisms[name]
             skimpy_reaction = create_reaction_from_data(name,
                                                         reaction_data)
-
         except KeyError:
             met_stoich_dict = {}
             for k,v in cobra_reaction.metabolites.items():
