@@ -83,7 +83,7 @@ class FromCobra(ModelGenerator):
             name = cobra_reaction.name
 
         # Ignore if only water is participating
-        is_water = all([met.startswith("{}_".format(self.water))
+        is_water = all([met.name.startswith("{}_".format(self.water))
                         for met in cobra_reaction.metabolites])
         if is_water:
             return None
