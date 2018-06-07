@@ -200,7 +200,7 @@ def get_dlogx_dlogy(sympy_expression, variable):
     """
     partial_derivative = diff(sympy_expression, variable)
 
-    expression = simplify(partial_derivative / sympy_expression * variable)
+    expression = partial_derivative / sympy_expression * variable
 
     return expression
 
