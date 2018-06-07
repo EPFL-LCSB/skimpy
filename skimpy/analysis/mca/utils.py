@@ -179,10 +179,8 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
 
         column = 0
         for this_variable in respective_variables.values():
-
-            this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
-
-            if this_elasticity != 0:
+            if this_variable in this_expression.free_symbols:
+                this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
                 elasticity_expressions[(row, column)] = this_elasticity
             column += 1
         row += 1
