@@ -69,8 +69,8 @@ class ElasticityFunction:
             this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
             # Cast a dummy value for elasticities = 1
             if not this_ordered_sym_vars:
-                this_ordered_sym_vars = sym_vars[0]
-                this_sym_var_ix = 0
+                this_ordered_sym_vars = sym_vars[0:2]
+                this_sym_var_ix = [0,1]
 
             self.function.append((ufuncify(tuple(this_ordered_sym_vars),
                                          exp,
