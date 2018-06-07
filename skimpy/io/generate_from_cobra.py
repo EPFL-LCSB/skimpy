@@ -95,7 +95,7 @@ class FromCobra(ModelGenerator):
         except KeyError:
             met_stoich_dict = {}
             for k,v in cobra_reaction.metabolites.items():
-                k = sanitize_cobra_vars(k.name)
+                k = sanitize_cobra_vars(k.id)
                 met_stoich_dict[k] = v
 
             skimpy_reaction = create_reaction_from_stoich(name,
