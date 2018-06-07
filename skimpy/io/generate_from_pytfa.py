@@ -90,7 +90,7 @@ class FromPyTFA(FromCobra):
             # TODO Check wtf id vs name in pytfa
             if check_boundary_reaction(this_reaction):
                 for this_met in this_reaction.metabolites:
-                    met = sanitize_cobra_vars(this_met.name)
+                    met = sanitize_cobra_vars(this_met.id)
 
                     # If the metabolite does not correspond to water as water is
                     # omited from the reactions

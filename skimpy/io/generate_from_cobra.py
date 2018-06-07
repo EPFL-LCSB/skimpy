@@ -66,7 +66,7 @@ class FromCobra(ModelGenerator):
         # Add Boundaries
         for this_reaction in cobra_model.reactions:
             if check_boundary_reaction(this_reaction):
-                met = sanitize_cobra_vars(this_met.name)
+                met = sanitize_cobra_vars(this_met.id)
 
                 # If the metabolite does not correspond to water as water is
                 # omitted from the reactions
@@ -83,7 +83,7 @@ class FromCobra(ModelGenerator):
             name = cobra_reaction.name
 
         # Ignore if only water is participating
-        is_water = all([met.name.startswith("{}".format(self.water))
+        is_water = all([met.id.startswith("{}_".format(self.water))
                         for met in cobra_reaction.metabolites])
         if is_water:
             return None
