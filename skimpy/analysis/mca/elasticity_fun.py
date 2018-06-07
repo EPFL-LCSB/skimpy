@@ -63,10 +63,13 @@ class ElasticityFunction:
         # Make a function to compute every non zero entry in the matrix
         self.function = []
         self.coordinates = []
-        for coord,exp in expressions.items():
-            self.function.append(ufuncify(tuple(sym_vars),
+        for coord, exp in expressions.items():
+            this_sym_vars = exp.free_symbols
+            this_sym_var_ix = [i for i,e in enumerate(sym_vars) if e in this_sym_vars]
+            this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
+            self.function.append((ufuncify(tuple(this_ordered_sym_vars),
                                          exp,
-                                         backend='Cython'))
+                                         backend='Cython'),this_sym_var_ix))
             self.coordinates.append(coord)
 
 
@@ -77,9 +80,8 @@ class ElasticityFunction:
         parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
         input_vars = append_array(variables , parameter_values)
-        array_input = [array([input_var], dtype=double) for input_var in input_vars]
-
-        values = [function(*array_input)[0] for function in self.function]
+        array_input = array([array([input_var], dtype=double) for input_var in input_vars])
+        values = [function(*array_input[ix])[0] for function, ix in self.function]
         rows, columns = zip(*self.coordinates)
 
         elasticiy_matrix = coo_matrix((values,

@@ -57,9 +57,12 @@ class ODEFunction:
         # Awsome sympy magic
         self.function = []
         for exp in the_expressions:
-           self.function.append(ufuncify(tuple(sym_vars),
-                                         exp,
-                                         backend='Cython'))
+            this_sym_vars = exp.free_symbols
+            this_sym_var_ix = [i for i, e in enumerate(sym_vars) if e in this_sym_vars]
+            this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
+            self.function.append((ufuncify(tuple(this_ordered_sym_vars),
+                                           exp,
+                                           backend='Cython'), this_sym_var_ix))
 
     @property
     def parameter_values(self):
@@ -82,8 +85,8 @@ class ODEFunction:
 
     def __call__(self, t, y, ydot):
         input_vars = list(y)+self.parameter_values
-        array_input = [array([input_var], dtype=double) for input_var in  input_vars  ]
-        results = [f(*array_input)[0] for f in self.function]
+        array_input = array([array([input_var], dtype=double) for input_var in  input_vars  ])
+        results = [f(*array_input[ix])[0] for f,ix in self.function]
         # Needed by SUNDIALS solver
         for ix,e in enumerate(results):
             ydot[ix] = e
