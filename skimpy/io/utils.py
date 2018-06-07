@@ -105,12 +105,14 @@ def guess_mechanism(reactants):
     mechanism = check_rev_michaelis_menten(reactants)
     if mechanism is not None:
         return mechanism
-
-    # 2) Convenience kinetics
+    # Else convineince or irrevv MM
     else:
         stoich = [i for i in reactants.values()]
         stoich.sort()
-        return make_convenience(stoich)
+        if max(stoich) > 10:
+            return make_irrev_m_n_michaelis_menten(stoich)
+        else:
+            return make_convenience(stoich)
 
 def check_boundary_reaction(cobra_reaction):
     stoich = [i for i in cobra_reaction.metabolites.values()]

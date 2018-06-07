@@ -28,4 +28,5 @@ limitations under the License.
 from .michaelis_menten import *
 from .rand_bi_bi_michaelis_menten import *
 from .convenience import *
+from .irrev_m_n_michaelis_menten import *
 from .mechanism import KineticMechanism
