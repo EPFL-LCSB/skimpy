@@ -67,6 +67,11 @@ class ElasticityFunction:
             this_sym_vars = exp.free_symbols
             this_sym_var_ix = [i for i,e in enumerate(sym_vars) if e in this_sym_vars]
             this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
+            # Cast a dummy value for elasticities = 1
+            if not this_ordered_sym_vars:
+                this_ordered_sym_vars = sym_vars[0]
+                this_sym_var_ix = 0
+
             self.function.append((ufuncify(tuple(this_ordered_sym_vars),
                                          exp,
                                          backend='Cython'),this_sym_var_ix))
