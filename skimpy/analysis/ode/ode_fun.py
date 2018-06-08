@@ -27,8 +27,7 @@ limitations under the License.
 
 from numpy import array, double
 from sympy import symbols
-from sympy.utilities.autowrap import ufuncify
-
+from sympy.printing.theanocode import theano_function
 
 class ODEFunction:
     def __init__(self, variables, expr, parameters):
@@ -52,17 +51,10 @@ class ODEFunction:
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
         # Sort the expressions
-        the_expressions = [self.expr[x] for x in self.variables.values()]
+        expressions = [self.expr[x] for x in self.variables.values()]
 
         # Awsome sympy magic
-        self.function = []
-        for exp in the_expressions:
-            this_sym_vars = exp.free_symbols
-            this_sym_var_ix = [i for i, e in enumerate(sym_vars) if e in this_sym_vars]
-            this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
-            self.function.append((ufuncify(tuple(this_ordered_sym_vars),
-                                           exp,
-                                           backend='Cython'), this_sym_var_ix))
+        self.function = theano_function(sym_vars, expressions)
 
     @property
     def parameter_values(self):
@@ -85,8 +77,9 @@ class ODEFunction:
 
     def __call__(self, t, y, ydot):
         input_vars = list(y)+self.parameter_values
-        array_input = array([array([input_var], dtype=double) for input_var in  input_vars  ])
-        results = [f(*array_input[ix])[0] for f,ix in self.function]
+
+        results = self.function(*input_vars)
+
         # Needed by SUNDIALS solver
         for ix,e in enumerate(results):
             ydot[ix] = e

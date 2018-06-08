@@ -29,7 +29,7 @@ from numpy import append as append_array
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import symbols
-from sympy.utilities.autowrap import ufuncify
+from sympy.printing.theanocode import theano_function
 
 
 class ElasticityFunction:
@@ -61,21 +61,13 @@ class ElasticityFunction:
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot variables is interpreted as interger
         # Make a function to compute every non zero entry in the matrix
-        self.function = []
-        self.coordinates = []
-        for coord, exp in expressions.items():
-            this_sym_vars = exp.free_symbols
-            this_sym_var_ix = [i for i,e in enumerate(sym_vars) if e in this_sym_vars]
-            this_ordered_sym_vars = [e for i, e in enumerate(sym_vars) if e in this_sym_vars]
-            # Cast a dummy value for elasticities = 1
-            if not this_ordered_sym_vars:
-                this_ordered_sym_vars = sym_vars[0:2]
-                this_sym_var_ix = [0,1]
+        coordinates, expressions= zip(*[(coord,expr) for coord,expr in expressions.items()])
 
-            self.function.append((ufuncify(tuple(this_ordered_sym_vars),
-                                         exp,
-                                         backend='Cython'),this_sym_var_ix))
-            self.coordinates.append(coord)
+        rows, columns = zip(*coordinates)
+        self.rows = rows
+        self.columns = columns
+
+        self.function = theano_function(sym_vars,expressions)
 
 
     def __call__(self, variables, parameters):
@@ -85,12 +77,11 @@ class ElasticityFunction:
         parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
         input_vars = append_array(variables , parameter_values)
-        array_input = array([array([input_var], dtype=double) for input_var in input_vars])
-        values = [function(*array_input[ix])[0] for function, ix in self.function]
-        rows, columns = zip(*self.coordinates)
+
+        values = self.function(*input_vars)
 
         elasticiy_matrix = coo_matrix((values,
-                                      (rows, columns)),
+                                      (self.rows, self.columns)),
                                        shape=self.shape).tocsc()
 
         return elasticiy_matrix
