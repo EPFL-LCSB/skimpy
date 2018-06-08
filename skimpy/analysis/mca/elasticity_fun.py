@@ -28,8 +28,10 @@ from numpy import array, double, reciprocal
 from numpy import append as append_array
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import inv as sparse_inv
-from sympy import symbols
+from sympy import symbols,Symbol
 from sympy.printing.theanocode import theano_function
+
+from skimpy.utils.tabdict import TabDict
 
 
 class ElasticityFunction:
@@ -56,12 +58,20 @@ class ElasticityFunction:
         parameters = [x for x in self.parameters]
         variables = [x for x in variables]
 
+        self.dummy = TabDict([])
         sym_vars = list(symbols(variables+parameters))
 
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot variables is interpreted as interger
         # Make a function to compute every non zero entry in the matrix
-        coordinates, expressions= zip(*[(coord,expr) for coord,expr in expressions.items()])
+        if 1 in expressions.values():
+            dummy = Symbol('dummy_one')
+            sym_vars += [dummy]
+            self.dummy[dummy] = 1
+            coordinates, expressions= zip(*[ (coord, expr*dummy) if expr == 1 else (coord, expr)
+                                             for coord, expr in expressions.items()])
+        else:
+            coordinates, expressions = zip(*[ (coord, expr) for coord, expr in expressions.items()])
 
         rows, columns = zip(*coordinates)
         self.rows = rows
@@ -76,7 +86,11 @@ class ElasticityFunction:
         """
         parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
-        input_vars = append_array(variables , parameter_values)
+        dummy_values = array([x for x in self.dummy.values()])
+        if not dummy_values:
+            input_vars = append_array(variables, parameter_values)
+        else:
+            input_vars = append_array(variables , parameter_values ,dummy_values)
 
         values = self.function(*input_vars)
 
