@@ -64,20 +64,20 @@ class ElasticityFunction:
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot variables is interpreted as interger
         # Make a function to compute every non zero entry in the matrix
-        if 1 in expressions.values():
-            dummy = Symbol('dummy_one')
-            sym_vars += [dummy]
-            self.dummy[dummy] = 1
-            coordinates, expressions= zip(*[ (coord, expr*dummy) if expr == 1 else (coord, expr)
-                                             for coord, expr in expressions.items()])
-        else:
-            coordinates, expressions = zip(*[ (coord, expr) for coord, expr in expressions.items()])
+
+        dummy = Symbol('dummy_one')
+        sym_vars += [dummy]
+        self.dummy[dummy] = 1
+
+        coordinates, expressions= zip(*[ (coord, expr*dummy) if expr == 1 else (coord, expr)
+                                         for coord, expr in expressions.items()])
 
         rows, columns = zip(*coordinates)
         self.rows = rows
         self.columns = columns
 
-        self.function = theano_function(sym_vars,expressions)
+        self.function = theano_function(sym_vars, expressions,
+                                        on_unused_input='ignore')
 
 
     def __call__(self, variables, parameters):
@@ -87,10 +87,9 @@ class ElasticityFunction:
         parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
         dummy_values = array([x for x in self.dummy.values()])
-        if not dummy_values:
-            input_vars = append_array(variables, parameter_values)
-        else:
-            input_vars = append_array(variables , parameter_values ,dummy_values)
+
+        input_vars = append_array(variables , parameter_values)
+        input_vars = append_array(input_vars, dummy_values)
 
         values = self.function(*input_vars)
 
