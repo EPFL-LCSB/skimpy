@@ -86,6 +86,7 @@ def make_irrev_m_n_michaelis_menten(stoichioemtry):
             KineticMechanism.__init__(self, name, reactants, parameters)
 
         def get_qssa_rate_expression(self):
+            reactant_km_relation = {v.symbol:k for k,v in parameter_reactant_links.items()}
 
             substrates = {k:r for k,r in self.reactants.items()
                           if k.startswith('substrate')}
@@ -100,7 +101,8 @@ def make_irrev_m_n_michaelis_menten(stoichioemtry):
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
-                kms = this_substrate.hook.symbol
+                kms = reactant_km_relation[s].symbol
+
                 forward_rate_expression *= s/(s+kms)
 
             rate_expression = forward_rate_expression-backward_rate_expression

@@ -87,6 +87,7 @@ def make_convenience(stoichioemtry):
             KineticMechanism.__init__(self, name, reactants, parameters)
 
         def get_qssa_rate_expression(self):
+            reactant_km_relation = {v.symbol: k for k, v in parameter_reactant_links.items()}
 
             substrates = {k:r for k,r in self.reactants.items()
                           if k.startswith('substrate')}
@@ -105,7 +106,7 @@ def make_convenience(stoichioemtry):
             for type, this_substrate in substrates.items():
                 common_denominator_this_substrate = 1
                 s = this_substrate.symbol
-                kms = this_substrate.hook.symbol
+                kms = reactant_km_relation[s].symbol
                 stoich = self.reactant_stoichiometry[type]
                 for alpha in range(int(abs(stoich))):
                     common_denominator_this_substrate += (s/kms)**alpha
@@ -119,7 +120,7 @@ def make_convenience(stoichioemtry):
             for type, this_product in products.items():
                 common_denominator_this_product = 1
                 p = this_product.symbol
-                kmp = this_product.hook.symbol
+                kmp = reactant_km_relation[p].symbol
                 stoich = self.reactant_stoichiometry[type]
                 for beta in range(int(abs(stoich))):
                     common_denominator_this_product += (p/kmp)**beta
