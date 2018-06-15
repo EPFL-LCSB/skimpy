@@ -110,7 +110,7 @@ def make_convenience(stoichioemtry):
                 kms = self.parameters[reactant_km_relation[s]].symbol
                 stoich = self.reactant_stoichiometry[type]
                 for alpha in range(int(abs(stoich))):
-                    common_denominator_this_substrate += (s/kms)**alpha
+                    common_denominator_this_substrate += (s/kms)**(alpha+1)
                 # Multiply for every substrate
                 common_denominator_substrates *= common_denominator_this_substrate
 
@@ -121,15 +121,14 @@ def make_convenience(stoichioemtry):
             for type, this_product in products.items():
                 common_denominator_this_product = 1
                 p = this_product.symbol
-                kmp = self.parameters[reactant_km_relation[s]].symbol
+                kmp = self.parameters[reactant_km_relation[p]].symbol
                 stoich = self.reactant_stoichiometry[type]
                 for beta in range(int(abs(stoich))):
-                    common_denominator_this_product += (p/kmp)**beta
+                    common_denominator_this_product += (p/kmp)**(beta+1)
                 # Multiply for every product
                 common_denominator_products *= common_denominator_this_product
 
                 bwd_nominator *= p**abs(stoich)
-
 
             common_denominator = common_denominator_substrates +\
                                  common_denominator_products - 1
