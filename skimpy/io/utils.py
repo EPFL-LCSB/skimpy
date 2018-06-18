@@ -34,6 +34,7 @@ def create_reaction_from_stoich(name,
                                 model_generator):
 
     water = model_generator.water
+    hydrogen = model_generator.hydrogen
     small_molecules = model_generator.small_molecules
     reactant_relations = model_generator.reactant_relations
 
@@ -49,12 +50,16 @@ def create_reaction_from_stoich(name,
         # TODO the detection needs to be better !!!
         is_small_molecule = any([this_met.startswith(s) for s in small_molecules])
         # TODO the detection needs to be better !!!
-        if not this_met.startswith(water) \
+        if not this_met.startswith("{}_".format(water)) \
+           and not this_met.startswith("{}_".format(hydrogen)) \
            and is_small_molecule:
+
             this_reaction_small_molecules[this_met] = stoich
 
-        elif not this_met.startswith(water) \
+        elif not this_met.startswith("{}_".format(water)) \
+             and not this_met.startswith("{}_".format(hydrogen)) \
              and not is_small_molecule:
+
             this_reaction_reactants[this_met] = stoich
 
     # TODO this currently catches transport of small molecules

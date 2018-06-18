@@ -95,7 +95,7 @@ class FromCobra(ModelGenerator):
                         for met in cobra_reaction.metabolites])
 
 
-        if is_hydrogen:
+        if is_hydrogen or is_water:
             return None
 
         try:
