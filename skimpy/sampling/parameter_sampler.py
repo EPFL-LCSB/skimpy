@@ -130,12 +130,17 @@ class SimpleParameterSampler(ParameterSampler):
         # Sample parameters for every reaction
         for this_reaction in compiled_model.reactions.values():
 
-            keq_param = this_reaction.parameters.k_equilibrium
+
             vmax_param = this_reaction.parameters.vmax_forward
 
-            this_parameters = {
-                keq_param.symbol: keq_param.value,
-                vmax_param.symbol: 1.0}
+            try:
+                keq_param = this_reaction.parameters.k_equilibrium
+                this_parameters = {
+                    keq_param.symbol: keq_param.value,
+                    vmax_param.symbol: 1.0}
+
+            except KeyError:
+                this_parameters = { vmax_param.symbol: 1.0}
 
             # Get parameters from mechanism
             this_reaction_parameters = this_reaction.parameters
