@@ -33,7 +33,8 @@ class ModelGenerator(ABC):
                  reactant_relations=None,
                  small_molecules=None,
                  small_molecule_modifier=None,
-                 water=None):
+                 water=None,
+                 hydrogen=None):
         """
         This class defines the rules to build a kinetic models from
         solely stoichiometric data and supplemented data
@@ -49,7 +50,7 @@ class ModelGenerator(ABC):
         """Default values """
         if small_molecules is None:
             self.small_molecules = \
-                ['h', 'co2', 'nh4', 'o2', 'pi', 'ppi', 'pppi', 'h2o2', 'hco3', 'h2s', 'so3', 'so4']
+                ['co2', 'nh4', 'o2', 'pi', 'ppi', 'pppi', 'h2o2', 'hco3', 'h2s', 'so3', 'so4']
         else:
             self.small_molecules = small_molecules
 
@@ -63,6 +64,10 @@ class ModelGenerator(ABC):
         else:
             self.water = water
 
+        if hydrogen is None:
+            self.hydrogen = 'h'
+        else:
+            self.hydrogen = hydrogen
 
 
     @abstractmethod

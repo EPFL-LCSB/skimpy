@@ -42,12 +42,16 @@ class FromPyTFA(FromCobra):
                  reaction_to_mechanisms={},
                  reactant_relations={},
                  small_molecules=None,
-                 water=None):
+                 water=None,
+                 hydrogen=None):
+
         ModelGenerator.__init__(self,
                                 reaction_to_mechanisms=reaction_to_mechanisms,
                                 reactant_relations=reactant_relations,
                                 small_molecules=small_molecules,
-                                water=water)
+                                water=water,
+                                hydrogen=hydrogen,
+                                )
 
     def import_model(self, pytfa_model, pytfa_solution):
         """
@@ -94,7 +98,8 @@ class FromPyTFA(FromCobra):
 
                     # If the metabolite does not correspond to water as water is
                     # omited from the reactions
-                    if not met.startswith("{}".format(self.water)):
+                    if not met.startswith("{}_".format(self.water)) \
+                    and not met.startswith("{}_".format(self.hydrogen)) :
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)

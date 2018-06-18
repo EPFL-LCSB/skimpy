@@ -38,12 +38,15 @@ class FromCobra(ModelGenerator):
                  reaction_to_mechanisms={},
                  reactant_relations={},
                  small_molecules=None,
-                 water=None):
+                 water=None,
+                 hydrogen=None,
+                 ):
         ModelGenerator.__init__(self,
                                 reaction_to_mechanisms=reaction_to_mechanisms,
                                 reactant_relations=reactant_relations,
                                 small_molecules=small_molecules,
-                                water=water)
+                                water=water,
+                                hydrogen=hydrogen)
 
     def import_model(self,cobra_model):
         """
@@ -70,7 +73,8 @@ class FromCobra(ModelGenerator):
 
                 # If the metabolite does not correspond to water as water is
                 # omitted from the reactions
-                if not met.startswith("{}_".format(self.water)):
+                if not met.startswith("{}_".format(self.water)) \
+                and not met.startswith("{}_".format(self.hydrogen)):
                     this_reactant = skimpy_model.reactants[met]
                     this_const_met = ConstantConcentration(this_reactant)
                     skimpy_model.add_boundary_condition(this_const_met)
@@ -85,7 +89,13 @@ class FromCobra(ModelGenerator):
         # Ignore if only water is participating
         is_water = all([met.id.startswith("{}_".format(self.water))
                         for met in cobra_reaction.metabolites])
-        if is_water:
+
+        # Ignore if only hydrogen is participating
+        is_hydrogen = all([met.id.startswith("{}_".format(self.hydrogen))
+                        for met in cobra_reaction.metabolites])
+
+
+        if is_hydrogen:
             return None
 
         try:
