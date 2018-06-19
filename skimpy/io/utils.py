@@ -113,7 +113,7 @@ def guess_mechanism(reactants):
     # Else convineince or irrevv MM
     else:
         stoich = [i for i in reactants.values()]
-        stoich.sort()
+        stoich.sort(reverse=True)
         if max(stoich) > 10:
             return make_irrev_m_n_michaelis_menten(stoich)
         else:
@@ -148,8 +148,10 @@ def make_reactant_set(mechanism,
                                       key=itemgetter(1),
                                       reverse=True))
 
-    reactant_list = [k for k in mechanism.reactant_stoichiometry.keys()]
-    reactant_list.sort()# Sort P,S / P1,P2,P3,S1,S2,S3 ...
+    reactant_list_temp = sorted(mechanism.reactant_stoichiometry.items(),
+                           key=lambda x: (x[1],x[0]), reverse=True)
+
+    reactant_list = [v for v,k in reactant_list_temp]
 
     # ToDo Sort the reactants to match the reactant list
     # using the reactant_relations
