@@ -124,7 +124,10 @@ class ElasticityFunction:
         Fd = L0[:, all_dependent_ix]
         # Qd the scaling matrix
         dxd_dxi = sparse_inv(Fd).dot(-1*Fi)
-        Qd = reciprocal(Xd).dot(dxd_dxi).dot(Xi)
+
+        Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
+
+        #reciprocal(Xd).dot(dxd_dxi).dot(Xi)
 
         return Qd
 
