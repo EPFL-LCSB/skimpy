@@ -30,7 +30,8 @@ from collections import namedtuple
 
 import numpy as np
 from numpy.random import sample
-from scipy.sparse.linalg import eigs as eigenvalues
+#from scipy.sparse.linalg import eigs as eigenvalues
+from scipy.linalg import eigvals as eigenvalues
 from sympy import sympify, Symbol
 
 from skimpy.utils.namespace import *
@@ -104,8 +105,13 @@ class SimpleParameterSampler(ParameterSampler):
 
             this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
                                                         parameter_sample)
-            largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
-                                             return_eigenvectors=False)
+
+            #largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
+            #                                 return_eigenvectors=False)
+            # Test suggests that this is apparently much faster ....
+            largest_eigenvalue = np.real(sorted(
+                eigenvalues(this_jacobian.todense()))[-1])
+
             is_stable = largest_eigenvalue <= 0
 
             compiled_model.logger.info('Model is stable? {} '
