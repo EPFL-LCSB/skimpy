@@ -139,7 +139,7 @@ class SimpleParameterSampler(ParameterSampler):
                     keq_param.symbol: keq_param.value,
                     vmax_param.symbol: 1.0}
 
-            except KeyError:
+            except AttributeError:
                 this_parameters = { vmax_param.symbol: 1.0}
 
             # Get parameters from mechanism
