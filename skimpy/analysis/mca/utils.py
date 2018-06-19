@@ -243,9 +243,13 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         # Get all unassigned metabolites participating in this mojetie
         unassigned_vars = [x for x in set(mojetie_vars)
             .difference(all_independent_ix+all_dependent_ix)]
+        # Get the metabolite that participates in least mojeties:
+        unassigned_vars_sorted = sorted(unassigned_vars,
+               key=lambda k: L0_sparse[row,k].count_nonzero())
+
         # Choose a representative dependent metabolite:
-        if unassigned_vars:
-            all_dependent_ix.append(unassigned_vars[-1])
+        if unassigned_vars_sorted:
+            all_dependent_ix.append(unassigned_vars_sorted[0])
         else:
             raise Exception('Could not find an dependent var that is not already used'
                             ' in {}'.format(mojetie_vars))
