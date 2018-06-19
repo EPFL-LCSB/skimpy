@@ -245,7 +245,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
             .difference(all_independent_ix+all_dependent_ix)]
         # Get the metabolite that participates in least mojeties:
         unassigned_vars_sorted = sorted(unassigned_vars,
-               key=lambda k: L0_sparse[row,k].count_nonzero())
+               key=lambda k: L0_sparse[:,row].count_nonzero())
 
         # Choose a representative dependent metabolite:
         if unassigned_vars_sorted:
