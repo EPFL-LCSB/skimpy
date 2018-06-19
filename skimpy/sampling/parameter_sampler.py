@@ -180,8 +180,9 @@ class SimpleParameterSampler(ParameterSampler):
 
             # If is 0 try more exact evaluation
             if normed_net_reaction_rate == 0:
-                normed_net_reaction_rate = this_net_reaction_rate.evalf( 50,
-                    subs=this_parameter_subs )
+                normed_net_reaction_rate = float(
+                    this_net_reaction_rate.subs(this_parameter_subs))
+
 
             if (flux_dict[this_reaction.name] > 0 and
                normed_net_reaction_rate <= 0) \
