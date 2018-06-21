@@ -68,16 +68,18 @@ class FromCobra(ModelGenerator):
 
         # Add Boundaries
         for this_reaction in cobra_model.reactions:
-            if check_boundary_reaction(this_reaction):
-                met = sanitize_cobra_vars(this_met.id)
 
-                # If the metabolite does not correspond to water as water is
-                # omitted from the reactions
-                if not met.startswith("{}_".format(self.water)) \
-                and not met.startswith("{}_".format(self.hydrogen)):
-                    this_reactant = skimpy_model.reactants[met]
-                    this_const_met = ConstantConcentration(this_reactant)
-                    skimpy_model.add_boundary_condition(this_const_met)
+            if check_boundary_reaction(this_reaction):
+                for this_met in this_reaction.metabolites:
+                    met = sanitize_cobra_vars(this_met.id)
+
+                    # If the metabolite does not correspond to water as water is
+                    # omitted from the reactions
+                    if not met.startswith("{}_".format(self.water)) \
+                    and not met.startswith("{}_".format(self.hydrogen)):
+                        this_reactant = skimpy_model.reactants[met]
+                        this_const_met = ConstantConcentration(this_reactant)
+                        skimpy_model.add_boundary_condition(this_const_met)
 
         return skimpy_model
 
