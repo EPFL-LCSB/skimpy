@@ -84,7 +84,7 @@ class FromCobra(ModelGenerator):
     def import_reaction(self, cobra_reaction, name=None):
 
         if name is None:
-            name = cobra_reaction.name
+            name = cobra_reaction.id
 
         # Ignore if only water is participating
         is_water = all([met.id.startswith("{}_".format(self.water))
