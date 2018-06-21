@@ -64,7 +64,7 @@ class FromCobra(ModelGenerator):
            if not check_boundary_reaction(this_reaction):
                 this_kinetic_reaction = self.import_reaction(this_reaction)
                 if this_kinetic_reaction is not None:
-                    this_mechanism = this_skimpy_reaction.mechanism
+                    this_mechanism = this_kinetic_reaction.mechanism
                     parameters[this_kinetic_reaction.name] = this_mechanism.Parameters()
                     skimpy_model.add_reaction(this_kinetic_reaction)
 
