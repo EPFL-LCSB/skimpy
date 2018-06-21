@@ -58,8 +58,10 @@ class FromCobra(ModelGenerator):
         skimpy_model = KineticModel()
 
         """Read the reactions """
+        # DM_     Boundary reactions
         # By default the metabolites of boundary reactions
         # to be constant concentrations
+        parameters = {}
         for this_reaction in cobra_model.reactions:
            if not check_boundary_reaction(this_reaction):
                 this_kinetic_reaction = self.import_reaction(this_reaction)
