@@ -64,6 +64,8 @@ class FromCobra(ModelGenerator):
            if not check_boundary_reaction(this_reaction):
                 this_kinetic_reaction = self.import_reaction(this_reaction)
                 if this_kinetic_reaction is not None:
+                    this_mechanism = this_skimpy_reaction.mechanism
+                    parameters[this_kinetic_reaction.name] = this_mechanism.Parameters()
                     skimpy_model.add_reaction(this_kinetic_reaction)
 
         # Add Boundaries
@@ -81,6 +83,7 @@ class FromCobra(ModelGenerator):
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
 
+        skimpy_model.parametrize(parameters)
         return skimpy_model
 
     def import_reaction(self, cobra_reaction, name=None):
