@@ -55,7 +55,7 @@ class ModelGenerator(ABC):
             self.small_molecules = small_molecules
 
         if small_molecule_modifier is None:
-            self.small_molecule_modifier = FirstOrderSmallMoleculeModifier
+            self.small_molecule_modifier = DisplacementSmallMoleculeModifier
         else:
             self.small_molecule_modifier = small_molecule_modifier
 
