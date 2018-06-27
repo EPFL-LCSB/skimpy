@@ -41,7 +41,10 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
 
         # MAKE COLORZ
         num_species = data.shape[1]
-        palette = Spectral11[0:num_species]
+        if num_species > 11:
+            palette = viridis(num_species)
+        else:
+            palette = Spectral11[:num_species]
 
         # PLOTS
         p = figure(x_axis_type="datetime")
