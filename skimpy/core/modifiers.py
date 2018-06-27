@@ -224,4 +224,59 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
 
 
+class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "DSM"
+
+    Reactants = make_reactant_set(__name__, ['small_molecule'])
+
+    Parameters = make_parameter_set(    __name__,
+                                        { })
+
+    parameter_reactant_links = {}
+
+    def __init__(self, reaction, reactant, stoichiometry, name=None):
+
+        if name is None:
+            name = reaction.__str__()+"_"+reactant.__str__()
+
+        reactants = self.Reactants(small_molecule=reactant)
+        parameters = self.Parameters()
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.stoichiometry = stoichiometry
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+
+        expressions['v_bwd'] = expressions['v_bwd'] \
+                                * self.get_qssa_rate_expression()**self.stoichiometry
+
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        sm = self.reactants.small_molecule.symbol
+        return sm
+
+    def update_qssa_rate_expression(self):
+        return None
+
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
+
+
+
 
