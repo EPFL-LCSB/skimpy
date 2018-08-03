@@ -6,8 +6,29 @@
 """
 
 from setuptools import setup, find_packages
+from distutils.extension import Extension
+from Cython.Build import cythonize
+from Cython.Distutils import build_ext
+
+
+
 
 version_tag = '0.0.1'
+
+
+extensions = [
+            Extension("skimpy.nullspace",
+                      sources=["skimpy/cython/nullspace.pyx"],
+                      library_dirs=['/usr/lib'],
+                      extra_compile_args=[],
+                      extra_link_args=['-lgmp','-lflint'],
+                      include_dirs=[],
+                      language = 'c',
+                      libraries=['/usr/local/lib/libgmp.so.23',
+                                 '/usr/local/lib/libflint.so.13'],
+                      )
+            ,]
+
 
 setup(name='skimpy',
       version=version_tag,
@@ -30,6 +51,10 @@ setup(name='skimpy',
       description='SKiMPy adds Thermodynamics-based Flux Analysis',
       keywords=['skimpy','kinetic','models'],
       extras_require={ 'ORACLE':  ["pytfa"], },
+
+      #ext_modules=cythonize(extensions ),
+      ext_modules=extensions,
+      cmdclass={'build_ext': build_ext},
 
       license='Apache2',
 

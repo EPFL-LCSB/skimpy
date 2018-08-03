@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		fort77          \
 		wget            \
 		cmake           \
+		libgmp3-dev     \
+		libmpfr-dev     \
+		libmpfr4        \
+		yasm            \
     && rm -rf /var/lib/apt/lists/*
 
 ENV USER skimpy
@@ -34,16 +38,26 @@ RUN pip install -r requirements.txt
 RUN mkdir /src
 COPY src/ /src/
 
-# Copy tnstall sundials script
-COPY install_sundials.sh .
 # Install sundials
+COPY install_sundials.sh .
 RUN ./install_sundials.sh
+
 # Export environment vairables from installation
 ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-2.7.0/include"
 ENV SUNDIALS_LIBDIR ="${HOME}/sundials-2.7.0/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-2.7.0"
 # Install python interface to sundials
 RUN pip install scikits.odes
+ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
+
+# Install MPIR
+COPY install_mpir.sh .
+RUN ./install_mpir.sh
+# Install FLINT
+COPY install_flint.sh .
+RUN ./install_flint.sh
 
 # Make the workspace folder that will link the sources
 RUN mkdir /skimpy
@@ -57,7 +71,7 @@ USER $USER
 RUN mkdir ./work
 WORKDIR ./work
 
-ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
+
 # Load your package in development mode on startup
 ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && $0 $*"]
 CMD /bin/bash
