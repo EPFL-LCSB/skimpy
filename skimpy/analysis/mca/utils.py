@@ -210,7 +210,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     #TODO IMPLEMENT THE MOIJETY DETECTION
     full_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
 
-    S = Matrix(full_stoichiometry.todense())
+    S = full_stoichiometry.todense()
     # Left basis dimensions: rows are metabolites, columns are moieties
     # L0*S = 0 -> L0 is the left null space matrix
     left_basis = rational_left_basis(S)
@@ -259,7 +259,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         .difference(all_dependent_ix)]
 
     # Reindex S in N, N0
-    S = S[all_independent_ix+all_dependent_ix,:]
+    S = Matrix(S[all_independent_ix+all_dependent_ix,:])
     # If we reindex S, then so should be L0
     L0 = L0[:,all_independent_ix+all_dependent_ix]
 

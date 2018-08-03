@@ -27,17 +27,16 @@ limitations under the License.
 
 
 import numpy as np
+
 from scipy.sparse import eye as speye
 from scipy.sparse import find as sfind
 from scipy.sparse import hstack, vstack
-
+from skimpy.nullspace import integer_nullspace
 from sympy import Matrix, nsimplify
 
 def rational_left_basis(S):
-    sym_S = Matrix(S)
-    rational_S = nsimplify(sym_S, rational=True)
-
-    return rational_S.transpose().nullspace()
+    S = np.array(S, dtype=np.int)
+    return integer_nullspace(S.T)
 
 
 """
