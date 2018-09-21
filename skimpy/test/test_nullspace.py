@@ -1,16 +1,24 @@
-from skimpy.nullspace import integer_nullspace
+from skimpy.nullspace import left_integer_nullspace
 
 import numpy as np
+from scipy.sparse import random
+from scipy import stats
 
+class CustomRandomState(object):
+    def randint(self, k):
+        i = np.random.randint(k)
+        return i
 
-A = np.random.randint(0,10,size=(3,3))
+rs = CustomRandomState()
+rvs = stats.poisson(2, loc=10).rvs
+S = random(5,6, density=0.1, random_state=rs, data_rvs=rvs)
 
-A = np.array([[1,0,0],[0,0,1],[1,0,1]])
+print(S.todense())
 
-print(A)
-
-ns = integer_nullspace(A)
+ns = left_integer_nullspace(S.todense())
 
 print(ns)
+null = ns @ S.todense()
 
-print(A.dot(ns))
+print(null)
+print(np.any(null))

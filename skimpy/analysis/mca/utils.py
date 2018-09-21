@@ -37,7 +37,8 @@ from .elasticity_fun import ElasticityFunction
 from skimpy.utils.general import get_stoichiometry, join_dicts
 from skimpy.utils.tabdict import iterable_to_tabdict, TabDict
 from skimpy.utils.namespace import *
-from skimpy.utils.moieties import rational_left_basis
+
+from skimpy.nullspace import left_integer_nullspace
 
 from ...utils.namespace import *
 
@@ -213,92 +214,96 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     S = full_stoichiometry.todense()
     # Left basis dimensions: rows are metabolites, columns are moieties
     # L0*S = 0 -> L0 is the left null space matrix
-    left_basis = rational_left_basis(S)
-    L0 = Matrix([x.transpose() for x in left_basis])
+    left_basis = left_integer_nullspace(S)
 
-    ## We need to separate N and N0 beforehand
+    if left_basis.any():
 
-    # Per moiety, select one variable that has not been selected before
-    # L0
-    L0_sparse = sparse_matrix(np.array(L0), dtype=np.float)
+        L0 = Matrix([x for x in left_basis])
 
-    nonzero_rows, nonzero_cols = L0_sparse.nonzero()
-    row_dict = defaultdict(list)
+        ## We need to separate N and N0 beforehand
 
-    # Put the ixs in a dict indexed by row number (moiety index)
-    for k, v in zip(nonzero_rows, nonzero_cols):
-        row_dict[k].append(v)
+        # Per moiety, select one variable that has not been selected before
+        # L0
+        L0_sparse = sparse_matrix(np.array(L0), dtype=np.float)
 
-    # The first independent variables are those involved in no moieties
-    all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
-    # Indices for dependent metabolites indices
-    all_dependent_ix = []
+        nonzero_rows, nonzero_cols = L0_sparse.nonzero()
+        row_dict = defaultdict(list)
 
-    # For each line, get an exclusive representative.
-    # There should be at least as many exclusive representatives as lines
+        # Put the ixs in a dict indexed by row number (moiety index)
+        for k, v in zip(nonzero_rows, nonzero_cols):
+            row_dict[k].append(v)
 
-    # Iterate over mojeties and start with the ones with least members
-    for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
-        mojetie_vars = row_dict[row]
-        # Get all unassigned metabolites participating in this mojetie
-        unassigned_vars = [x for x in set(mojetie_vars)
-            .difference(all_independent_ix+all_dependent_ix)]
-        # Get the metabolite that participates in least mojeties:
-        unassigned_vars_sorted = sorted(unassigned_vars,
-               key=lambda k: L0_sparse[:,row].count_nonzero())
+        # The first independent variables are those involved in no moieties
+        all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
+        # Indices for dependent metabolites indices
+        all_dependent_ix = []
 
-        # Choose a representative dependent metabolite:
-        if unassigned_vars_sorted:
-            all_dependent_ix.append(unassigned_vars_sorted[0])
-        else:
-            raise Exception('Could not find an dependent var that is not already used'
-                            ' in {}'.format(mojetie_vars))
+        # For each line, get an exclusive representative.
+        # There should be at least as many exclusive representatives as lines
 
-    # The independent mets is the set difference from the dependent
-    all_independent_ix = [x for x in set(range(L0.shape[1]))
-        .difference(all_dependent_ix)]
+        # Iterate over mojeties and start with the ones with least members
+        for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
+            mojetie_vars = row_dict[row]
+            # Get all unassigned metabolites participating in this mojetie
+            unassigned_vars = [x for x in set(mojetie_vars)
+                .difference(all_independent_ix+all_dependent_ix)]
+            # Get the metabolite that participates in least mojeties:
+            unassigned_vars_sorted = sorted(unassigned_vars,
+                   key=lambda k: L0_sparse[:,row].count_nonzero())
 
-    # Reindex S in N, N0
-    S = Matrix(S[all_independent_ix+all_dependent_ix,:])
-    # If we reindex S, then so should be L0
-    L0 = L0[:,all_independent_ix+all_dependent_ix]
+            # Choose a representative dependent metabolite:
+            if unassigned_vars_sorted:
+                all_dependent_ix.append(unassigned_vars_sorted[0])
+            else:
+                raise Exception('Could not find an dependent var that is not already used'
+                                ' in {}'.format(mojetie_vars))
 
-    # Getting the reduced Stoichiometry:
-    # S is the full stoichiometric matrix
-    # N  is the full rank reduced stoichiometric matrix
-    # N0 is the remainder
-    #
-    #     [ I_n (nxn) | 0_r nxr) ]
-    # L = [     L0 ((r)x(n+r))    ]
-    #
-    #     [ N  ]
-    # S = [ N0 ]
-    #
-    # Then:
-    #          [ I_n (nxn) | 0_r (nxr) ] * [ N  ]
-    # L * S  = [     L0 ((r)x(n+r))    ]   [ N0 ]
-    #
-    #          [ I_n*N + 0_r * N0 ]   [ N ]
-    # L * S  = [      L0 * S      ] = [ 0 ]
+        # The independent mets is the set difference from the dependent
+        all_independent_ix = [x for x in set(range(L0.shape[1]))
+            .difference(all_dependent_ix)]
 
-    r,n_plus_r = L0.shape
-    n = n_plus_r - r
+        # Reindex S in N, N0
+        S = Matrix(S[all_independent_ix+all_dependent_ix,:])
+        # If we reindex S, then so should be L0
+        L0 = L0[:,all_independent_ix+all_dependent_ix]
 
-    # Upper block
-    U = Matrix([eye(n), zeros(r,n)]).transpose()
-    L = Matrix([U,L0])
+        # Getting the reduced Stoichiometry:
+        # S is the full stoichiometric matrix
+        # N  is the full rank reduced stoichiometric matrix
+        # N0 is the remainder
+        #
+        #     [ I_n (nxn) | 0_r nxr) ]
+        # L = [     L0 ((r)x(n+r))    ]
+        #
+        #     [ N  ]
+        # S = [ N0 ]
+        #
+        # Then:
+        #          [ I_n (nxn) | 0_r (nxr) ] * [ N  ]
+        # L * S  = [     L0 ((r)x(n+r))    ]   [ N0 ]
+        #
+        #          [ I_n*N + 0_r * N0 ]   [ N ]
+        # L * S  = [      L0 * S      ] = [ 0 ]
 
-    N_ = L*S
-    N  = N_[:n,:] # the rows after n are 0s
+        r,n_plus_r = L0.shape
+        n = n_plus_r - r
 
-    reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
-    conservation_relation = L0_sparse
+        # Upper block
+        U = Matrix([eye(n), zeros(r,n)]).transpose()
+        L = Matrix([U,L0])
+
+        N_ = L*S
+        N  = N_[:n,:] # the rows after n are 0s
+
+        reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
+        conservation_relation = L0_sparse
 
     # If the left hand null space is empty no mojeties
-    if L0_sparse.shape[1] <= 1 :
+    else:
         reduced_stoichiometry = full_stoichiometry
         all_independent_ix = range(full_stoichiometry.shape[0])
         all_dependent_ix = []
+        conservation_relation = sparse_matrix(np.array([]),dtype=np.float)
 
     return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 

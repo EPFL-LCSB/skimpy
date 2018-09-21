@@ -27,9 +27,8 @@ limitations under the License.
 """
 import numpy as np
 
-
 cdef extern from "nullspace.pyh":
-    ctypedef long slong
+    ctypedef int slong
     ctypedef slong fmpz
     ctypedef fmpz fmpz_t[1]
 
@@ -41,50 +40,93 @@ cdef extern from "nullspace.pyh":
 
     ctypedef fmpz_mat_struct fmpz_mat_t[1]
 
-    cdef slong fmpz_mat_nullspace(fmpz_mat_t N, fmpz_mat_t A);
+    # Rationals
+    ctypedef struct fmpq:
+         fmpz num;
+         fmpz den;
 
-    cdef void fmpz_mat_init(fmpz_mat_t A, long rows, long columns);
-    cdef fmpz_t fmpz_mat_entry(fmpz_mat_t A, long row, long column);
+    ctypedef fmpq fmpq_t[1]
+
+    ctypedef struct fmpq_mat_struct:
+        fmpq * entries;
+        slong r;
+        slong c;
+        fmpq ** rows;
+
+    ctypedef fmpq_mat_struct fmpq_mat_t[1]
+
+    cdef void fmpz_mat_init(fmpz_mat_t A, int rows, int columns);
+    cdef fmpz_t fmpz_mat_entry(fmpz_mat_t A, int row, int column);
     cdef void fmpz_set_ui(fmpz_t A, slong x);
     cdef slong fmpz_get_ui(fmpz_t A);
     cdef void fmpz_mat_clear(fmpz_mat_t A);
 
+    cdef void fmpq_mat_init(fmpq_mat_t A, int rows, int columns);
+    cdef fmpq_t fmpq_mat_entry(fmpq_mat_t A, int row, int column);
+    cdef void fmpq_init(fmpq_t x)
+    cdef void fmpq_set(fmpq_t dest , const fmpq_t src)
+    cdef void fmpq_clear(fmpq_t x)
+    cdef void fmpq_mat_clear(fmpq_mat_t A);
 
-cdef int get_fmpz_mat_entry(fmpz_mat_t A, long row, long column):
+    cdef slong fmpq_mat_rref(fmpq_mat_t B, const fmpq_mat_t A)
+
+
+cdef int get_fmpz_mat_entry(fmpz_mat_t A, int row, int column):
     cdef fmpz_t entry_t = fmpz_mat_entry( A, row, column);
     cdef int entry = fmpz_get_ui(entry_t );
     return entry
 
 
-cpdef integer_nullspace(matrix):
+cpdef left_integer_nullspace(matrix):
+
+    n_0 = matrix.shape[0]
+    m_0 = matrix.shape[1]
+
+    matrix = np.concatenate((matrix,np.eye(n_0)) ,axis=1)
 
     n = matrix.shape[0]
     m = matrix.shape[1]
 
-    cdef fmpz_mat_t matrix_t;
-    cdef fmpz_mat_t nullspace_t;
+    cdef fmpq_mat_t matrix_t;
+    cdef fmpq_mat_t rrechelon_t;
 
-    fmpz_mat_init(matrix_t, n, m)
-    fmpz_mat_init(nullspace_t, n, m)
+
+    fmpq_mat_init(matrix_t, n, m)
+    t = max([m,n])
+    fmpq_mat_init(rrechelon_t, n, m)
+
+    cdef fmpq_t q
+    fmpq_init(q)
 
     for i in range(n):
         for j in range(m):
-            entry = fmpz_mat_entry(matrix_t, i, j)
-            fmpz_set_ui(entry , matrix[i,j])
+            entry = fmpq_mat_entry(matrix_t, i, j)
+            q.num = int(matrix[i,j])
+            q.den = 1
+            fmpq_set(entry ,q )
 
+    cdef slong* perm
+    cdef fmpz_t den
+    cdef rank = fmpq_mat_rref(rrechelon_t, matrix_t)
 
-    cdef rank_def = fmpz_mat_nullspace(nullspace_t, matrix_t)
+    echelon = np.zeros( (n,m) )
 
-
-    nullspace = np.zeros( (n,rank_def) )
     for i in range(n):
-        for j in range(rank_def):
-            nullspace[i,j] = get_fmpz_mat_entry(nullspace_t,i,j)
+        for j in range(m):
+            q = fmpq_mat_entry(rrechelon_t,i,j)
+            echelon[i,j] = float(q.num)/float(q.den)
 
-    #Clear matrices
-    fmpz_mat_clear(nullspace_t)
-    fmpz_mat_clear(matrix_t)
 
-    return nullspace
+    fmpq_mat_clear(rrechelon_t)
+    fmpq_mat_clear(matrix_t)
+    fmpq_clear(q)
 
+    rref = echelon[:,:m_0]
+    transformation = echelon[:,m_0:]
+
+    zero_rows = [i for i,row in enumerate(rref) if not np.any(row)]
+
+    left_nullspace = transformation[zero_rows,:]
+
+    return left_nullspace
 
