@@ -36,6 +36,9 @@ from sympy import sympify, Symbol
 
 from skimpy.utils.namespace import *
 
+from .saturation_parameter_function import SaturationParameterFunction
+from .flux_parameter_function import  FluxParameterFunction
+
 class ParameterSampler(ABC):
     def __init__(self, parameters=None):
         """
@@ -90,13 +93,22 @@ class SimpleParameterSampler(ParameterSampler):
                                         for k,v in concentration_dict.items()}
 
         trials = 0
+
+        #Compile functions
+        self._compile_sampling_functions(
+            compiled_model,
+            symbolic_concentrations_dict,
+            flux_dict)
+
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
             try:
 
-                parameter_sample = self._sample_saturations_step(compiled_model,
-                                                                 symbolic_concentrations_dict,
-                                                                 flux_dict)
+                parameter_sample = self._sample_saturation_step_compiled(
+                    compiled_model,
+                    symbolic_concentrations_dict,
+                    flux_dict)
+
             except ValueError:
                 continue
 
@@ -126,88 +138,68 @@ class SimpleParameterSampler(ParameterSampler):
 
         return parameter_population
 
-    def _sample_saturations_step(self, compiled_model, concentration_dict,
-                                 flux_dict):
+    # Under construction new sampling with compiled function
+    def _compile_sampling_functions(self,model,
+                                    concentrations,
+                                    fluxes):
+        """
+        Compliles the function for sampling using theano
+        :param model:
+        """
+        model.saturation_parameter_function = SaturationParameterFunction(model.parameters,
+                                                                         concentrations)
+
+        model.flux_parameter_function = FluxParameterFunction(model,
+                                                             model.parameters,
+                                                             concentrations,
+                                                             fluxes)
+
+
+
+    def _sample_saturation_step_compiled(self,
+                                         compiled_model,
+                                         concentration_dict,
+                                         flux_dict):
+
+        """
+        Sample one set of staturations using theano complied functions
+        :param compiled_model:
+        :param concentration_dict:
+        :param flux_dict:
+        :return:
+        """
+
         parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
+
         # Update the concentrations which are parameters (Boundaries)
         for k,v in concentration_dict.items():
             parameter_sample[k] = v
 
-        # Sample parameters for every reaction
+
+        #Set all vmax/flux parameters to 1.
+        # TODO Generalize into Flux and Saturation parameters
         for this_reaction in compiled_model.reactions.values():
-
-
             vmax_param = this_reaction.parameters.vmax_forward
+            parameter_sample[vmax_param.symbol] = 1
 
-            try:
-                keq_param = this_reaction.parameters.k_equilibrium
-                this_parameters = {
-                    keq_param.symbol: keq_param.value,
-                    vmax_param.symbol: 1.0}
+        if not hasattr(compiled_model,'saturation_parameter_function')\
+           or not hasattr(compiled_model,'flux_parameter_function'):
+            raise RuntimeError("Function for sampling not complied")
 
-            except AttributeError:
-                this_parameters = { vmax_param.symbol: 1.0}
+        # Calcualte the Km's
+        compiled_model.saturation_parameter_function(
+            parameter_sample,
+            concentration_dict
+        )
 
-            # Get parameters from mechanism
-            this_reaction_parameters = this_reaction.parameters
+        # Calculate the Vmax's
+        compiled_model.flux_parameter_function(
+            compiled_model,
+            parameter_sample,
+            concentration_dict,
+            flux_dict
+        )
 
-            # Add concentrations
-            for k, v in this_reaction_parameters.items():
-                try:
-                    this_reaction_parameters[k].value = concentration_dict[v.symbol]
-                except KeyError:
-                    pass
-
-            # Loop over the named tuple
-            for this_p_name, this_parameter in this_reaction_parameters.items():
-                # Sample a saturation
-                # The parameters that have to be sampled are attached to
-                # reactants. hence, their .hook attribute shall not be None
-
-                if (this_parameter.hook is not None) \
-                   and (this_parameter.value is None):
-                    this_saturation = sample()
-                    # TODO THIS IS A HOT FIX AND REALLY STUPID REMOVE ASAP
-                    # TODO - OK, removed
-                    this_reactant = this_parameter.hook.symbol
-                    this_concentration = concentration_dict[this_reactant]
-                    this_param_symbol = this_parameter.symbol
-                    this_parameters[this_param_symbol] = \
-                        ((1.0 - this_saturation) * this_concentration) / this_saturation
-
-            # Calculate the effective saturation
-            this_net_reaction_rate = this_reaction.mechanism.reaction_rates[
-                'v_net']
-            this_parameter_subs = concentration_dict.copy()
-            this_parameter_subs.update(this_parameters.copy())
-
-            normed_net_reaction_rate = this_net_reaction_rate.evalf(
-                subs=this_parameter_subs )
-
-            # If is 0 try more exact evaluation
-            if normed_net_reaction_rate == 0:
-                normed_net_reaction_rate = float(
-                    this_net_reaction_rate.subs(this_parameter_subs))
-
-
-            if (flux_dict[this_reaction.name] > 0 and
-               normed_net_reaction_rate <= 0) \
-               or \
-               (flux_dict[this_reaction.name] < 0 and
-                normed_net_reaction_rate >= 0):
-                    # msg = 'Overall saturation for reaction {}' \
-                    #       ' is not 0 < {} < 1 '.format(this_reaction.name,
-                    #                                    normed_net_reaction_rate)
-                    msg = 'Reaction {} operates in opposite direction '.format(this_reaction.name)
-
-                    compiled_model.logger.error(msg)
-                    raise ValueError(msg)
-
-
-            # Calculate the effective VMax
-            this_vmax = flux_dict[this_reaction.name] / normed_net_reaction_rate
-            this_parameters[vmax_param.symbol] = this_vmax
-
-            # Update the dict with explicit model parameters
-            parameter_sample.update(this_parameters)
         return parameter_sample
+
+
