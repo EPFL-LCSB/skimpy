@@ -24,9 +24,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+import numpy as np
 
 from sympy import symbols,Symbol
-from sympy.printing.theanocode import theano_function
+from skimpy.utils.compile_sympy import make_cython_function
 
 class FluxParameterFunction():
     def __init__(self,
@@ -45,8 +46,7 @@ class FluxParameterFunction():
                              for rxn in model.reactions.values()]
 
         sym_vars = self.sym_parameters+self.sym_concentrations+self.sym_fluxes
-        self.function = theano_function(sym_vars, self.expressions,
-                                        on_unused_input='ignore')
+        self.function = make_cython_function(sym_vars, self.expressions)
 
     def __call__(self,
                  model,
@@ -58,7 +58,9 @@ class FluxParameterFunction():
         _fluxes = [flux_dict[str(c)] for c in self.sym_fluxes]
 
         input = _parameters + _concentrations + _fluxes
-        flux_parameter_values = self.function(*input)
+        flux_parameter_values = np.zeros(len(model.reactions))
+
+        self.function(input,flux_parameter_values)
 
         for rxn,v in zip(model.reactions.values(),flux_parameter_values):
             parameters[rxn.parameters.vmax_forward.symbol] = v

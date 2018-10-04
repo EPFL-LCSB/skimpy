@@ -24,15 +24,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from numpy import array, double, reciprocal
+from numpy import array, double, reciprocal,zeros
 from numpy import append as append_array
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import symbols,Symbol
-from sympy.printing.theanocode import theano_function
 
 from skimpy.utils.tabdict import TabDict
-
+from skimpy.utils.compile_sympy import make_cython_function
 
 class ElasticityFunction:
     def __init__(self, expressions, variables,  parameters, shape):
@@ -58,27 +57,22 @@ class ElasticityFunction:
         parameters = [x for x in self.parameters]
         variables = [x for x in variables]
 
-        self.dummy = TabDict([])
         sym_vars = list(symbols(variables+parameters))
 
         # Awsome sympy magic
         # TODO problem with typs if any parameter ot variables is interpreted as interger
         # Make a function to compute every non zero entry in the matrix
 
-        dummy = Symbol('dummy_one')
-        sym_vars += [dummy]
-        self.dummy[dummy] = 1
-
-        coordinates, expressions= zip(*[ (coord, expr*dummy) if expr == 1 else (coord, expr)
-                                         for coord, expr in expressions.items()])
+        coordinates, expressions= zip(*[ (coord, expr) for coord, expr in expressions.items()])
 
         rows, columns = zip(*coordinates)
         self.rows = rows
         self.columns = columns
 
-        self.function = theano_function(sym_vars, expressions,
-                                        on_unused_input='ignore')
+        # self.function = theano_function(sym_vars, expressions,
+        #                                 on_unused_input='ignore')
 
+        self.function = make_cython_function(sym_vars, expressions)
 
     def __call__(self, variables, parameters):
         """
@@ -86,12 +80,11 @@ class ElasticityFunction:
         """
         parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
 
-        dummy_values = array([x for x in self.dummy.values()])
-
         input_vars = append_array(variables , parameter_values)
-        input_vars = append_array(input_vars, dummy_values)
 
-        values = self.function(*input_vars)
+        values = array(zeros(len(self.expressions)),dtype=double)
+
+        self.function(input_vars, values)
 
         elasticiy_matrix = coo_matrix((values,
                                       (self.rows, self.columns)),

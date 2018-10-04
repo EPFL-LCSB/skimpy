@@ -114,7 +114,6 @@ class SimpleParameterSampler(ParameterSampler):
 
 
             # Check stability: real part of all eigenvalues of the jacobian is <= 0
-
             this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
                                                         parameter_sample)
 
@@ -137,6 +136,7 @@ class SimpleParameterSampler(ParameterSampler):
             trials += 1
 
         return parameter_population
+
 
     # Under construction new sampling with compiled function
     def _compile_sampling_functions(self,model,

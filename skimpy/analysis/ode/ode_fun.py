@@ -27,7 +27,8 @@ limitations under the License.
 
 from numpy import array, double
 from sympy import symbols
-from sympy.printing.theanocode import theano_function
+
+from skimpy.utils.compile_sympy import make_cython_function
 
 class ODEFunction:
     def __init__(self, variables, expr, parameters):
@@ -53,8 +54,8 @@ class ODEFunction:
         # Sort the expressions
         expressions = [self.expr[x] for x in self.variables.values()]
 
-        # Awsome sympy magic
-        self.function = theano_function(sym_vars, expressions)
+        # Awsome magic
+        self.function = make_cython_function(sym_vars, expressions, simplify=False)
 
     @property
     def parameter_values(self):
@@ -77,10 +78,4 @@ class ODEFunction:
 
     def __call__(self, t, y, ydot):
         input_vars = list(y)+self.parameter_values
-
-        results = self.function(*input_vars)
-
-        # Needed by SUNDIALS solver
-        for ix,e in enumerate(results):
-            ydot[ix] = e
-
+        self.function(input_vars,ydot)

@@ -29,7 +29,7 @@ import numpy as np
 from numpy.random import sample
 
 from sympy import symbols,Symbol
-from sympy.printing.theanocode import theano_function
+from skimpy.utils.compile_sympy import make_cython_function
 
 class SaturationParameterFunction():
     def __init__(self,parameters,concentrations):
@@ -54,15 +54,16 @@ class SaturationParameterFunction():
 
         sym_vars = sym_saturations + sym_concentrations
 
-        self.function = theano_function(sym_vars, expressions,
-                                        on_unused_input='ignore')
+        self.function = make_cython_function(sym_vars, expressions)
 
     def __call__(self,parameters,concentrations):
         _saturations = sample(len(self.sym_saturations))
         _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
 
         input = np.concatenate((_saturations,_concentrations))
-        saturation_parameter_values = self.function(*input)
+        saturation_parameter_values = np.zeros(len(self.saturation_parameters))
+
+        self.function(input,saturation_parameter_values)
 
         # Assing saturation parameters
         for p,v in zip(self.saturation_parameters, saturation_parameter_values):

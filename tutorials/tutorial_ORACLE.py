@@ -95,7 +95,7 @@ this_bounds = {  'DM_13dpg': (-10.0, -2.0),
 
 solution = this_pytfa_model.optimize()
 
-min_log_displacement = 1e-3
+min_log_displacement = 1e-1
 for ln_gamma in this_pytfa_model.thermo_displacement:
      if ln_gamma.variable.primal > 0:
          ln_gamma.variable.lb = min_log_displacement
