@@ -33,20 +33,18 @@ class FluxParameterFunction():
     def __init__(self,
                  model,
                  parameters,
-                 concentration_dict,
-                 flux_dict):
+                 concentration_dict):
 
         self.sym_concentrations = [c for c in concentration_dict]
-        self.sym_fluxes = [Symbol(c) for c in flux_dict]
 
         self.sym_parameters = [p.symbol for p in parameters.values()
                                if p.symbol not in self.sym_concentrations ]
 
-        self.expressions = [ Symbol(rxn.name) / rxn.mechanism.reaction_rates['v_net']
+        self.expressions = [ rxn.mechanism.reaction_rates['v_net']
                              for rxn in model.reactions.values()]
 
-        sym_vars = self.sym_parameters+self.sym_concentrations+self.sym_fluxes
-        self.function = make_cython_function(sym_vars, self.expressions)
+        sym_vars = self.sym_parameters+self.sym_concentrations
+        self.function = make_cython_function(sym_vars, self.expressions, simplify=True)
 
     def __call__(self,
                  model,
@@ -55,12 +53,14 @@ class FluxParameterFunction():
                  flux_dict):
         _parameters = [parameters[p] for p in self.sym_parameters]
         _concentrations = [concentration_dict[c] for c in self.sym_concentrations]
-        _fluxes = [flux_dict[str(c)] for c in self.sym_fluxes]
 
-        input = _parameters + _concentrations + _fluxes
+        input = _parameters + _concentrations
         flux_parameter_values = np.zeros(len(model.reactions))
 
         self.function(input,flux_parameter_values)
+
+        _fluxes = np.array([flux_dict[rxn.name] for rxn in model.reactions.values() ])
+        flux_parameter_values = _fluxes / flux_parameter_values
 
         for rxn,v in zip(model.reactions.values(),flux_parameter_values):
             parameters[rxn.parameters.vmax_forward.symbol] = v

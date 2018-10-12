@@ -54,7 +54,7 @@ class SaturationParameterFunction():
 
         sym_vars = sym_saturations + sym_concentrations
 
-        self.function = make_cython_function(sym_vars, expressions)
+        self.function = make_cython_function(sym_vars, expressions, simplify=False)
 
     def __call__(self,parameters,concentrations):
         _saturations = sample(len(self.sym_saturations))

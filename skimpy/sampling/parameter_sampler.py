@@ -150,9 +150,8 @@ class SimpleParameterSampler(ParameterSampler):
                                                                          concentrations)
 
         model.flux_parameter_function = FluxParameterFunction(model,
-                                                             model.parameters,
-                                                             concentrations,
-                                                             fluxes)
+                                                              model.parameters,
+                                                              concentrations,)
 
 
 

@@ -31,7 +31,7 @@ import re
 from sympy.printing import ccode
 
 CYTHON_DECLARATION = "#cython boundscheck=False, wraparound=False," \
-                     "nonecheck=False, initializecheck=False \n"
+                     "nonecheck=False, initializecheck=False , optimize=False\n"
 
 
 def make_cython_function(symbols, expressions, quiet=True , simplify=True):
@@ -58,7 +58,7 @@ def generate_vectorized_code(inputs, expressions, simplify=True):
 
     cython_code = '\n'.join(cython_code)
 
-    for str_sym,array_sym in input_subs.items():
+    for str_sym, array_sym in input_subs.items():
         cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)({})(\ |\+|\-|\*|\(|\)|\/|\,)".format(str_sym),
                              r"\1 {} \3 ".format(array_sym),
                              cython_code)

@@ -114,7 +114,7 @@ def guess_mechanism(reactants):
     else:
         stoich = [i for i in reactants.values()]
         stoich.sort(reverse=True)
-        if max(stoich) > 10:
+        if max(stoich) > 3 or len(stoich) > 5:
             return make_irrev_m_n_michaelis_menten(stoich)
         else:
             return make_convenience(stoich)
