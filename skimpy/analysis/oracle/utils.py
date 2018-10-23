@@ -46,10 +46,11 @@ MAX_STOICH = 10
 
 
 def add_undefined_delta_g(tmodel,
-                          delta_g_std = 100,
+                          solution,
+                          delta_g_std = -10,
                           delta_g_std_err = 2,
                           add_displacement=True):
-    sol = tmodel.solution
+    sol = solution
 
     for this_rxn in tmodel.reactions:
 
@@ -57,9 +58,9 @@ def add_undefined_delta_g(tmodel,
         if not this_rxn.thermo['computed'] and \
            not this_rxn.boundary:
             if this_rxn_rev_flux > 0:
-                this_dgo = delta_g_std
+                this_dgo = -delta_g_std
             else:
-                this_dgo = -1 * delta_g_std
+                this_dgo = delta_g_std
 
             add_dummy_delta_g(tmodel,
                               this_rxn,
@@ -70,7 +71,7 @@ def add_undefined_delta_g(tmodel,
     tmodel.repair()
 
 def add_dummy_delta_g(tmodel,rxn,
-                      delta_g_std=100,
+                      delta_g_std=-100,
                       delta_g_std_err=2,
                       add_displacement=True):
     RT = tmodel.RT
