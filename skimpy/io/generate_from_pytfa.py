@@ -83,6 +83,13 @@ class FromPyTFA(FromCobra):
                     k_eq = deltag0_to_keq(deltag0,
                                           temp,
                                           gas_constant=gas_constant)
+                    #ToDo make it an option
+                    max_tol = 1e-7
+                    if k_eq > 1./max_tol:
+                        k_eq = 1./max_tol
+                    if k_eq < max_tol:
+                        k_eq = max_tol
+
 
                     this_mechanism = this_skimpy_reaction.mechanism
                     parameters[this_skimpy_reaction.name] = this_mechanism.Parameters(k_equilibrium=k_eq)
