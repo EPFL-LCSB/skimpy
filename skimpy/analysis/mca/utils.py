@@ -263,7 +263,8 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
             .difference(all_dependent_ix)]
 
         # Reindex S in N, N0
-        S = Matrix(S[all_independent_ix+all_dependent_ix,:])
+        #S = Matrix(S[all_independent_ix+all_dependent_ix,:])
+
         # If we reindex S, then so should be L0
         L0 = L0[:,all_independent_ix+all_dependent_ix]
 
@@ -284,16 +285,20 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         #
         #          [ I_n*N + 0_r * N0 ]   [ N ]
         # L * S  = [      L0 * S      ] = [ 0 ]
+        #
+        # r,n_plus_r = L0.shape
+        # n = n_plus_r - r
+        #
+        # # Upper block
+        # U = Matrix([eye(n), zeros(r,n)]).transpose()
+        # L = Matrix([U,L0])
+        #
+        # N_ = L*S
+        # N  = N_[:n,:] # the rows after n are 0s
+        #
 
-        r,n_plus_r = L0.shape
-        n = n_plus_r - r
-
-        # Upper block
-        U = Matrix([eye(n), zeros(r,n)]).transpose()
-        L = Matrix([U,L0])
-
-        N_ = L*S
-        N  = N_[:n,:] # the rows after n are 0s
+        # This is equivalent to
+        N = Matrix(S[all_independent_ix, :])
 
         reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
         conservation_relation = L0_sparse
