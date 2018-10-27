@@ -31,34 +31,35 @@ import os
 
 from sympy.printing import ccode
 
-CYTHON_DECLARATION = "#cython boundscheck=True, wraparound=False,"+\
-                     "nonecheck=True, initializecheck=False , optimize=False\n"
+CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
+                     "nonecheck=True, initializecheck=False , optimize=False\n"+\
+                     "# distutils: language = c++ \n"
 
 SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
 
 def _set_cflags():
     """ Suppress cython warnings by setting -w flag """
-    del_cflags = False
+
+    flags = '-w -O0'
+
     if 'CFLAGS' not in os.environ:
-        del_cflags = True
-        os.environ['CFLAGS'] = '-w -O2'
-    try:
-        yield
-    finally:
-        if del_cflags:
-            del os.environ['CFLAGS']
+        os.environ['CFLAGS'] = flags
+    elif not flags in os.environ['CFLAGS']:
+        os.environ['CFLAGS'] = os.environ['CFLAGS'] + " " + flags
+
+
 
 def make_cython_function(symbols, expressions, quiet=True , simplify=True):
 
     code_expressions = generate_vectorized_code(symbols, expressions, simplify=simplify)
+
+    _set_cflags()
 
     def this_function(input_array,output_array):
         Cython.inline(CYTHON_DECLARATION\
                       +SQRT_FUNCTION\
                       +code_expressions,
                       quiet=quiet)
-
-    _set_cflags()
 
     return this_function
 
