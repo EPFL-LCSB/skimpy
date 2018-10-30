@@ -47,20 +47,22 @@ from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
 
+from skimpy.analysis.oracle import *
+
 """ 
-Import an curate the model
+Import and curate a model
 """
 
-#this_cobra_model = import_matlab_model('../models/toy_model.mat', 'ToyModel_DP')
-this_cobra_model = import_matlab_model('../models/toy_model_maria.mat', 'model')
-#this_cobra_model = import_matlab_model('../models/redGEM_glycolysis_Maria.mat', 'model')
+#this_cobra_model = import_matlab_model('../../models/toy_model.mat', 'ToyModel_DP')
+this_cobra_model = import_matlab_model('../../models/toy_model_maria.mat', 'model')
+
 
 """ 
 Make tfa analysis of the model
 """
 
 # Convert to a thermodynamics model
-thermo_data = load_thermoDB('../data/thermo_data.thermodb')
+thermo_data = load_thermoDB('../../data/thermo_data.thermodb')
 this_pytfa_model = pytfa.ThermoModel(thermo_data, this_cobra_model)
 
 GLPK = 'optlang-glpk'
@@ -70,7 +72,10 @@ this_pytfa_model.solver = GLPK
 this_pytfa_model.prepare()
 this_pytfa_model.convert(add_displacement=True)
 
-# We choose an fdp
+
+# We choose a flux directionality profile (FDP)
+# with minium fluxes of 1e-3
+
 this_bounds = {  'DM_13dpg': (-10.0, -2.0),
                  'DM_2h3oppan': (1e-3, 100.0),
                  'DM_adp':      (-100.0, -1e-3),
@@ -92,16 +97,14 @@ this_bounds = {  'DM_13dpg': (-10.0, -2.0),
                  'Trp_h2o':     (-100.0, 100.0),
                  'Trp_nad':     (-100.0, 100.0),
                  'Trp_nadh':    (-100.0, 100.0)}
-
+# Find a solution for this FDP
 solution = this_pytfa_model.optimize()
 
+# Force a minimal thermodynamic displacement
 min_log_displacement = 1e-1
-for ln_gamma in this_pytfa_model.thermo_displacement:
-     if ln_gamma.variable.primal > 0:
-         ln_gamma.variable.lb = min_log_displacement
-     if ln_gamma.variable.primal < 0:
-         ln_gamma.variable.ub = -min_log_displacement
+add_min_log_displacement(this_pytfa_model,min_log_displacement)
 
+# Find a solution for the model
 solution = this_pytfa_model.optimize()
 
 
@@ -109,23 +112,18 @@ solution = this_pytfa_model.optimize()
 Get a Kinetic Model 
 """
 # Generate the KineticModel
-# TODO This is really bad we need a better way
+
+# Define the molecules that should be considered small-molecules
+# These molecules will not be accounted explicitly in the kinetic mechanism as
+# substrates and products
 small_molecules = ['h_c','h_e']
 
-model_gen = FromPyTFA(water='h2o')
-this_skimpy_model = model_gen.  import_model(this_pytfa_model,solution)
-
+model_gen = FromPyTFA(water='h2o', small_molecules=small_molecules)
+this_skimpy_model = model_gen.import_model(this_pytfa_model,solution)
 
 """
-Sample the kinetic parameters using MCA
+Sanitize the solution to match with the skimpy model
 """
-
-# Compile MCA functions
-this_skimpy_model.compile_mca(sim_type=QSSA)
-
-# Initialize parameter sampler
-sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
-sampler = SimpleParameterSampler(sampling_parameters)
 
 # Map fluxes back to reaction variables
 this_flux_solution = get_reaction_data(this_pytfa_model, solution)
@@ -140,8 +138,19 @@ temp_concentration_dict = np.exp(solution[variable_names]).to_dict()
 
 # Map concentration names
 mapping_dict = {k:sanitize_cobra_vars(v) for k,v in zip(variable_names,metabolite_ids)}
-
 concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items()}
+
+
+"""
+Sample the kinetic parameters using MCA
+"""
+
+# Compile MCA functions
+this_skimpy_model.compile_mca(sim_type=QSSA)
+
+# Initialize parameter sampler
+sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
+sampler = SimpleParameterSampler(sampling_parameters)
 
 parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentration_dict)
 
