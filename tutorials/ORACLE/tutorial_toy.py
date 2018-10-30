@@ -29,13 +29,6 @@ import numpy as np
 
 import pytfa
 from pytfa.io import import_matlab_model, load_thermoDB
-from pytfa.optim.variables import DeltaG,DeltaGstd,ThermoDisplacement
-from pytfa.analysis import  variability_analysis,           \
-                            apply_reaction_variability,     \
-                            apply_generic_variability,       \
-                            apply_directionality
-
-from pytfa.optim.variables import ReactionVariable, MetaboliteVariable
 from pytfa.io.viz import get_reaction_data
 
 from skimpy.core import *
