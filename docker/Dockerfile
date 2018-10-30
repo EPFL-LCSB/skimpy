@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		fort77          \
 		wget            \
 		cmake           \
-		libgmp3-dev     \
-		libmpfr-dev     \
-		libmpfr4        \
+        libflint-2.5.2  \
+        libflint-dev    \
+        libgmp-dev      \
 		yasm            \
     && rm -rf /var/lib/apt/lists/*
 
@@ -51,13 +51,6 @@ RUN pip install scikits.odes
 ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
-
-# Install MPIR
-COPY install_mpir.sh .
-RUN ./install_mpir.sh
-# Install FLINT
-COPY install_flint.sh .
-RUN ./install_flint.sh
 
 # Make the workspace folder that will link the sources
 RUN mkdir /skimpy
