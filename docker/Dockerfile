@@ -39,7 +39,7 @@ RUN mkdir /src
 COPY src/ /src/
 
 # Install sundials
-COPY install_sundials.sh .
+COPY ./utils/install_sundials.sh .
 RUN ./install_sundials.sh
 
 # Export environment vairables from installation
@@ -51,6 +51,19 @@ RUN pip install scikits.odes
 ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
+
+
+# If files are provided install cplex and gurobi
+COPY ./solvers /solvers
+COPY ./utils /utils
+RUN /utils/install_cplex.sh
+# Install gurobi
+COPY ./utils/gurobi.lic* ./
+RUN /utils/install_gurobi.sh
+# Remove installers
+RUN rm -rf /solvers
+# Activation of necessary licenses
+RUN /utils/activate_gurobi.sh
 
 # Make the workspace folder that will link the sources
 RUN mkdir /skimpy
