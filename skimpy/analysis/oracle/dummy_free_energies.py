@@ -45,11 +45,17 @@ EPSILON = numerics.EPSILON
 MAX_STOICH = 10
 
 
-def add_undefined_delta_g(tmodel,
+def add_undefined_delta_g(_tmodel,
                           solution,
                           delta_g_std = -10,
                           delta_g_std_err = 2,
-                          add_displacement=True):
+                          add_displacement=True,
+                          inplace=True):
+    if inplace:
+        tmodel = _tmodel
+    else:
+        tmodel = _tmodel.copy()
+
     sol = solution
 
     for this_rxn in tmodel.reactions:
@@ -70,7 +76,11 @@ def add_undefined_delta_g(tmodel,
 
     tmodel.repair()
 
-def add_dummy_delta_g(tmodel,rxn,
+    return tmodel
+
+
+def add_dummy_delta_g(tmodel,
+                      rxn,
                       delta_g_std=-100,
                       delta_g_std_err=2,
                       add_displacement=True):
