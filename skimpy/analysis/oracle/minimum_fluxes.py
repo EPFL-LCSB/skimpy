@@ -26,13 +26,26 @@ limitations under the License.
 
 """
 
+from pytfa.analysis import variability_analysis
 
-def add_min_flux_requirements(tmodel,flux, inplace=True):
+
+def add_min_flux_requirements(tmodel,flux, inplace=True, safe=True):
     if inplace:
         temp_model = tmodel
     else:
         temp_model = tmodel.copy()
         temp_model.repair()
+
+    if safe:
+        # Make variability analysis to check which reaction can carry the flux
+        tva_fluxes = variability_analysis(temp_model, kind='reactions')
+
+        blocked_rxns = tva_fluxes[(tva_fluxes['minimum'] > -flux) &
+                                  (tva_fluxes['maximum'] < flux)].index
+
+        # Remove the reactions that cant carry the minimum flux requirement
+        temp_model.remove_reactions([temp_model.reactions.get_by_id(rxn)
+                                 for rxn in blocked_rxns])
 
     for rxn in temp_model.reactions:
         rev_var = rxn.reverse_variable
@@ -45,4 +58,4 @@ def add_min_flux_requirements(tmodel,flux, inplace=True):
 
     temp_model.repair()
 
-    return temp_moel
+    return temp_model
