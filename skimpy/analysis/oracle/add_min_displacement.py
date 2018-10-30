@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 .. module:: skimpy
@@ -8,7 +9,7 @@
 
 [---------]
 
-Copyright 2017 Laboratory of Computational Systems Biotechnology (LCSB),
+Copyright 2018 Laboratory of Computational Systems Biotechnology (LCSB),
 Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,5 +26,17 @@ limitations under the License.
 
 """
 
-from .add_min_displacement import *
-from .dummy_free_energies import *
+def add_min_log_displacement(tmodel,min_log_displacement, inplace=True):
+    if inplace:
+        temp_model = tmodel
+    else:
+        temp_model = tmodel.copy()
+        temp_model.repair()
+
+    for ln_gamma in temp_model.thermo_displacement:
+         if ln_gamma.variable.primal > 0:
+             ln_gamma.variable.lb = min_log_displacement
+         if ln_gamma.variable.primal < 0:
+             ln_gamma.variable.ub = -min_log_displacement
+
+    return temp_model

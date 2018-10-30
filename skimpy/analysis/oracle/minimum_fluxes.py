@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 .. module:: skimpy
@@ -8,7 +9,7 @@
 
 [---------]
 
-Copyright 2017 Laboratory of Computational Systems Biotechnology (LCSB),
+Copyright 2018 Laboratory of Computational Systems Biotechnology (LCSB),
 Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,5 +26,23 @@ limitations under the License.
 
 """
 
-from .add_min_displacement import *
-from .dummy_free_energies import *
+
+def add_min_flux_requirements(tmodel,flux, inplace=True):
+    if inplace:
+        temp_model = tmodel
+    else:
+        temp_model = tmodel.copy()
+        temp_model.repair()
+
+    for rxn in temp_model.reactions:
+        rev_var = rxn.reverse_variable
+        fwd_var = rxn.forward_variable
+
+        if flux <= rev_var.ub and rev_var.lb < flux:
+            rev_var.lb = flux
+        if flux <= fwd_var.ub and fwd_var.lb < flux:
+            fwd_var.lb = flux
+
+    temp_model.repair()
+
+    return temp_moel
