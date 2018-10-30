@@ -28,3 +28,4 @@ limitations under the License.
 from .add_min_displacement import *
 from .dummy_free_energies import *
 from .minimum_fluxes import *
+from .fix_directionality import *
