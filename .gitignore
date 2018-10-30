@@ -1,3 +1,7 @@
+# Skimpy
+# Ignore generated c files
+skimpy/cython/nullspace.c
+
 # Pycharm folders
 .idea/*
 cobra_docker/work/.idea/*
