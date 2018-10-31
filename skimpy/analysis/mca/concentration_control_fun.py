@@ -25,7 +25,7 @@ limitations under the License.
 
 """
 
-from numpy import array
+from numpy import array, zeros
 
 from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
@@ -50,47 +50,56 @@ class ConcentrationControlFunction:
         self.dependent_variable_ix = dependent_variable_ix
         self.conservation_relation = conservation_relation
 
-    def __call__(self, fluxes, concentrations, parameters):
+    def __call__(self, fluxes, concentrations, parameter_population):
 
         # Calculate the Concentration Control coefficients
         # Log response of the concentration with respect to the log change in a Parameter
         #
         # C_Xi_P = -(N_r*V*E_i + N_r*V*E_d*Q_i)(N_r*V*Pi)
         #
+        num_parameters = len(self.parameter_elasticity_function.expressions)
+        num_concentration = len(concentrations)
+        population_size = len(parameter_population)
 
-        flux_matrix = diags(array(fluxes), 0).tocsc()
+        concentration_control_coefficients = zeros((num_concentration,num_parameters,population_size))
 
-        # Elasticity matrix
+        for i,parameters in enumerate(parameter_population):
 
-        if self.conservation_relation.nnz == 0:
-            # If there are no moieties
-            elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
+            flux_matrix = diags(array(fluxes), 0).tocsc()
 
-        else:
-            # If there are moieties
-            ix = self.independent_variable_ix
+            # Elasticity matrix
 
-            elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
+            if self.conservation_relation.nnz == 0:
+                # If there are no moieties
+                elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
 
-            dependent_weights = self.dependent_elasticity_function.\
-                get_dependent_weights(
-                                concentration_vector=concentrations,
-                                L0=self.conservation_relation,
-                                all_dependent_ix=self.dependent_variable_ix,
-                                all_independent_ix=self.independent_variable_ix,
-                            )
+            else:
+                # If there are moieties
+                ix = self.independent_variable_ix
 
-            # Calculate the effective elasticises
-            elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
-                                 .dot(dependent_weights)
+                elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
 
-        N_E_V = self.reduced_stoichometry.dot(flux_matrix).dot(elasticity_matrix)
-        N_E_V_inv = sparse_inv(N_E_V)
+                dependent_weights = self.dependent_elasticity_function.\
+                    get_dependent_weights(
+                                    concentration_vector=concentrations,
+                                    L0=self.conservation_relation,
+                                    all_dependent_ix=self.dependent_variable_ix,
+                                    all_independent_ix=self.independent_variable_ix,
+                                )
 
-        parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
+                # Calculate the effective elasticises
+                elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
+                                     .dot(dependent_weights)
 
-        N_E_P = self.reduced_stoichometry.dot(flux_matrix).dot(parameter_elasticity_matrix)
+            N_E_V = self.reduced_stoichometry.dot(flux_matrix).dot(elasticity_matrix)
+            N_E_V_inv = sparse_inv(N_E_V)
 
-        concentration_control_coefficients = - N_E_V_inv.dot(N_E_P)
+            parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
+
+            N_E_P = self.reduced_stoichometry.dot(flux_matrix).dot(parameter_elasticity_matrix)
+
+            this_cc = - N_E_V_inv.dot(N_E_P)
+            concentration_control_coefficients[:,:,i] = this_cc.todense()
+
 
         return concentration_control_coefficients

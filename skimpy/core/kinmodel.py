@@ -228,8 +228,8 @@ class KineticModel(object):
                     reduced_stoichometriy,
                     independent_elasticity_fun,
                     dependent_elasticity_fun,
-                    conservation_relation,
                     parameter_elasticities_fun,
+                    conservation_relation,
                     independent_variables_ix,
                     dependent_variables_ix)
 
@@ -237,8 +237,8 @@ class KineticModel(object):
                     reduced_stoichometriy,
                     independent_elasticity_fun,
                     dependent_elasticity_fun,
-                    conservation_relation,
                     parameter_elasticities_fun,
+                    conservation_relation,
                     independent_variables_ix,
                     dependent_variables_ix,
                     self.concentration_control_fun)
