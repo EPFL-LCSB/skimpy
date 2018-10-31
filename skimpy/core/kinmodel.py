@@ -28,7 +28,7 @@ limitations under the License.
 from scikits.odes import ode
 from skimpy.analysis.ode.utils import make_ode_fun
 from skimpy.analysis.mca.utils import make_mca_functions
-from skimpy.analysis.mca.jacobian_fun import JacobianFunction
+from skimpy.analysis.mca import *
 from ..utils.logger import get_bistream_logger
 from .solution import ODESolution
 
@@ -215,10 +215,34 @@ class KineticModel(object):
                 self.variables = all_variables
                 self.reduced_stoichiometry = reduced_stoichometriy
 
-                self.jacobian_fun = JacobianFunction(reduced_stoichometriy,
-                                                     independent_elasticity_fun,
-                                                     dependent_elasticity_fun,
-                                                     conservation_relation,
-                                                     independent_variables_ix,
-                                                     dependent_variables_ix)
+                # Build functions for stability and control coefficient's
+                self.jacobian_fun = JacobianFunction(
+                    reduced_stoichometriy,
+                    independent_elasticity_fun,
+                    dependent_elasticity_fun,
+                    conservation_relation,
+                    independent_variables_ix,
+                    dependent_variables_ix)
+
+                self.concentration_control_fun = ConcentrationControlFunction(
+                    reduced_stoichometriy,
+                    independent_elasticity_fun,
+                    dependent_elasticity_fun,
+                    conservation_relation,
+                    parameter_elasticities_fun,
+                    independent_variables_ix,
+                    dependent_variables_ix)
+
+                self.flux_control_fun = FluxControlFunction(
+                    reduced_stoichometriy,
+                    independent_elasticity_fun,
+                    dependent_elasticity_fun,
+                    conservation_relation,
+                    parameter_elasticities_fun,
+                    independent_variables_ix,
+                    dependent_variables_ix,
+                    self.concentration_control_fun)
+
+
+
 
