@@ -147,6 +147,18 @@ sampler = SimpleParameterSampler(sampling_parameters)
 
 parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentration_dict)
 
+"""
+Calculate control coefficients 
+"""
+parameter_list = TabDict([(k,p.symbol) for k,p in this_skimpy_model.parameters.items()
+                              if p.name.startswith('km')])
+
+this_skimpy_model.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
+
+flux_control_coeff = this_skimpy_model.flux_control_fun([flux_dict[r] for r in this_skimpy_model.reactions],
+                                                        [concentration_dict[r] for r in this_skimpy_model.reactants],
+                                                        parameter_population)
+
 
 """
 Integrate the ODEs
