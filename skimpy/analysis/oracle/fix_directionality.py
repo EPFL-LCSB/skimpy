@@ -55,5 +55,5 @@ def fix_directionality(tmodel,solution, inplace = True):
             fwd_var.lb = 0.0
             fwd_var.ub = 0.0
 
-    _tmodel.repairs()
+    _tmodel.repair()
     return _tmodel

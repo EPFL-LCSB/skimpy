@@ -26,17 +26,18 @@ limitations under the License.
 
 """
 
+
 def add_min_log_displacement(tmodel,min_log_displacement, inplace=True):
     if inplace:
         temp_model = tmodel
     else:
         temp_model = tmodel.copy()
-        temp_model.repair()
 
     for ln_gamma in temp_model.thermo_displacement:
-         if ln_gamma.variable.primal > 0:
-             ln_gamma.variable.lb = min_log_displacement
-         if ln_gamma.variable.primal < 0:
-             ln_gamma.variable.ub = -min_log_displacement
+        if tmodel.solution[ln_gamma.variable.name] >= 0:
+            ln_gamma.variable.lb = min_log_displacement
+        elif tmodel.solution[ln_gamma.variable.name] < 0:
+            ln_gamma.variable.ub = -min_log_displacement
 
+    temp_model.repair()
     return temp_model
