@@ -225,6 +225,7 @@ class KineticModel(object):
                     dependent_variables_ix)
 
                 self.concentration_control_fun = ConcentrationControlFunction(
+                    self,
                     reduced_stoichometriy,
                     independent_elasticity_fun,
                     dependent_elasticity_fun,
@@ -234,6 +235,7 @@ class KineticModel(object):
                     dependent_variables_ix)
 
                 self.flux_control_fun = FluxControlFunction(
+                    self,
                     reduced_stoichometriy,
                     independent_elasticity_fun,
                     dependent_elasticity_fun,

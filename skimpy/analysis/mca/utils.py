@@ -190,7 +190,11 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
     shape = (len(expressions), len(respective_variables))
 
     # Create the elasticity function
-    elasticity_fun = ElasticityFunction(elasticity_expressions, variables, parameters, shape)
+    elasticity_fun = ElasticityFunction(elasticity_expressions,
+                                        respective_variables,
+                                        variables,
+                                        parameters,
+                                        shape, )
 
     return elasticity_fun
 

@@ -25,14 +25,18 @@ limitations under the License.
 
 """
 
+import pandas as pd
 from numpy import array, zeros
 
 from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
 
+from skimpy.utils.tensor import Tensor
+
 
 class FluxControlFunction:
     def __init__(self,
+                 model,
                  reduced_stoichometry,
                  independent_elasticity_function,
                  dependent_elasticity_function,
@@ -42,7 +46,7 @@ class FluxControlFunction:
                  dependent_variable_ix,
                  concentration_control_fun,
                  ):
-
+        self.model = model
         self.reduced_stoichometry = reduced_stoichometry
         self.dependent_elasticity_function = dependent_elasticity_function
         self.independent_elasticity_function = independent_elasticity_function
@@ -53,7 +57,7 @@ class FluxControlFunction:
 
         self.concentration_control_fun = concentration_control_fun
 
-    def __call__(self, fluxes, concentrations, parameter_population):
+    def __call__(self, flux_dict, concentration_dict, parameter_population):
 
         # Calculate the Flux Control coefficients
         # Log response of the concentration with respect to the log change in a Parameter
@@ -61,7 +65,10 @@ class FluxControlFunction:
         # C_V_P = (E_i + E_d*Q_i)*C_Xi_P + Pi
         #
 
-        num_parameters = len(self.parameter_elasticity_function.expressions)
+        fluxes = [flux_dict[r] for r in self.model.reactions]
+        concentrations = [concentration_dict[r] for r in self.model.reactants]
+
+        num_parameters = len(self.parameter_elasticity_function.respective_variables)
         num_fluxes = len(fluxes)
         population_size = len(parameter_population)
 
@@ -90,11 +97,17 @@ class FluxControlFunction:
                 elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
                                      .dot(dependent_weights)
 
-            C_Xi_P = self.concentration_control_fun(fluxes, concentrations, [parameters])
+            C_Xi_P = self.concentration_control_fun(flux_dict, concentration_dict, [parameters])._data
 
             parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
 
             this_cc = elasticity_matrix.dot(C_Xi_P[:,:,0]) + parameter_elasticity_matrix
             flux_control_coefficients[:,:,i] = this_cc
 
-        return flux_control_coefficients
+        flux_index = pd.Index(self.model.reactions.keys(), name="flux")
+        parameter_index = pd.Index(self.parameter_elasticity_function.respective_variables, name="parameter")
+        sample_index = pd.Index(range(population_size), name="sample")
+
+        tensor_fcc = Tensor(flux_control_coefficients, [flux_index,parameter_index,sample_index])
+
+        return tensor_fcc

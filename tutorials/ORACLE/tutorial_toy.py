@@ -151,12 +151,12 @@ parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentratio
 Calculate control coefficients 
 """
 parameter_list = TabDict([(k,p.symbol) for k,p in this_skimpy_model.parameters.items()
-                              if p.name.startswith('km')])
+                              if p.name.startswith('vmax_forward')])
 
 this_skimpy_model.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
-flux_control_coeff = this_skimpy_model.flux_control_fun([flux_dict[r] for r in this_skimpy_model.reactions],
-                                                        [concentration_dict[r] for r in this_skimpy_model.reactants],
+flux_control_coeff = this_skimpy_model.flux_control_fun(flux_dict,
+                                                        concentration_dict,
                                                         parameter_population)
 
 

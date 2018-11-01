@@ -34,7 +34,7 @@ from skimpy.utils.tabdict import TabDict
 from skimpy.utils.compile_sympy import make_cython_function
 
 class ElasticityFunction:
-    def __init__(self, expressions, variables,  parameters, shape):
+    def __init__(self, expressions, respective_variables, variables,  parameters, shape):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
@@ -47,7 +47,7 @@ class ElasticityFunction:
         :param shape: Tuple defining the over all matrix size e.g (10,30)
 
         """
-
+        self.respective_variables = respective_variables
         self.variables = variables
         self.expressions = expressions
         self.parameters = parameters
