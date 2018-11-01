@@ -59,10 +59,15 @@ class Tensor(object):
         self.index_order = {k:v for k,v in zip(index_names, range(3))}
 
         # Use deque for circular permutation
-        for k in index_names:
+        for e,k in enumerate(index_names):
             index1 = self.indexes[rotating_index_names[-2]]
             index2 = self.indexes[rotating_index_names[-1]]
-            self.complementary_indexes[k] = (index1, index2)
+            if e != 1:
+                # rotation + numpy conventions shenanigans
+                self.complementary_indexes[k] = (index1, index2)
+            else:
+                self.complementary_indexes[k] = (index2, index1)
+
             rotating_index_names.rotate(-1)
 
 
@@ -76,15 +81,38 @@ class Tensor(object):
 
         index1, index2 = self.complementary_indexes[slicer.name]
 
-        slicer_order = list(self.indexes.keys()).index(slicer.name)
+        slicer_order = self.get_slice_index(slicer.name)
         ix = slicer.get_loc(value)
 
         if slicer_order == 0:
-            return pd.DataFrame(self._data[ix,:,:], index = index1, columns = index2)
+            the_data = self._data[ix,:,:]
         elif slicer_order == 1:
-            return pd.DataFrame(self._data[:, ix,:].T, index = index1, columns = index2)
+            the_data = self._data[:, ix,:]
         elif slicer_order == 2:
-            return pd.DataFrame(self._data[:,:,ix], index = index1, columns = index2)
+            the_data = self._data[:,:,ix]
+
+        return self.make_df(the_data, index1, index2)
+
+    def get_slice_index(self, slicer):
+        slicer_order = list(self.indexes.keys()).index(slicer)
+        return slicer_order
+
+    def mean(self, slicer, *args, **kwargs):
+        axis = self.get_slice_index(slicer)
+        index1, index2 = self.complementary_indexes[slicer]
+        the_data = self._data.mean(axis=axis)
+        return self.make_df(the_data, index1, index2)
+
+    def std(self, slicer, *args, **kwargs):
+        axis = self.get_slice_index(slicer)
+        index1, index2 = self.complementary_indexes[slicer]
+        the_data = self._data.std(axis=axis)
+        return self.make_df(the_data, index1, index2)
+
+    def make_df(self, data, index1, index2):
+        return pd.DataFrame(data,
+                            index=index1,
+                            columns=index2)
 
 
 if __name__ == '__main__':
@@ -111,10 +139,18 @@ if __name__ == '__main__':
 
     print('\n # Slice by sample:')
     print(tdata.slice_by('sample', 2))
+
     print('\n # Slice by param:')
     print(tdata.slice_by('param', 'Vmax2'))
+
     print('\n # Slice by reaction:')
     print(tdata.slice_by('rxn', 'r1'))
+
+    print('\n # Sample mean')
+    print(tdata.mean('sample'))
+
+    print('\n # Sample std')
+    print(tdata.std('sample'))
 
 
 
