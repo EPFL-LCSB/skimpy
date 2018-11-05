@@ -56,6 +56,7 @@ class FromPyTFA(FromCobra):
     def import_model(self, pytfa_model, pytfa_solution):
         """
         Function to create a kinetic model from a constraint based model
+
         :param pytfa_model:
         :param pytfa_solution: a prepresentative solution for the pytfa model
         :return: skimpy model

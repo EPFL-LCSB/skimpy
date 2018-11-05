@@ -30,6 +30,15 @@ from bokeh.layouts import column
 from bokeh.palettes import Spectral11, viridis
 
 def timetrace_plot(time,data,filename='out.html', legend = None):
+    """
+    Classic time vs. Y-value plot.
+
+    :param time:
+    :param data:
+    :param filename:
+    :param legend:
+    :return:
+    """
     # Make cool plot functions maype there is also a cooler way?
     if filename == '':
         # show the plot
@@ -61,6 +70,14 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
 
 
 def plot_population_per_variable(data, filename, stride = 1):
+    """
+
+    :param data:
+    :param filename:
+    :param stride: How many points to skip for the plot. `stride=100` will only plot every 100
+    points
+    :return:
+    """
 
     plots = OrderedDict()
 

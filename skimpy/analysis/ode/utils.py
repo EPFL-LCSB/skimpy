@@ -33,6 +33,12 @@ from skimpy.utils.namespace import *
 
 
 def make_ode_fun(kinetic_model, sim_type):
+    """
+
+    :param kinetic_model:
+    :param sim_type:
+    :return:
+    """
 
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
@@ -128,6 +134,12 @@ def make_ode_fun(kinetic_model, sim_type):
 
 
 def make_flux_fun(kinetic_model):
+    """
+
+    :param kinetic_model:
+    :type kinetic_model: skimpy.core.KineticModel
+    :return:
+    """
 
     # Get all variables and expressions (Better solution with types?)
     all_rate_expr = [this_reaction.mechanism.reaction_rates \

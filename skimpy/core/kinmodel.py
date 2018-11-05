@@ -71,6 +71,13 @@ class KineticModel(object):
         return reactants
 
     def add_reaction(self, reaction):
+        """
+        Adds a SKiMPy reaction to the model
+
+        :param reaction: The reaction to add
+        :type reaction: skimpy.core.Reaction
+        :return:
+        """
         # If the variable name already exists substitute
         # with the variable
         for k,v in reaction.reactants.items():
@@ -95,6 +102,14 @@ class KineticModel(object):
         self.add_to_tabdict(constraint, 'constraints')
 
     def add_boundary_condition(self, boundary_condition):
+        """
+        Enforces a boundary condition (e.g. a constant concentration) on the
+        kinetic model
+
+        :param boundary_condition: the boundary condition to enforce
+        :type boundary_condition: skimpy.core.BoundaryCondition
+        :return:
+        """
         boundary_condition.link(self)
         self.add_to_tabdict(boundary_condition, 'boundary_conditions')
 
@@ -162,6 +177,17 @@ class KineticModel(object):
                   time_out,
                   solver_type='cvode',
                   **kwargs):
+        """
+
+        The solver types are from ::scikits.odes::, and can be found at
+        <https://scikits-odes.readthedocs.io/en/latest/solvers.html>`_.
+
+        :param time_out: The times at which the solution is evaluated
+        :type time_out:  list(float) or similar
+        :param solver_type: must be among ['cvode','ida','dopri5','dop853']
+        :param kwargs:
+        :return:
+        """
         extra_options = {'old_api': False}
         kwargs.update(extra_options)
         # Choose a solver

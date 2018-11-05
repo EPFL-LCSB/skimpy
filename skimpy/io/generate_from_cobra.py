@@ -51,6 +51,7 @@ class FromCobra(ModelGenerator):
     def import_model(self,cobra_model):
         """
         Function to create a kinetic model from a constraint based model
+
         :param cobra_model:
         :return: skimpy model
         """

@@ -32,6 +32,17 @@ import pandas as pd
 class Tensor(object):
 
     def __init__(self, data, indexes, *args, **kwargs):
+        """
+        This class is a wrapper for 3D numpy arrays using pandas slices
+
+
+        :param data: A 3D numpy array
+        :type data: numpy.ndarray
+        :param indexes: Inedexes with which the 3D array will be accessed
+        :type indexes: list{3}(pandas.Index)
+        :param args:
+        :param kwargs:
+        """
 
         assert len(indexes) == 3
         for ix in indexes:
@@ -73,6 +84,14 @@ class Tensor(object):
 
 
     def slice_by(self, slicer, value):
+        """
+        Returns a slice of the tensor along a value on a specific index
+
+        :param slicer:
+        :type slicer: str or pandas.Index
+        :param value:
+        :return:
+        """
         if isinstance(slicer,str):
             slicer = slicer.lower()
             slicer = self.indexes[slicer]
@@ -94,22 +113,45 @@ class Tensor(object):
         return self.make_df(the_data, index1, index2)
 
     def get_slice_index(self, slicer):
+        """
+        Utility function for getting the integer number of the index (0,1, or 2)
+
+        :param slicer:
+        :return:
+        """
         slicer_order = list(self.indexes.keys()).index(slicer)
         return slicer_order
 
     def mean(self, slicer, *args, **kwargs):
+        """
+        Flatten using the mean along an index
+
+        :param slicer:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         axis = self.get_slice_index(slicer)
         index1, index2 = self.complementary_indexes[slicer]
         the_data = self._data.mean(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
     def std(self, slicer, *args, **kwargs):
+        """
+        Flatten using the standard deviation along an index
+        :param slicer:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
         axis = self.get_slice_index(slicer)
         index1, index2 = self.complementary_indexes[slicer]
         the_data = self._data.std(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
     def make_df(self, data, index1, index2):
+
         return pd.DataFrame(data,
                             index=index1,
                             columns=index2)
