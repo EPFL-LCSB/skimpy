@@ -38,9 +38,12 @@ RUN pip install -r requirements.txt
 RUN mkdir /src
 COPY src/ /src/
 
+COPY ./utils /utils
+# Make executable
+RUN chmod +x /utils/*.sh
+
 # Install sundials
-COPY ./utils/install_sundials.sh .
-RUN ./install_sundials.sh
+RUN /utils/install_sundials.sh
 
 # Export environment vairables from installation
 ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-2.7.0/include"
@@ -55,10 +58,8 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
 
 # If files are provided install cplex and gurobi
 COPY ./solvers /solvers
-COPY ./utils /utils
 RUN /utils/install_cplex.sh
 # Install gurobi
-COPY ./utils/gurobi.lic* ./
 RUN /utils/install_gurobi.sh
 # Remove installers
 RUN rm -rf /solvers
