@@ -100,13 +100,13 @@ class Tensor(object):
     def mean(self, slicer, *args, **kwargs):
         axis = self.get_slice_index(slicer)
         index1, index2 = self.complementary_indexes[slicer]
-        the_data = self._data.mean(axis=axis)
+        the_data = self._data.mean(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
     def std(self, slicer, *args, **kwargs):
         axis = self.get_slice_index(slicer)
         index1, index2 = self.complementary_indexes[slicer]
-        the_data = self._data.std(axis=axis)
+        the_data = self._data.std(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
     def make_df(self, data, index1, index2):
