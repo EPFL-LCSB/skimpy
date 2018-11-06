@@ -31,7 +31,7 @@ import numpy as np
 from scipy.sparse import eye as speye
 from scipy.sparse import find as sfind
 from scipy.sparse import hstack, vstack
-from skimpy.nullspace import integer_nullspace
+from skimpy.nullspace import left_integer_nullspace
 from sympy import Matrix, nsimplify
 
 def rational_left_basis(S):
