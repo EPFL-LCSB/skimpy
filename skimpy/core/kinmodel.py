@@ -127,7 +127,7 @@ class KineticModel(object):
         # TODO : Implement with metabolites
         # for this_metabolite in reaction.metabolites:
         #     self.metabolites.append(this_metabolite)
-        self._modifed = True
+        self._modified = True
 
     def parametrize(self,param_dict):
         """
