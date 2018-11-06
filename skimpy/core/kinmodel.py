@@ -56,7 +56,7 @@ class KineticModel(object):
         self.constraints = iterable_to_tabdict(constraints)
         self.initial_conditions = iterable_to_tabdict([])
         self.logger = get_bistream_logger(name)
-        self._sim_type = None
+        self._simtype = None
         self._modified = True
         self._recompiled = False
 
