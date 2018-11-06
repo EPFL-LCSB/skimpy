@@ -175,7 +175,11 @@ class KineticModel(object):
             self._modified = False
             self._recompiled = True
             # Create initial_conditions from variables
+            old_initial_conditions = self.initial_conditions
             self.initial_conditions = TabDict([(x,0.0) for x in self.variables])
+            # If data was stored previously in the initial conditions, recover it (needed for
+            # serialization)
+            self.initial_conditions.update(old_initial_conditions)
 
     def solve_ode(self,
                   time_out,

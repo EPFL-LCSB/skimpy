@@ -153,7 +153,6 @@ def load_yaml_model(path):
                 #No value found
                 pass
 
-
     for the_ic, value in the_dict['initial_conditions'].items():
         new.initial_conditions[the_ic] = value
 
