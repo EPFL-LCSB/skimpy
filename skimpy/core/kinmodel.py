@@ -129,7 +129,7 @@ class KineticModel(object):
         #     self.metabolites.append(this_metabolite)
         self._modified = True
 
-    def parametrize(self,param_dict):
+    def parametrize_by_reaction(self, param_dict):
         """
         If has input: apply as dict to reactions in the model by
             reaction.parametrize(args)
@@ -140,6 +140,10 @@ class KineticModel(object):
             the_reaction.parametrize(the_params)
 
         self.update()
+
+    def parametrize(self, param_dict):
+        raise NotImplemented('We have to do some thinking OK')
+        pass
 
     def update(self):
         for r in self.reactions.values():

@@ -33,6 +33,8 @@ from ..utils.tabdict import TabDict
 from collections import namedtuple
 from ..core.itemsets import make_parameter_set, make_reactant_set
 from ..utils.namespace import *
+from .utils import stringify_stoichiometry
+
 
 
 def make_irrev_massaction(stoichioemtry):
@@ -44,7 +46,7 @@ def make_irrev_massaction(stoichioemtry):
     class IrrevMassaction(KineticMechanism):
         """A reversible N-M enyme class """
 
-        suffix = "_{0}".format(stoichioemtry)
+        suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
         reactant_list = []
         parameter_list = {'k_forward': [ODE, MCA, QSSA],}

@@ -52,7 +52,7 @@ pfk = Reaction(name=name,
 
 this_model = KineticModel()
 this_model.add_reaction(pfk)
-this_model.parametrize({pfk.name:parameters})
+this_model.parametrize_by_reaction({pfk.name:parameters})
 
 
 ## Elementary rate method
@@ -66,5 +66,5 @@ this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type=
 
 calc_fluxes = make_flux_fun(this_model)
 
-steady_state_fluxes = calc_fluxes(this_sol_full.species[-1])
+steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
 

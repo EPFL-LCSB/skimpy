@@ -78,7 +78,7 @@ class Item(object):
         self._generate_symbol()
 
     def __str__(self):
-        return self.symbol
+        return str(self.symbol)
 
     def __repr__(self):
         repr = "{} object {} with symbol {}".format(self.__class__.__name__,

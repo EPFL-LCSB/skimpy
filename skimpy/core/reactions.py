@@ -85,7 +85,6 @@ class Reaction(object):
 
         return parameters
 
-    # TODO implement the setter
     @parameters.setter
     def parameters(self, value):
         for name,p in value.items():

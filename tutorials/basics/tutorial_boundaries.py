@@ -49,7 +49,7 @@ pfk = Reaction(name=name,
 
 this_model = KineticModel()
 this_model.add_reaction(pfk)
-this_model.parametrize({pfk.name:parameters})
+this_model.parametrize_by_reaction({pfk.name:parameters})
 
 ## Make the Boundary Condition
 

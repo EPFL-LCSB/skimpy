@@ -105,7 +105,7 @@ class FromPyTFA(FromCobra):
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
 
-        skimpy_model.parametrize(parameters)
+        skimpy_model.parametrize_by_reaction(parameters)
 
         return skimpy_model
 

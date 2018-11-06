@@ -28,3 +28,4 @@ limitations under the License.
 from .kinmodel import KineticModel
 from .modifiers import *
 from .reactions import Reaction
+from .itemsets import *

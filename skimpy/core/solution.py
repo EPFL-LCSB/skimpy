@@ -43,9 +43,12 @@ class ODESolution:
         self.species = np.array(solution.values.y)
         self.names = [x for x in model.ode_fun.variables]
 
-        self.concentrations = iterable_to_tabdict([])
+        # TODO: Cleanup this
+        concentrations = iterable_to_tabdict([])
         for this_species, this_name in zip(self.species.T, self.names):
-            self.concentrations[this_name] = this_species
+            concentrations[this_name] = this_species
+
+        self.concentrations = pd.DataFrame.from_dict(concentrations, orient='columns')
 
     def plot(self, filename=''):
         timetrace_plot(self.time, self.species, filename, legend=self.names)

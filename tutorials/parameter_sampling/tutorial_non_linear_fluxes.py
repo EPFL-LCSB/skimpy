@@ -66,7 +66,7 @@ this_model.add_boundary_condition(the_boundary_condition)
 the_boundary_condition = ConstantConcentration(this_model.reactants['D'])
 this_model.add_boundary_condition(the_boundary_condition)
 
-this_model.parametrize({'E1': parameters_1,
+this_model.parametrize_by_reaction({'E1': parameters_1,
                         'E2': parameters_2,
                         'E3': parameters_3})
 

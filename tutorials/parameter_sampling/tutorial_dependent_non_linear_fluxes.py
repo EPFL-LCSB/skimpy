@@ -161,7 +161,7 @@ the_boundary_condition = BoundaryFlux("nadh", flux_dict['DM_nadh'])
 this_model.add_boundary_condition(the_boundary_condition)
 
 
-this_model.parametrize({'PGK'   : parameters_pgk,
+this_model.parametrize_by_reaction({'PGK'   : parameters_pgk,
                         'PGM'   : parameters_pgm,
                         'GLYCK' : parameters_glyck,
                         'GLYCK2': parameters_glyck2,

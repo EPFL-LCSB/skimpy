@@ -27,24 +27,26 @@ limitations under the License.
 
 
 from sympy import sympify
+
 from .mechanism import KineticMechanism,ElementrayReactionStep
 from ..core.reactions import Reaction
 from ..utils.tabdict import TabDict
 from collections import namedtuple
 from ..core.itemsets import make_parameter_set, make_reactant_set
 from ..utils.namespace import *
+from .utils import stringify_stoichiometry
 
 
-def make_convenience(stoichioemtry):
+def make_convenience(stoichiometry):
 
     """
 
-    :param stoichioemtry is a list of the reaction stoichioemtry
+    :param stoichiometry is a list of the reaction stoichioemtry
     """
     class Convenience(KineticMechanism):
         """A reversible N-M enyme class """
 
-        suffix = "_{0}".format(stoichioemtry)
+        suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
@@ -55,7 +57,7 @@ def make_convenience(stoichioemtry):
 
         num_substrates = 1
         num_products = 1
-        for s in stoichioemtry:
+        for s in stoichiometry:
             if s < 0:
                 substrate = 'substrate{}'.format(num_substrates)
                 km_substrate ='km_substrate{}'.format(num_substrates)

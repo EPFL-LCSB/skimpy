@@ -86,7 +86,7 @@ class FromCobra(ModelGenerator):
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
 
-        skimpy_model.parametrize(parameters)
+        skimpy_model.parametrize_by_reaction(parameters)
         return skimpy_model
 
     def import_reaction(self, cobra_reaction, name=None):
