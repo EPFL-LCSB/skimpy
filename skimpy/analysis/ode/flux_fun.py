@@ -26,8 +26,8 @@ limitations under the License.
 """
 
 import numpy as np
-from sympy import symbols, Array
-from sympy.utilities.autowrap import ufuncify
+from sympy import symbols
+from skimpy.utils.compile_sympy import make_cython_function
 
 
 class FluxFunction:
@@ -50,14 +50,7 @@ class FluxFunction:
         the_variable_keys = [x for x in variables]
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
-
-        # Awsome sympy magic
-        # TODO problem with typs if any parameter ot vairabls is interpreted as interger
-        self.function = {}
-        for key, exp in expr.items():
-           self.function[key] = ufuncify(tuple(sym_vars),
-                                         exp,
-                                         backend='Cython')
+        self.function = make_cython_function(sym_vars, expr, simplify=False)
 
     @property
     def parameter_values(self):
@@ -78,9 +71,18 @@ class FluxFunction:
         #self._parameters = value
         self._parameter_values = [value[x] for x in self.parameters.values()]
 
-    def __call__(self,variables):
-        input_vars = list(variables)+self.parameter_values
-        #result = self.functin
-        array_input = [np.array([input_var])  for input_var in  input_vars]
-        results = {key:f(*array_input) for key,f in self.function.items()}
-        return results
+    def __call__(self,concentrations,  parameters=None):
+        # Todo handle different input types
+        variables = [concentrations[str(x)] for x in self.variables]
+
+        if parameters is None:
+            input_vars = list(variables)+self.parameter_values
+        else:
+            input_vars = list(variables) \
+                         + [parameters[x] for x in self.parameters.values()]
+
+        fluxes = np.zeros(len(self.expr))
+
+        self.function(input_vars, fluxes)
+
+        return fluxes
