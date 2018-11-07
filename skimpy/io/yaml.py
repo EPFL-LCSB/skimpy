@@ -29,7 +29,8 @@ import yaml
 from yaml.representer import SafeRepresenter
 
 from skimpy.utils import TabDict
-from skimpy.core import Item, Reactant, Parameter, Reaction
+from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
+    ConstantConcentration
 from skimpy.mechanisms import KineticMechanism
 
 
@@ -48,6 +49,7 @@ def make_subclasses_dict(cls):
     return the_dict
 
 ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
+ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
 
 FIELDS_TO_SERIALIZE = [
                        # 'variables',
@@ -84,6 +86,21 @@ def mechanism_representer(dumper, data):
 def reaction_representer(dumper,data):
     return dumper.represent_dict(vars(data))
 
+def boundary_condition_representer(dumper, data):
+    the_dict = dict()
+    classname = data.__class__.__name__
+    the_dict['class'] = classname
+    the_dict['reactant'] = data.reactant.name
+    if classname == ConstantConcentration.__name__:
+        # There is no extra fields
+        pass
+    else:
+        raise NotImplementedError('This modifier class is not implemented yet')
+        the_dict['value'] = the_value
+
+    return dumper.represent_dict(the_dict)
+
+
 
 yaml.add_representer(TabDict, SafeRepresenter.represent_dict)
 yaml.add_representer(Reactant, reactant_representer)
@@ -92,6 +109,8 @@ yaml.add_representer(Reaction, reaction_representer)
 
 for the_class in ALL_MECHANISM_SUBCLASSES.values():
     yaml.add_representer(the_class, mechanism_representer)
+for the_class in ALL_BOUNDARY_SUBCLASSES.values():
+    yaml.add_representer(the_class, boundary_condition_representer)
 
 
 def export_to_yaml(model, path=None, **kwargs):
@@ -121,7 +140,7 @@ def get_mechanism(classname):
         stoichiometry = get_stoich(classname)
         return make_convenience(stoichiometry)
     else:
-        return ALL_MECHANISM_SUBCLASSES[the_reaction[classname]]
+        return ALL_MECHANISM_SUBCLASSES[classname]
 
 def load_yaml_model(path):
     with open(path,'r') as fid:
@@ -155,5 +174,15 @@ def load_yaml_model(path):
 
     for the_ic, value in the_dict['initial_conditions'].items():
         new.initial_conditions[the_ic] = value
+
+    # Boundary Conditions
+    for the_bc_dict in the_dict['boundary_conditions'].values():
+        TheBoundaryCondition = ALL_BOUNDARY_SUBCLASSES[the_bc_dict.pop('class')]
+        reactant = new.reactants[the_bc_dict.pop('reactant')]
+        the_bc = TheBoundaryCondition(reactant, **the_bc_dict)
+        new.add_boundary_condition(the_bc)
+
+    # Do not forget to update parameters
+    new.update()
 
     return new
