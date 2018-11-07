@@ -245,7 +245,7 @@ for parameters in parameter_population:
     this_sol_qssa = kmodel.solve_ode(np.linspace(0.0, 10.0, 1000), solver_type='cvode')
     solutions.append(this_sol_qssa)
 
-this_sol_qssa.plot('output/tutorial_oracle.html')
+this_sol_qssa.plot('output/tutorial_oracle_small_ecoli.html')
 
 solpop = ODESolutionPopulation(solutions)
 #If desired plot the solution population for every metabolite

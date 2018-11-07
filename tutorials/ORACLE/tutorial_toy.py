@@ -173,7 +173,7 @@ for parameters in parameter_population:
     this_sol_qssa = this_skimpy_model.solve_ode(np.linspace(0.0, 0.5, 1000), solver_type='cvode')
     solutions.append(this_sol_qssa)
 
-this_sol_qssa.plot('output/tutorial_oracle.html')
+this_sol_qssa.plot('output/tutorial_oracle_toy.html')
 
 solpop = ODESolutionPopulation(solutions)
 solpop.plot('output/tutorial_oracle_pop_{}.html')
