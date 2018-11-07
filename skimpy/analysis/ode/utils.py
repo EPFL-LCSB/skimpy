@@ -81,7 +81,7 @@ def make_ode_fun(kinetic_model, sim_type):
                              this_reaction.mechanism.expression_parameters)
                             )
     else:
-        raise(ArgumentError('Simulation type not recognized'))
+        raise(ValueError('Simulation type not recognized: {}'.format(sim_type)))
 
     all_expr, all_parameters = list(zip(*all_data))
 
@@ -164,7 +164,7 @@ def make_flux_fun(kinetic_model):
     # Make vector function from expressions in this case all_expressions
     # are all the expressions indexed by the
     flux_fun = FluxFunction(variables, expr, all_param)
-    flux_fun._parameter_values = kinetic_model.ode_fun._parameter_values
+    flux_fun._parameter_values = kinetic_model.ode_fun.parameter_values
 
     return flux_fun
 

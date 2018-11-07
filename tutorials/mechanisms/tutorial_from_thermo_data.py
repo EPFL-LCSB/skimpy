@@ -43,6 +43,10 @@ thermo_data_pfk = {'concetration_substrate':     1e-2,
                    'flux':                       1e-4,
                    'total_enzyme_concentration': 1e-5}
 
+
+import warnings
+warnings.warn('We still need to implement saturation to elementary')
+
 ## QSSA Method
 parameters = reversible_michaelis_menten_from_thermo_data(thermo_data_pfk)
 

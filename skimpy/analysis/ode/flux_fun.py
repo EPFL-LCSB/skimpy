@@ -76,7 +76,7 @@ class FluxFunction:
         variables = [concentrations[str(x)] for x in self.variables]
 
         if parameters is None:
-            input_vars = list(variables)+self.parameter_values
+            input_vars = list(variables)+list(self.parameter_values.values())
         else:
             input_vars = list(variables) \
                          + [parameters[x] for x in self.parameters.values()]

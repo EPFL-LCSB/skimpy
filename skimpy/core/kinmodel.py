@@ -162,6 +162,9 @@ class KineticModel(object):
     def compile_ode(self,
                     sim_type=QSSA,):
 
+        # For security
+        self.update()
+
         self.sim_type = sim_type
 
         # Recompile only if modified or simulation
