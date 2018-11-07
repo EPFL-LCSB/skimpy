@@ -37,11 +37,11 @@ from .utils import stringify_stoichiometry
 
 
 
-def make_irrev_massaction(stoichioemtry):
+def make_irrev_massaction(stoichiometry):
 
     """
 
-    :param stoichioemtry is a list of the reaction stoichioemtry
+    :param stoichiometry is a list of the reaction stoichioemtry
     """
     class IrrevMassaction(KineticMechanism):
         """A reversible N-M enyme class """
@@ -56,7 +56,7 @@ def make_irrev_massaction(stoichioemtry):
 
         num_substrates = 1
         num_products = 1
-        for s in stoichioemtry:
+        for s in stoichiometry:
             if s < 0:
                 substrate = 'substrate{}'.format(num_substrates)
                 reactant_list.append(substrate)

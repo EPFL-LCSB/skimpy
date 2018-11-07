@@ -37,11 +37,11 @@ from .utils import stringify_stoichiometry
 
 
 
-def make_irrev_m_n_michaelis_menten(stoichioemtry):
+def make_irrev_m_n_michaelis_menten(stoichiometry):
 
     """
 
-    :param stoichioemtry is a list of the reaction stoichioemtry
+    :param stoichiometry is a list of the reaction stoichioemtry
     """
     class IrrevMichaelisMenten(KineticMechanism):
         """A reversible N-M enyme class """
@@ -56,7 +56,7 @@ def make_irrev_m_n_michaelis_menten(stoichioemtry):
 
         num_substrates = 1
         num_products = 1
-        for s in stoichioemtry:
+        for s in stoichiometry:
             if s < 0:
                 substrate = 'substrate{}'.format(num_substrates)
                 km_substrate ='km_substrate{}'.format(num_substrates)

@@ -128,7 +128,7 @@ def make_ode_fun(kinetic_model, sim_type):
     #     this_boundary_condition(expr)
 
     # Make vector function from expressions
-    ode_fun = ODEFunction(variables, expr, all_parameters)
+    ode_fun = ODEFunction(kinetic_model, variables, expr, all_parameters)
 
     return ode_fun, variables
 

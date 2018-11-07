@@ -208,10 +208,10 @@ class KineticModel(object):
         ordered_initial_conditions = [self.initial_conditions[variable]
                                     for variable in self.variables]
 
-        #if parameters are empty try to fetch from model
-        if not self.ode_fun._parameter_values:
-            self.ode_fun.parameter_values = {v.symbol:v.value
-                                             for k,v in self.parameters.items()}
+        # #if parameters are empty try to fetch from model
+        # if not self.ode_fun._parameter_values:
+        #     self.ode_fun.parameter_values = {v.symbol:v.value
+        #                                      for k,v in self.parameters.items()}
 
         # solve the ode
         solution = self.solver.solve(time_out, ordered_initial_conditions)

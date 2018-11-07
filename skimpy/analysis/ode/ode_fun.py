@@ -26,12 +26,32 @@ limitations under the License.
 """
 
 from numpy import array, double
-from sympy import symbols
+from sympy import symbols, Symbol
 
 from skimpy.utils.compile_sympy import make_cython_function
+from ...utils.tabdict import TabDict
+from warnings import warn
+
+def robust_index(in_var):
+    """
+    Indexing can be done with symbols or strings representing the symbol,
+    so we harmonize it by returning the name of the symbol if the input is of
+    type symbol
+
+    :param in_var:
+    :type in_var: str or sympy.Symbol
+    :return:
+    """
+
+    if isinstance(in_var, str):
+        return in_var
+    elif isinstance(in_var, Symbol):
+        return in_var.name
+    else:
+        raise TypeError('Value should be of type str or sympy.Symbol')
 
 class ODEFunction:
-    def __init__(self, variables, expr, parameters):
+    def __init__(self, model, variables, expr, parameters):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
@@ -43,11 +63,18 @@ class ODEFunction:
         """
         self.variables = variables
         self.expr = expr
-        self.parameters = parameters
-        self._parameter_values = []
+        self.model = model
+        # self._parameter_values = TabDict([])
+
+        # Link to the model
+        self._parameters = parameters
+
+        # Set values
+        for k,v in parameters.items():
+            self.parameter_values[robust_index(k)] = v
 
         # Unpacking is needed as ufuncify only take ArrayTypes
-        the_param_keys = [x for x in self.parameters]
+        the_param_keys = [x for x in self._parameters]
         the_variable_keys = [x for x in variables]
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
@@ -58,11 +85,21 @@ class ODEFunction:
         self.function = make_cython_function(sym_vars, expressions, simplify=False)
 
     @property
+    def parameters(self):
+        return TabDict((k,self.model.parameters[robust_index(k)])
+                                   for k in self._parameters)
+
+    @parameters.setter
+    def parameters(self, value):
+        self._parameters = value
+
+    @property
     def parameter_values(self):
-        if not self._parameter_values:
-            raise ArgumentError('No parameters have been set')
-        else:
-            return self._parameter_values
+        # if not self._parameter_values:
+        #     raise Exception('No parameters have been set')
+        # else:
+        return TabDict((k,self.parameters[robust_index(k)].value)
+                       for k in self.parameters)
 
     @parameter_values.setter
     def parameter_values(self,value):
@@ -74,8 +111,21 @@ class ODEFunction:
         :return:
         """
         #self._parameters = value
-        self._parameter_values = [value[x] for x in self.parameters.values()]
+        # self._parameter_values = [value[x] for x in self.parameters.values()]
+
+        for k,v in value.items():
+            if v is None:
+                # No assignment is to be done
+                continue
+
+            try:
+                self.parameters[robust_index(k)].value = v
+            except KeyError:
+                # raise KeyError('Parameter is not in the model.')
+                warn('Tried to assign a value to parameter {}. '
+                     'Parameter is not in the model'.format(k))
+                self.parameters[robust_index(k)] = v
 
     def __call__(self, t, y, ydot):
-        input_vars = list(y)+self.parameter_values
+        input_vars = list(y)+list(self.parameter_values.values())
         self.function(input_vars,ydot)

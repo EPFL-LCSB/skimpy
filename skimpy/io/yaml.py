@@ -30,9 +30,9 @@ from yaml.representer import SafeRepresenter
 
 from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
-    ConstantConcentration
+    ConstantConcentration, KineticModel
 from skimpy.mechanisms import KineticMechanism
-
+from skimpy.utils.namespace import PARAMETER, VARIABLE
 
 def get_all_subclasses(cls):
     all_subclasses = []
@@ -69,14 +69,19 @@ FIELDS_TO_SERIALIZE = [
 #                       Model serialization
 #----------------------------------------------------------------
 
-def reactant_representer(dumper, data):
-    return dumper.represent_str(data.name)
 
 def parameter_representer(dumper, data):
     if data.value is not None:
         return dumper.represent_float(data.value)
     else:
         return  dumper.represent_none(data.value)
+
+def reactant_representer(dumper, data):
+    if data.type == PARAMETER:
+        # Store it as a parameter
+        return parameter_representer(dumper,data)
+    elif data.type == VARIABLE:
+        return dumper.represent_str(data.name)
 
 def mechanism_representer(dumper, data):
     the_dict = {k:v.name for k,v in data.reactants.items()}
@@ -148,6 +153,7 @@ def load_yaml_model(path):
 
     new = KineticModel(name = the_dict['name'])
 
+    # Rebuild the reactions
     for the_reaction in the_dict['reactions'].values():
         TheMechanism = get_mechanism(the_reaction['mechanism'].pop('class'))
         the_reactants = TheMechanism.Reactants(**the_reaction['mechanism'])
@@ -156,24 +162,12 @@ def load_yaml_model(path):
                                 reactants=the_reactants)
         new.add_reaction(new_reaction)
 
+    # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
     for rxn_obj in new.reactions.values():
         # initalize empty param list
         parameter_init_dict[rxn_obj.name] = rxn_obj.mechanism.__class__.Parameters()
     new.parametrize_by_reaction(parameter_init_dict)
-
-    for rxn_obj in new.reactions.values():
-        # Look into parameters for assignment
-        for p in rxn_obj.mechanism.parameters.values():
-            # Try to find the parameter in our YAML
-            try:
-                p.value = the_dict['parameters'][str(p.symbol)]
-            except KeyError:
-                #No value found
-                pass
-
-    for the_ic, value in the_dict['initial_conditions'].items():
-        new.initial_conditions[the_ic] = value
 
     # Boundary Conditions
     for the_bc_dict in the_dict['boundary_conditions'].values():
@@ -181,6 +175,25 @@ def load_yaml_model(path):
         reactant = new.reactants[the_bc_dict.pop('reactant')]
         the_bc = TheBoundaryCondition(reactant, **the_bc_dict)
         new.add_boundary_condition(the_bc)
+
+        # Do not forget to add the value of the BC!
+        reactant.value = the_dict['parameters'][str(reactant.symbol)]
+
+
+    # Parameter assignment based on what parameters have been stored
+    for rxn_obj in new.reactions.values():
+        # Look into parameters for assignment
+        for p in rxn_obj.parameters.values():
+            # Try to find the parameter in our YAML
+            try:
+                p.value = the_dict['parameters'][str(p.symbol)]
+            except KeyError:
+                #No value found
+                pass
+
+    # Initial conditions
+    for the_ic, value in the_dict['initial_conditions'].items():
+        new.initial_conditions[the_ic] = value
 
     # Do not forget to update parameters
     new.update()
