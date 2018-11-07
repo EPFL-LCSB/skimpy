@@ -39,7 +39,7 @@ def make_ode_fun(kinetic_model, sim_type):
     :param sim_type:
     :return:
     """
-
+    sim_type = sim_type.lower()
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
     if sim_type == QSSA:
@@ -81,7 +81,7 @@ def make_ode_fun(kinetic_model, sim_type):
                              this_reaction.mechanism.expression_parameters)
                             )
     else:
-        raise(ArumentError)
+        raise(ArgumentError('Simulation type not recognized'))
 
     all_expr, all_parameters = list(zip(*all_data))
 
