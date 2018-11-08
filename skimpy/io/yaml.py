@@ -31,7 +31,7 @@ from yaml.representer import SafeRepresenter
 from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
     ConstantConcentration, KineticModel
-from skimpy.mechanisms import KineticMechanism
+from skimpy.mechanisms import *
 from skimpy.utils.namespace import PARAMETER, VARIABLE
 
 def get_all_subclasses(cls):
@@ -50,6 +50,11 @@ def make_subclasses_dict(cls):
 
 ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
 ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
+#TODO We need to do better?
+ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience':make_convenience,
+                                    'GeneralizedReversibleHill':make_generalized_reversible_hill_n_n,
+                                    'IrrevMichaelisMenten':make_irrev_m_n_michaelis_menten,
+                                    'IrrevMassaction':make_irrev_massaction}
 
 FIELDS_TO_SERIALIZE = [
                        # 'variables',
@@ -63,7 +68,8 @@ FIELDS_TO_SERIALIZE = [
                        # '_recompiled', '_modifed',
                        'reactions',
                        # '_modified',
-                       'name', 'initial_conditions']
+                       'name',
+                       'initial_conditions']
 
 #----------------------------------------------------------------
 #                       Model serialization
@@ -136,16 +142,25 @@ def export_to_yaml(model, path=None, **kwargs):
 #                       Model loading
 #----------------------------------------------------------------
 
-def get_stoich(s):
-    splitted = s.split('_')
-    return [int(x.replace('m','-')) for x in splitted[1:]]
-
 def get_mechanism(classname):
-    if classname.startswith('Convenience'):
+    if any(map(classname.startswith, ALL_GENERIC_MECHANISM_SUBCLASSES)):
         stoichiometry = get_stoich(classname)
-        return make_convenience(stoichiometry)
+        make_mechanism = get_generic_constructor(classname)
+        return make_mechanism(stoichiometry)
     else:
         return ALL_MECHANISM_SUBCLASSES[classname]
+
+def get_generic_constructor(s):
+    for name, constructor in ALL_GENERIC_MECHANISM_SUBCLASSES.items():
+        if s.startswith(name):
+            return constructor
+
+
+def get_stoich(s):
+    #TODO can we generalize this so it can include inhibitors?
+    #Using regexp on something like e.g. _s1_s1_p1_i1_
+    splitted = s.split('_')
+    return [int(x.replace('m','-')) for x in splitted[1:]]
 
 def load_yaml_model(path):
     with open(path,'r') as fid:
