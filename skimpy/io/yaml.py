@@ -92,6 +92,8 @@ def reactant_representer(dumper, data):
 def mechanism_representer(dumper, data):
     the_dict = {k:v.name for k,v in data.reactants.items()}
     the_dict['class'] = data.__class__.__name__
+    if any(map(the_dict['class'].startswith, ALL_GENERIC_MECHANISM_SUBCLASSES)):
+        the_dict['mechanism_stoichometry'] = data.reactant_stoichiometry
     return dumper.represent_dict(the_dict)
 
 def reaction_representer(dumper,data):
@@ -142,13 +144,16 @@ def export_to_yaml(model, path=None, **kwargs):
 #                       Model loading
 #----------------------------------------------------------------
 
-def get_mechanism(classname):
-    if any(map(classname.startswith, ALL_GENERIC_MECHANISM_SUBCLASSES)):
-        stoichiometry = get_stoich(classname)
+def get_mechanism(classdict):
+    classname = classdict.pop('class')
+    try:
+        stoich_dict = classdict.pop('mechanism_stoichometry')
         make_mechanism = get_generic_constructor(classname)
+        stoichiometry = list(stoich_dict.values())
         return make_mechanism(stoichiometry)
-    else:
+    except KeyError:
         return ALL_MECHANISM_SUBCLASSES[classname]
+
 
 def get_generic_constructor(s):
     for name, constructor in ALL_GENERIC_MECHANISM_SUBCLASSES.items():
@@ -170,7 +175,7 @@ def load_yaml_model(path):
 
     # Rebuild the reactions
     for the_reaction in the_dict['reactions'].values():
-        TheMechanism = get_mechanism(the_reaction['mechanism'].pop('class'))
+        TheMechanism = get_mechanism(the_reaction['mechanism'])
         the_reactants = TheMechanism.Reactants(**the_reaction['mechanism'])
         new_reaction = Reaction(name=the_reaction['name'],
                                 mechanism=TheMechanism,
