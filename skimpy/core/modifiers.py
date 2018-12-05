@@ -178,7 +178,7 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
     def __init__(self, reaction, reactant, stoichiometry, name=None):
 
         if name is None:
-            name = reaction.__str__()+"_"+reactant.__str__()
+            name = reactant.__repr__()
 
         reactants = self.Reactants(small_molecule=reactant)
         parameters = self.Parameters()
@@ -238,7 +238,7 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
     def __init__(self, reaction, reactant, stoichiometry, name=None):
 
         if name is None:
-            name = reaction.__str__()+"_"+reactant.__str__()
+            name = reactant.__str__()
 
         reactants = self.Reactants(small_molecule=reactant)
         parameters = self.Parameters()

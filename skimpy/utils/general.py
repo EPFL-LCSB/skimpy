@@ -82,3 +82,19 @@ def sanitize_cobra_vars(met_name):
     # Add underscore for variables names that start with a number
     clean_met_name = re.sub(r"(^[0-9])", r"_\1", str(clean_met_name), 0, re.IGNORECASE)
     return clean_met_name
+
+
+def get_all_subclasses(cls):
+    all_subclasses = []
+
+    for subclass in cls.__subclasses__():
+        all_subclasses.append(subclass)
+        all_subclasses.extend(get_all_subclasses(subclass))
+
+    return all_subclasses
+
+
+def make_subclasses_dict(cls):
+    the_dict = {x.__name__:x for x in get_all_subclasses(cls)}
+    the_dict[cls.__name__] = cls
+    return the_dict

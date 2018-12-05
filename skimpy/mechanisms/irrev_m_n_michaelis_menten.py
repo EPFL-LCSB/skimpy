@@ -33,6 +33,7 @@ from ..utils.tabdict import TabDict
 from collections import namedtuple
 from ..core.itemsets import make_parameter_set, make_reactant_set
 from ..utils.namespace import *
+from skimpy.utils.general import make_subclasses_dict
 from .utils import stringify_stoichiometry
 
 
@@ -43,6 +44,16 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
 
     :param stoichiometry is a list of the reaction stoichioemtry
     """
+
+    # This refresh all subclasses and fetches already create mechanism classes
+    ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
+
+    new_class_name = "IrrevMichaelisMenten"\
+                     + "_{0}".format(stringify_stoichiometry(stoichiometry))
+
+    if new_class_name in ALL_MECHANISM_SUBCLASSES.keys():
+        return ALL_MECHANISM_SUBCLASSES[new_class_name]
+
     class IrrevMichaelisMenten(KineticMechanism):
         """A reversible N-M enyme class """
 
@@ -63,7 +74,7 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
                 reactant_list.append(substrate)
                 parameter_list[km_substrate] = [ODE, MCA, QSSA]
                 parameter_reactant_links[km_substrate] = substrate
-                reactant_stoichiometry[substrate] = s
+                reactant_stoichiometry[substrate] = float(s)
                 num_substrates += 1
 
             if s > 0:
@@ -72,7 +83,7 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
                 reactant_list.append(product)
                 parameter_list[km_product] = [ODE, MCA, QSSA]
                 parameter_reactant_links[km_product] = product
-                reactant_stoichiometry[product] = s
+                reactant_stoichiometry[product] = float(s)
                 num_products += 1
 
         Reactants = make_reactant_set(__name__ + suffix, reactant_list)

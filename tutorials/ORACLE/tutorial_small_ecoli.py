@@ -144,68 +144,6 @@ small_molecules = ['h_c','h_e','h_m',
 model_gen = FromPyTFA(water='h2o')
 kmodel = model_gen.import_model(tmodel, solution)
 
-"""
-Model bio-synthesis
-"""
-# TODO can this be wrapped into a function ths is not too specific ??
-# TODO Can we always split this into ATP hyd and BS?
-# Substitute biomass reaction with synthetic reactions for the BBS
-# and ATP hydrolysis
-
-atp_c = cobra_model.metabolites.atp_c
-adp_c = cobra_model.metabolites.adp_c
-pi_c = cobra_model.metabolites.pi_c
-
-#biomass_rxn = cobra_model.reactions.biomass
-biomass_rxn = cobra_model.reactions.Ec_biomass_iJO1366_WT_53p95M
-
-IrrevMichaelisMentenBioSynth = make_irrev_m_n_michaelis_menten([-1,])
-
-for met, stoich in biomass_rxn.metabolites.items():
-    if stoich < 0 \
-        and not met.id.startswith('h2o') \
-        and met.id is not atp_c.id:
-
-        reactants = IrrevMichaelisMentenBioSynth.Reactants(substrate1=sanitize_cobra_vars(met.id))
-        parameters = IrrevMichaelisMentenBioSynth.Parameters()
-        rxn = Reaction('BS_{}'.format(met.id),
-                        mechanism=IrrevMichaelisMentenBioSynth,
-                        reactants=reactants)
-        rxn.parameters = parameters
-        kmodel.add_reaction(rxn)
-        flux_dict[rxn.name] = -stoich*flux_dict[biomass_rxn.id]
-
-# Add ATP hydrolysis
-IrrevMichaelisMentenATP = make_irrev_m_n_michaelis_menten([-1,1,1])
-
-# Add ATP consumption for DNA
-reactants = IrrevMichaelisMentenBioSynth.Reactants(substrate1=atp_c.id)
-parameters = IrrevMichaelisMentenBioSynth.Parameters()
-rxn = Reaction('BS_{}'.format(atp_c.id),
-               mechanism=IrrevMichaelisMentenBioSynth,
-               reactants=reactants)
-rxn.parameters = parameters
-kmodel.add_reaction(rxn)
-flux_dict[rxn.name] = -(biomass_rxn.metabolites[atp_c] +
-                        biomass_rxn.metabolites[adp_c]) * flux_dict[biomass_rxn.id]
-
-
-reactants = IrrevMichaelisMentenATP.Reactants(substrate1=atp_c.id,
-                                              product1=adp_c.id,
-                                              product2=pi_c.id)
-parameters = IrrevMichaelisMentenATP.Parameters()
-rxn = Reaction('atp_hydrolysis',
-               mechanism=IrrevMichaelisMentenATP,
-               reactants=reactants)
-rxn.parameters = parameters
-kmodel.add_reaction(rxn)
-
-flux_dict['atp_hydrolysis'] = biomass_rxn.metabolites[adp_c]\
-                               *flux_dict[biomass_rxn.id]
-
-# Remove biomass rxn
-del kmodel.reactions[biomass_rxn.id]
-
 kmodel.update()
 
 """

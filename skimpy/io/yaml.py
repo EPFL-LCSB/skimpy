@@ -32,29 +32,17 @@ from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
     ConstantConcentration, KineticModel
 from skimpy.mechanisms import *
+from skimpy.utils.general import make_subclasses_dict
 from skimpy.utils.namespace import PARAMETER, VARIABLE
-
-def get_all_subclasses(cls):
-    all_subclasses = []
-
-    for subclass in cls.__subclasses__():
-        all_subclasses.append(subclass)
-        all_subclasses.extend(get_all_subclasses(subclass))
-
-    return all_subclasses
-
-def make_subclasses_dict(cls):
-    the_dict = {x.__name__:x for x in get_all_subclasses(cls)}
-    the_dict[cls.__name__] = cls
-    return the_dict
 
 ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
 ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
+
 #TODO We need to do better?
-ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience':make_convenience,
-                                    'GeneralizedReversibleHill':make_generalized_reversible_hill_n_n,
-                                    'IrrevMichaelisMenten':make_irrev_m_n_michaelis_menten,
-                                    'IrrevMassaction':make_irrev_massaction}
+ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience': make_convenience,
+                                    'GeneralizedReversibleHill': make_generalized_reversible_hill_n_n,
+                                    'IrrevMichaelisMenten': make_irrev_m_n_michaelis_menten,
+                                    'IrrevMassaction': make_irrev_massaction}
 
 FIELDS_TO_SERIALIZE = [
                        # 'variables',
@@ -92,7 +80,8 @@ def reactant_representer(dumper, data):
 def mechanism_representer(dumper, data):
     the_dict = {k:v.name for k,v in data.reactants.items()}
     the_dict['class'] = data.__class__.__name__
-    if any(map(the_dict['class'].startswith, ALL_GENERIC_MECHANISM_SUBCLASSES)):
+    _find = lambda s: the_dict['class'].find(s) >= 0
+    if any(map(_find , ALL_GENERIC_MECHANISM_SUBCLASSES)):
         the_dict['mechanism_stoichometry'] = data.reactant_stoichiometry
     return dumper.represent_dict(the_dict)
 
