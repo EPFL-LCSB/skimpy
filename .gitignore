@@ -1,6 +1,8 @@
 # Skimpy
 # Ignore generated c files
 skimpy/cython/nullspace.c
+# Ignore model files by default
+*.yml
 
 # Pycharm folders
 .idea/*
