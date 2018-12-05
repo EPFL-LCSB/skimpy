@@ -31,13 +31,14 @@ from re import sub as re_sub
 
 from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
-    ConstantConcentration, KineticModel
+    ConstantConcentration, KineticModel, ExpressionModifier
 from skimpy.mechanisms import *
 from skimpy.utils.general import make_subclasses_dict
 from skimpy.utils.namespace import PARAMETER, VARIABLE
 
 ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
 ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
+ALL_MODIFIER_SUBCLASSES = make_subclasses_dict(ExpressionModifier)
 
 #TODO We need to do better?
 ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience': make_convenience,
@@ -83,9 +84,14 @@ def mechanism_representer(dumper, data):
     the_dict['class'] = data.__class__.__name__
     _find = lambda s: the_dict['class'].find(s) >= 0
     if any(map(_find , ALL_GENERIC_MECHANISM_SUBCLASSES)):
-        the_dict['mechanism_stoichometry'] = data.reactant_stoichiometry
+        the_dict['mechanism_stoichiometry'] = data.reactant_stoichiometry
+
         #Clean the class name (will be reconstructed from stoichometry)
         the_dict['class'] = re_sub(data.__class__.suffix,'',the_dict['class'])
+
+    elif any(map(_find , ALL_MODIFIER_SUBCLASSES)):
+        the_dict['mechanism_stoichiometry'] = data.reactant_stoichiometry
+
     return dumper.represent_dict(the_dict)
 
 def reaction_representer(dumper,data):
@@ -137,12 +143,24 @@ def export_to_yaml(model, path=None, **kwargs):
 #----------------------------------------------------------------
 
 def get_mechanism(classdict):
+    #TODO Make nice and more readable
+    """
+    This function should construct mechanism for the generic types
+    and get the mechanism for modifiers and the defined types 
+    :param classdict:
+    :return:
+    """
     classname = classdict.pop('class')
+    _find = lambda s: classname.find(s) >= 0
     try:
-        stoich_dict = classdict.pop('mechanism_stoichometry')
+        if any(map(_find, ALL_MODIFIER_SUBCLASSES)):
+            return ALL_MECHANISM_SUBCLASSES[classname]
+
+        stoich_dict = classdict.pop('mechanism_stoichiometry')
         make_mechanism = get_generic_constructor(classname)
         stoichiometry = list(stoich_dict.values())
         return make_mechanism(stoichiometry)
+
     except KeyError:
         return ALL_MECHANISM_SUBCLASSES[classname]
 
@@ -151,7 +169,6 @@ def get_generic_constructor(s):
     for name, constructor in ALL_GENERIC_MECHANISM_SUBCLASSES.items():
         if s.startswith(name):
             return constructor
-
 
 def get_stoich(s):
     #TODO can we generalize this so it can include inhibitors?
@@ -172,6 +189,13 @@ def load_yaml_model(path):
         new_reaction = Reaction(name=the_reaction['name'],
                                 mechanism=TheMechanism,
                                 reactants=the_reactants)
+        # Add kinetic modifiers
+        modifiers = the_reaction['modifiers']
+        for the_modifier in modifiers.values():
+            TheModifier = get_mechanism(the_modifier)
+            new_modifier = TheModifier(**the_modifier)
+            new_reaction.modifiers[new_modifier.name] = new_modifier
+
         new.add_reaction(new_reaction)
 
     # Populate the kinmodel.parameters TabDict

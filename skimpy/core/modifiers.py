@@ -175,16 +175,16 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     parameter_reactant_links = {}
 
-    def __init__(self, reaction, reactant, stoichiometry, name=None):
+    def __init__(self, small_molecule, mechanism_stoichiometry, name=None):
 
         if name is None:
-            name = reactant.__repr__()
+            name = small_molecule.__repr__()
 
-        reactants = self.Reactants(small_molecule=reactant)
+        reactants = self.Reactants(small_molecule=small_molecule)
         parameters = self.Parameters()
         KineticMechanism.__init__(self, name, reactants, parameters)
 
-        self.stoichiometry = stoichiometry
+        self.reactant_stoichiometry = float(mechanism_stoichiometry)
 
     def modifier(self, expressions):
         """
@@ -198,11 +198,11 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
 
-        if self.stoichiometry < 0:
+        if self.reactant_stoichiometry < 0:
             expressions['v_fwd'] = expressions['v_fwd']\
                                    * self.get_qssa_rate_expression()
 
-        if self.stoichiometry > 0:
+        if self.reactant_stoichiometry > 0:
             expressions['v_bwd'] = expressions['v_bwd'] \
                                    * self.get_qssa_rate_expression()
 
@@ -228,23 +228,23 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     prefix = "DSM"
 
-    Reactants = make_reactant_set(__name__, ['small_molecule'])
+    Reactants = make_reactant_set(__name__, ['small_molecule',])
 
     Parameters = make_parameter_set(    __name__,
                                         { })
 
     parameter_reactant_links = {}
 
-    def __init__(self, reaction, reactant, stoichiometry, name=None):
+    def __init__(self, small_molecule, mechanism_stoichiometry, name=None):
 
         if name is None:
-            name = reactant.__str__()
+            name = small_molecule.__str__()
 
-        reactants = self.Reactants(small_molecule=reactant)
+        reactants = self.Reactants(small_molecule=small_molecule,)
         parameters = self.Parameters()
         KineticMechanism.__init__(self, name, reactants, parameters)
 
-        self.stoichiometry = stoichiometry
+        self.reactant_stoichiometry = float(mechanism_stoichiometry)
 
     def modifier(self, expressions):
         """
@@ -259,7 +259,7 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         #                        ])
 
         expressions['v_bwd'] = expressions['v_bwd'] \
-                                * self.get_qssa_rate_expression()**self.stoichiometry
+                                * self.get_qssa_rate_expression()**self.reactant_stoichiometry
 
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
 

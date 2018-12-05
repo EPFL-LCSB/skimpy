@@ -87,7 +87,7 @@ def create_reaction_from_stoich(name,
     # Add small molecules modifiers
     small_molecule_modifier = model_generator.small_molecule_modifier
     for this_sm, stoich in this_reaction_small_molecules.items():
-        small_molecule_mod = small_molecule_modifier(skimpy_reaction, this_sm, stoich)
+        small_molecule_mod = small_molecule_modifier(this_sm, stoich)
         skimpy_reaction.modifiers[small_molecule_mod.name] = small_molecule_mod
 
     return skimpy_reaction
