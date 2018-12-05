@@ -27,6 +27,7 @@ limitations under the License.
 
 import yaml
 from yaml.representer import SafeRepresenter
+from re import sub as re_sub
 
 from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
@@ -83,6 +84,8 @@ def mechanism_representer(dumper, data):
     _find = lambda s: the_dict['class'].find(s) >= 0
     if any(map(_find , ALL_GENERIC_MECHANISM_SUBCLASSES)):
         the_dict['mechanism_stoichometry'] = data.reactant_stoichiometry
+        #Clean the class name (will be reconstructed from stoichometry)
+        the_dict['class'] = re_sub(data.__class__.suffix,'',the_dict['class'])
     return dumper.represent_dict(the_dict)
 
 def reaction_representer(dumper,data):
