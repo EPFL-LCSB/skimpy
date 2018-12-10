@@ -114,7 +114,7 @@ def add_dummy_delta_g(tmodel,
             # we use the LC here as we already accounted for the
             # changes in deltaGFs in the RHS term
             try:
-                tmodel.LC_vars[met]
+                tmodel.log_concentration.getbyid(met).variable
             except KeyError:
                 metComp = met.compartment
                 metLConc_lb = log(tmodel.compartments[metComp]['c_min'])
@@ -124,9 +124,9 @@ def add_dummy_delta_g(tmodel,
                                        met,
                                        lb=metLConc_lb,
                                        ub=metLConc_ub)
-                tmodel.LC_vars[met] = LC
+                #tmodel.LC_vars[met] = LC
 
-            LC_ChemMet += (tmodel.LC_vars[met]
+            LC_ChemMet += (tmodel.log_concentration.getbyid(met).variable
                            * RT
                            * rxn.metabolites[met])
 
