@@ -28,15 +28,17 @@ WORKDIR $HOME
 
 USER root
 
+# Add extra src if needed
+RUN mkdir /src
+COPY src/ /src/
+
 # Copy python package requirements
 COPY requirements.txt .
 
 # Install python packages
+COPY install_pytfa_dev.sh .
+RUN /bin/bash install_pytfa_dev.sh
 RUN pip install -r requirements.txt
-
-# Add extra src if needed
-RUN mkdir /src
-COPY src/ /src/
 
 COPY ./utils /utils
 # Make executable
