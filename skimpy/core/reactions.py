@@ -66,7 +66,7 @@ class Reaction(object):
         for this_modifier in self.modifiers.values():
             this_mod_sm = this_modifier.reactants.small_molecule
             if this_mod_sm.type == VARIABLE:
-                reactant_stoichiometry[this_mod_sm] = this_modifier.stoichiometry
+                reactant_stoichiometry[this_mod_sm] = this_modifier.reactant_stoichiometry
         return reactant_stoichiometry
 
     @property

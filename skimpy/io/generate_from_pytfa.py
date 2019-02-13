@@ -75,9 +75,11 @@ class FromPyTFA(FromCobra):
 
                 if this_skimpy_reaction is not None:
                     # get delta_Gstd variable name
-                    var_delta_g_std = getattr(pytfa_model.delta_gstd,
-                                              this_reaction.id).name
-                    deltag0 = pytfa_solution[var_delta_g_std]
+                    try:
+                        var_delta_g_std = pytfa_model.delta_gstd.get_by_id(this_reaction.id).name
+                        deltag0 = pytfa_solution.raw[var_delta_g_std]
+                    except KeyError:
+                        deltag0 = self.dummy_dgo
 
                     temp = pytfa_model.TEMPERATURE
                     gas_constant = pytfa_model.GAS_CONSTANT

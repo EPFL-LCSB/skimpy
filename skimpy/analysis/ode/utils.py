@@ -28,7 +28,7 @@ from sympy import sympify
 
 from skimpy.analysis.ode.ode_fun import ODEFunction
 from skimpy.analysis.ode.flux_fun import FluxFunction
-from skimpy.utils import iterable_to_tabdict,TabDict
+from skimpy.utils import iterable_to_tabdict, TabDict
 from skimpy.utils.namespace import *
 
 
@@ -57,7 +57,7 @@ def make_ode_fun(kinetic_model, sim_type):
                 small_mol = this_mod.reactants['small_molecule']
                 sm = small_mol.symbol
                 flux = this_reaction.mechanism.reaction_rates['v_net']
-                flux_expression_sm = flux * this_mod.stoichiometry
+                flux_expression_sm = flux * this_mod.reactant_stoichiometry
                 this_reaction.mechanism.expressions[sm] = flux_expression_sm
                 # Add small molecule parameters if they are
                 if small_mol.type == PARAMETER:

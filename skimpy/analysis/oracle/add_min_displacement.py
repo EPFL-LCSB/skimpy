@@ -34,9 +34,9 @@ def add_min_log_displacement(tmodel,min_log_displacement, inplace=True):
         temp_model = tmodel.copy()
 
     for ln_gamma in temp_model.thermo_displacement:
-        if tmodel.solution[ln_gamma.variable.name] >= 0:
+        if tmodel.solution.raw[ln_gamma.variable.name] >= 0:
             ln_gamma.variable.lb = min_log_displacement
-        elif tmodel.solution[ln_gamma.variable.name] < 0:
+        elif tmodel.solution.raw[ln_gamma.variable.name] < 0:
             ln_gamma.variable.ub = -min_log_displacement
 
     temp_model.repair()

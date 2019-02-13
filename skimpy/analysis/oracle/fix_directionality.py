@@ -47,11 +47,11 @@ def fix_directionality(tmodel,solution, inplace = True):
         rev_var = this_reaction.reverse_variable
         fwd_var = this_reaction.forward_variable
 
-        if solution.x_dict[rev_var.name] < tol:
+        if solution.fluxes[this_reaction.id] > -tol:
             rev_var.lb = 0.0
             rev_var.ub = 0.0
 
-        elif solution.x_dict[fwd_var.name] < tol:
+        elif solution.fluxes[this_reaction.id] < tol:
             fwd_var.lb = 0.0
             fwd_var.ub = 0.0
 

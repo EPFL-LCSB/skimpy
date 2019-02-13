@@ -70,6 +70,8 @@ class ModelGenerator(ABC):
         else:
             self.hydrogen = hydrogen
 
+        self.dummy_dgo = -10.0
+
 
     @abstractmethod
     def import_model(self,model):

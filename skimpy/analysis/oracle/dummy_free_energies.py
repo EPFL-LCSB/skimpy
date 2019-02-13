@@ -47,8 +47,8 @@ MAX_STOICH = 10
 
 def add_undefined_delta_g(_tmodel,
                           solution,
-                          delta_g_std = -10,
-                          delta_g_std_err = 2,
+                          delta_g_std=-10,
+                          delta_g_std_err=2,
                           add_displacement=True,
                           inplace=True):
     if inplace:
@@ -60,19 +60,21 @@ def add_undefined_delta_g(_tmodel,
 
     for this_rxn in tmodel.reactions:
 
-        this_rxn_rev_flux = sol[this_rxn.reverse_variable.name]
-        if not this_rxn.thermo['computed'] and \
-           not this_rxn.boundary:
-            if this_rxn_rev_flux > 0:
-                this_dgo = -delta_g_std
-            else:
-                this_dgo = delta_g_std
+        this_rxn_rev_flux = sol[this_rxn.id]
+        try:
+           this_dgo = tmodel.delta_gstd.get_by_id(this_rxn.id)
+        except KeyError:
+           if not this_rxn.boundary:
+                if this_rxn_rev_flux < 0:
+                    this_dgo = -delta_g_std
+                else:
+                    this_dgo = delta_g_std
 
-            add_dummy_delta_g(tmodel,
-                              this_rxn,
-                              delta_g_std=this_dgo,
-                              delta_g_std_err=delta_g_std_err,
-                              add_displacement=add_displacement)
+                add_dummy_delta_g(tmodel,
+                                  this_rxn,
+                                  delta_g_std=this_dgo,
+                                  delta_g_std_err=delta_g_std_err,
+                                  add_displacement=add_displacement)
 
     tmodel.repair()
 
@@ -114,7 +116,7 @@ def add_dummy_delta_g(tmodel,
             # we use the LC here as we already accounted for the
             # changes in deltaGFs in the RHS term
             try:
-                tmodel.log_concentration.getbyid(met).variable
+                tmodel.log_concentration.get_by_id(met.id).variable
             except KeyError:
                 metComp = met.compartment
                 metLConc_lb = log(tmodel.compartments[metComp]['c_min'])
@@ -125,8 +127,9 @@ def add_dummy_delta_g(tmodel,
                                        lb=metLConc_lb,
                                        ub=metLConc_ub)
                 #tmodel.LC_vars[met] = LC
+                tmodel.repair()
 
-            LC_ChemMet += (tmodel.log_concentration.getbyid(met).variable
+            LC_ChemMet += (tmodel.log_concentration.get_by_id(met.id).variable
                            * RT
                            * rxn.metabolites[met])
 
