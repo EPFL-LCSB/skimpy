@@ -33,10 +33,17 @@ class Reaction(object):
     """
     Global reaction class
     """
-    def __init__(self, name, reactants, mechanism, parameters=None):
+    def __init__(self, name, reactants, mechanism, parameters=None, inhibitors=None):
         self.name = name
-        self.mechanism = mechanism(name=name, reactants=reactants,
-                                   parameters=parameters)
+        if inhibitors is not None:
+            self.mechanism = mechanism(name=name,
+                                       reactants=reactants,
+                                       parameters=parameters,
+                                       inhibitors=inhibitors)
+        else:
+            self.mechanism = mechanism(name=name,
+                                       reactants=reactants,
+                                       parameters=parameters)
         self.modifiers = TabDict([])
 
     # Hooks to the mechanism attributes for convenience

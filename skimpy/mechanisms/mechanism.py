@@ -31,19 +31,25 @@ class KineticMechanism(ABC):
 
     parameter_reactant_links = {}
 
-    def __init__(self, name, reactants, parameters = None):
+    def __init__(self, name, reactants, parameters=None, inhibitors=None):
         # ABC.__init__()
         self.name = name
         self.reactants = reactants
+        self.inhibitors = None
         self._parameters = None
 
         if parameters is not None:
             self._parameters = parameters
             # self.set_dynamic_attribute_links(self._parameters)
+        if inhibitors is not None:
+            self.inhibitors = inhibitors
 
     def link_parameters_and_reactants(self):
         for p,r in self.parameter_reactant_links.items():
-            reactant = self.reactants[r]
+            try:
+                reactant = self.reactants[r]
+            except KeyError:
+                reactant = self.inhibitors[r]
             parameter = self.parameters[p]
             parameter.hook = reactant
             #reactant.hook = parameter
@@ -96,6 +102,10 @@ class KineticMechanism(ABC):
 
         reactants = [x.symbol for x in self.reactants.values()
                                if x.type == VARIABLE]
+        if self.inhibitors is not None:
+            inhibitors = [x.symbol for x in self.inhibitors.values()
+                         if x.type == VARIABLE]
+            reactants += inhibitors
 
         parameters = set(expr.free_symbols).difference(reactants)
 
