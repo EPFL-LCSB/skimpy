@@ -34,7 +34,8 @@ class ModelGenerator(ABC):
                  small_molecules=None,
                  small_molecule_modifier=None,
                  water=None,
-                 hydrogen=None):
+                 hydrogen=None,
+                 reaction_groups=None):
         """
         This class defines the rules to build a kinetic models from
         solely stoichiometric data and supplemented data
@@ -43,11 +44,12 @@ class ModelGenerator(ABC):
         :param reactant_relations: relations of reactants e.g. S1 to P1 and P2
         :param small_molecules: list of small molecules ids
         :param water: id of the water molecule
+
         """
         self.reaction_to_mechanisms = reaction_to_mechanisms
         self.reactant_relations = reactant_relations
-
-
+        self.reaction_groups = reaction_groups
+        self.reactions_to_reaction_groups = {rxn: group for group, list in reaction_groups.items() for rxn in list}
         """Default values """
         if small_molecules is None:
             self.small_molecules = \

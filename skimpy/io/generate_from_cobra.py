@@ -40,13 +40,16 @@ class FromCobra(ModelGenerator):
                  small_molecules=None,
                  water=None,
                  hydrogen=None,
+                 reaction_groups=None,
                  ):
         ModelGenerator.__init__(self,
                                 reaction_to_mechanisms=reaction_to_mechanisms,
                                 reactant_relations=reactant_relations,
                                 small_molecules=small_molecules,
                                 water=water,
-                                hydrogen=hydrogen)
+                                hydrogen=hydrogen,
+                                reaction_groups=reaction_groups
+                                )
 
     def import_model(self,cobra_model):
         """
@@ -65,7 +68,7 @@ class FromCobra(ModelGenerator):
         parameters = {}
         for this_reaction in cobra_model.reactions:
            if not check_boundary_reaction(this_reaction):
-                this_kinetic_reaction = self.import_reaction(this_reaction)
+                this_kinetic_reaction = self.import_reaction(cobra_model, this_reaction)
                 if this_kinetic_reaction is not None:
                     this_mechanism = this_kinetic_reaction.mechanism
                     parameters[this_kinetic_reaction.name] = this_mechanism.Parameters()
@@ -89,7 +92,7 @@ class FromCobra(ModelGenerator):
         skimpy_model.parametrize_by_reaction(parameters)
         return skimpy_model
 
-    def import_reaction(self, cobra_reaction, name=None):
+    def import_reaction(self, cobra_model, cobra_reaction, name=None):
 
         if name is None:
             name = cobra_reaction.id
@@ -115,10 +118,33 @@ class FromCobra(ModelGenerator):
             for k,v in cobra_reaction.metabolites.items():
                 k = sanitize_cobra_vars(k.id)
                 met_stoich_dict[k] = v
+            # Get inhibitors from reaction groups
+            try:
+                reaction_group = self.reactions_to_reaction_groups[name]
+                reactions_in_group = self.reaction_groups[reaction_group]
+                reactants = set([])
+                products  = set([])
+                this_reactants = set(cobra_reaction.reactants)
+                this_products  = set(cobra_reaction.products)
+
+                for rxn_id in reactions_in_group:
+                    this_cobra_reaction = cobra_model.reactions.get_by_id(rxn_id)
+                    reactants.update(this_cobra_reaction.reactants)
+                    products.update(this_cobra_reaction.products)
+
+                inhibitors = products.difference(this_products)\
+                    .union(reactants.difference(this_reactants))
+                inhibitors = [i.id for i in inhibitors]
+
+            except KeyError:
+                inhibitors = None
+                reaction_group = None
 
             skimpy_reaction = create_reaction_from_stoich(name,
                                                           met_stoich_dict,
-                                                          self)
+                                                          self,
+                                                          inhibitors=inhibitors,
+                                                          reaction_group=reaction_group)
 
         return skimpy_reaction
 

@@ -149,8 +149,9 @@ class ReactantSet(ItemSet):
 
         if set(reactant_declaration) != set(reactant_values.keys()):
             raise KeyError('The reactants provided do not match the signature of '
-                           'the mechanism - should contain: {}'
-                            .format(set(reactant_values)))
+                           'the mechanism - should contain: {} not {}'
+                            .format(set(reactant_declaration),
+                                    set(reactant_values)))
 
         for s,v in reactant_values.items():
             self[s] = Reactant(v)

@@ -43,7 +43,9 @@ class FromPyTFA(FromCobra):
                  reactant_relations={},
                  small_molecules=None,
                  water=None,
-                 hydrogen=None):
+                 hydrogen=None,
+                 reaction_groups=None,
+                 ):
 
         ModelGenerator.__init__(self,
                                 reaction_to_mechanisms=reaction_to_mechanisms,
@@ -51,6 +53,7 @@ class FromPyTFA(FromCobra):
                                 small_molecules=small_molecules,
                                 water=water,
                                 hydrogen=hydrogen,
+                                reaction_groups=reaction_groups,
                                 )
 
     def import_model(self, pytfa_model, pytfa_solution):
@@ -71,7 +74,9 @@ class FromPyTFA(FromCobra):
         parameters = {}
         for this_reaction in pytfa_model.reactions:
             if not check_boundary_reaction(this_reaction):
-                this_skimpy_reaction = self.import_reaction(this_reaction,name=this_reaction.id)
+                this_skimpy_reaction = self.import_reaction(pytfa_model,
+                                                            this_reaction,
+                                                            name=this_reaction.id)
 
                 if this_skimpy_reaction is not None:
                     # get delta_Gstd variable name
@@ -92,7 +97,6 @@ class FromPyTFA(FromCobra):
 
                     skimpy_model.add_reaction(this_skimpy_reaction)
 
-
         for this_reaction in pytfa_model.reactions:
             # TODO Check wtf id vs name in pytfa
             if check_boundary_reaction(this_reaction):
@@ -102,7 +106,7 @@ class FromPyTFA(FromCobra):
                     # If the metabolite does not correspond to water as water is
                     # omited from the reactions
                     if not met.startswith("{}_".format(self.water)) \
-                    and not met.startswith("{}_".format(self.hydrogen)) :
+                    and not met.startswith("{}_".format(self.hydrogen)):
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)

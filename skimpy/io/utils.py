@@ -31,7 +31,9 @@ import re
 
 def create_reaction_from_stoich(name,
                                 met_stoich_dict,
-                                model_generator):
+                                model_generator,
+                                inhibitors=None,
+                                reaction_group=None):
 
     water = model_generator.water
     hydrogen = model_generator.hydrogen
@@ -62,6 +64,15 @@ def create_reaction_from_stoich(name,
 
             this_reaction_reactants[this_met] = stoich
 
+    # Filter inhibitors
+    if inhibitors is not None:
+        inhibitors = [inh for inh in inhibitors
+                      if not inh.startswith("{}_".format(water))
+                      and not inh.startswith("{}_".format(hydrogen))
+                      and not is_small_molecule]
+        if inhibitors == []:
+            inhibitors = None
+
     # TODO this currently catches transport of small molecules
     # create proper transports
     if not this_reaction_reactants:
@@ -73,16 +84,26 @@ def create_reaction_from_stoich(name,
     if not this_reaction_reactants:
         return None
 
+
     # Determine mechanism
-    mechanism = guess_mechanism(this_reaction_reactants)
+    mechanism = guess_mechanism(this_reaction_reactants, inhibitors)
     # Determine reactant order
     reactants = make_reactant_set(mechanism,
                                   this_reaction_reactants,
                                   reactant_relations)
+    # TODO: Can we generalize this type o?????
+    #Create an inhibitor set if there are any
+    if inhibitors is not None:
+        inhibitor_key_value =  {'inhibitor{}'.format(i+1): e
+                                for i, e in enumerate(inhibitors)}
+        inhibitors = mechanism.Inhibitors(**inhibitor_key_value)
 
     skimpy_reaction = Reaction(name=name,
                                 reactants=reactants,
-                                mechanism=mechanism)
+                                mechanism=mechanism,
+                                inhibitors=inhibitors,
+                                enzyme=reaction_group,
+                               )
 
     # Add small molecules modifiers
     small_molecule_modifier = model_generator.small_molecule_modifier
@@ -105,7 +126,11 @@ def create_reaction_from_data(name,
     raise NotImplmentendError
 
 
-def guess_mechanism(reactants):
+def guess_mechanism(reactants,inhibitors):
+    if inhibitors is not None:
+        stoich = [i for i in reactants.values()]
+        stoich_inhibitors = [1 for i in inhibitors]
+        return make_convenience_with_inhibition(stoich,stoich_inhibitors)
     # 1) Reversible Michaelis Menten kinetics
     mechanism = check_rev_michaelis_menten(reactants)
     if mechanism is not None:

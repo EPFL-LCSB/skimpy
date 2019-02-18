@@ -44,7 +44,8 @@ ALL_MODIFIER_SUBCLASSES = make_subclasses_dict(ExpressionModifier)
 ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience': make_convenience,
                                     'GeneralizedReversibleHill': make_generalized_reversible_hill_n_n,
                                     'IrrevMichaelisMenten': make_irrev_m_n_michaelis_menten,
-                                    'IrrevMassaction': make_irrev_massaction}
+                                    'IrrevMassaction': make_irrev_massaction,
+                                    'ConvenienceInhibited': make_convenience_with_inhibition}
 
 FIELDS_TO_SERIALIZE = [
                        # 'variables',
