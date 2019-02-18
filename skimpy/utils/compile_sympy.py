@@ -31,7 +31,7 @@ import os
 
 from sympy.printing import ccode
 
-CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
+CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False, language_level=3"+\
                      "nonecheck=True, initializecheck=False , optimize=False\n"+\
                      "# distutils: language = c++ \n"
 
