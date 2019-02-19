@@ -45,6 +45,7 @@ ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience': make_convenience,
                                     'GeneralizedReversibleHill': make_generalized_reversible_hill_n_n,
                                     'IrrevMichaelisMenten': make_irrev_m_n_michaelis_menten,
                                     'IrrevMassaction': make_irrev_massaction,
+                                    'RevMassaction': make_rev_massaction,
                                     'ConvenienceInhibited': make_convenience_with_inhibition}
 
 FIELDS_TO_SERIALIZE = [

@@ -38,7 +38,7 @@ from .utils import stringify_stoichiometry
 
 
 
-def make_irrev_massaction(stoichiometry):
+def make_rev_massaction(stoichiometry):
 
     """
 
@@ -53,13 +53,14 @@ def make_irrev_massaction(stoichiometry):
     if new_class_name in ALL_MECHANISM_SUBCLASSES.keys():
         return ALL_MECHANISM_SUBCLASSES[new_class_name]
 
-    class IrrevMassaction(KineticMechanism):
+    class RevMassaction(KineticMechanism):
         """A reversible N-M enyme class """
 
         suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
         reactant_list = []
-        parameter_list = {'k_forward': [ODE, MCA, QSSA],}
+        parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'k_equilibrium': [ODE, MCA, QSSA],}
 
         parameter_reactant_links = {}
         reactant_stoichiometry = {}
@@ -99,14 +100,19 @@ def make_irrev_massaction(stoichiometry):
             products= {k:r for k,r in self.reactants.items()
                           if k.startswith('product')}
 
-            kf = self.parameters.k_forward.symbol
+            kf = self.parameters.vmax_forward.symbol
+            Keq = self.parameters.k_equilibrium.symbol
 
             forward_rate_expression = kf
-            backward_rate_expression = 0
+            backward_rate_expression = kf*Keq
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 forward_rate_expression *= s
+
+            for type, this_product in products.items():
+                p = this_product.symbol
+                forward_rate_expression *= p
 
             rate_expression = forward_rate_expression-backward_rate_expression
 
@@ -158,6 +164,6 @@ def make_irrev_massaction(stoichiometry):
         def calculate_rate_constants(self):
             raise NotImplementedError
 
-    IrrevMassaction.__name__ += IrrevMassaction.suffix
+    RevMassaction.__name__ += RevMassaction.suffix
 
-    return IrrevMassaction
+    return RevMassaction
