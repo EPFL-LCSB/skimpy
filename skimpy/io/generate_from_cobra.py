@@ -119,24 +119,28 @@ class FromCobra(ModelGenerator):
                 k = sanitize_cobra_vars(k.id)
                 met_stoich_dict[k] = v
             # Get inhibitors from reaction groups
-            try:
-                reaction_group = self.reactions_to_reaction_groups[name]
-                reactions_in_group = self.reaction_groups[reaction_group]
-                reactants = set([])
-                products  = set([])
-                this_reactants = set(cobra_reaction.reactants)
-                this_products  = set(cobra_reaction.products)
+            if self.reactions_to_reaction_groups is not None:
+                try:
+                    reaction_group = self.reactions_to_reaction_groups[name]
+                    reactions_in_group = self.reaction_groups[reaction_group]
+                    reactants = set([])
+                    products  = set([])
+                    this_reactants = set(cobra_reaction.reactants)
+                    this_products  = set(cobra_reaction.products)
 
-                for rxn_id in reactions_in_group:
-                    this_cobra_reaction = cobra_model.reactions.get_by_id(rxn_id)
-                    reactants.update(this_cobra_reaction.reactants)
-                    products.update(this_cobra_reaction.products)
+                    for rxn_id in reactions_in_group:
+                        this_cobra_reaction = cobra_model.reactions.get_by_id(rxn_id)
+                        reactants.update(this_cobra_reaction.reactants)
+                        products.update(this_cobra_reaction.products)
 
-                inhibitors = products.difference(this_products)\
-                    .union(reactants.difference(this_reactants))
-                inhibitors = [i.id for i in inhibitors]
+                    inhibitors = products.difference(this_products)\
+                        .union(reactants.difference(this_reactants))
+                    inhibitors = [i.id for i in inhibitors]
 
-            except KeyError:
+                except KeyError:
+                    inhibitors = None
+                    reaction_group = None
+            else:
                 inhibitors = None
                 reaction_group = None
 
