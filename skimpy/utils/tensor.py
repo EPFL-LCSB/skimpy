@@ -150,6 +150,20 @@ class Tensor(object):
         the_data = self._data.std(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
+    def quantile(self, slicer, *args, **kwargs):
+        """
+        Flatten using the standard deviation along an index
+        :param slicer:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+
+        axis = self.get_slice_index(slicer)
+        index1, index2 = self.complementary_indexes[slicer]
+        the_data = np.percentile(self._data, axis=axis, *args, **kwargs)
+        return self.make_df(the_data, index1, index2)
+
     def make_df(self, data, index1, index2):
 
         return pd.DataFrame(data,
