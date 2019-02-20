@@ -104,7 +104,7 @@ def make_rev_massaction(stoichiometry):
             Keq = self.parameters.k_equilibrium.symbol
 
             forward_rate_expression = kf
-            backward_rate_expression = kf*Keq
+            backward_rate_expression = kf/Keq
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
