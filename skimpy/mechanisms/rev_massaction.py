@@ -112,7 +112,7 @@ def make_rev_massaction(stoichiometry):
 
             for type, this_product in products.items():
                 p = this_product.symbol
-                forward_rate_expression *= p
+                backward_rate_expression *= p
 
             rate_expression = forward_rate_expression-backward_rate_expression
 
