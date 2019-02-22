@@ -32,5 +32,6 @@ from .convenience_with_inihibition import *
 from .generalized_reversible_hill_n_n import *
 from .irrev_m_n_michaelis_menten import *
 from .irrev_massaction import *
+from .rev_massaction import *
 
 from .mechanism import KineticMechanism

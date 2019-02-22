@@ -52,8 +52,8 @@ def modal_matrix(kmodel,concentration_dict,parameters):
 
     if not hasattr(kmodel,'flux_fun'):
 
-        flux_expressions = [ rxn.mechanism.reaction_rates['v_net']
-                             for rxn in kmodel.reactions.values()]
+        flux_expressions = TabDict([ (rxn.name,rxn.mechanism.reaction_rates['v_net'])
+                             for rxn in kmodel.reactions.values()])
         flux_parameters = TabDict([(str(p),p) for rxn in kmodel.reactions.values()
                             for p in rxn.mechanism.expression_parameters])
         kmodel.flux_fun = FluxFunction(kmodel.variables,
@@ -73,7 +73,7 @@ def modal_matrix(kmodel,concentration_dict,parameters):
     lam,_ = eig(jacobian.todense())
     _,W = eig(jacobian.todense().T)
 
-    index = Index(lam, name ='eigenvalues')
+    index = Index([np.real(v) for v in lam], name ='eigenvalues')
     columns = kmodel.variables.keys()
 
     return DataFrame(W, index=index, columns=columns)

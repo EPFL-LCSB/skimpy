@@ -49,7 +49,10 @@ class ModelGenerator(ABC):
         self.reaction_to_mechanisms = reaction_to_mechanisms
         self.reactant_relations = reactant_relations
         self.reaction_groups = reaction_groups
-        self.reactions_to_reaction_groups = {rxn: group for group, list in reaction_groups.items() for rxn in list}
+        if reaction_groups is not None:
+            self.reactions_to_reaction_groups = {rxn: group for group, list in reaction_groups.items() for rxn in list}
+        else:
+            self.reactions_to_reaction_groups = None
         """Default values """
         if small_molecules is None:
             self.small_molecules = \
