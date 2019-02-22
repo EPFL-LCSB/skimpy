@@ -48,12 +48,12 @@ RUN chmod +x /utils/*.sh
 RUN /utils/install_sundials.sh
 
 # Export environment vairables from installation
-ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-2.7.0/include"
-ENV SUNDIALS_LIBDIR ="${HOME}/sundials-2.7.0/lib"
+ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-3.1.1/include"
+ENV SUNDIALS_LIBDIR ="${HOME}/sundials-3.1.1/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-2.7.0"
 # Install python interface to sundials
 RUN pip install scikits.odes
-ENV LD_LIBRARY_PATH="${HOME}/sundials-2.7.0/lib"
+ENV LD_LIBRARY_PATH="${HOME}/sundials-3.1.1/lib"
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
 
