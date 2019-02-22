@@ -79,6 +79,9 @@ cdef int get_fmpz_mat_entry(fmpz_mat_t A, int row, int column):
 
 cpdef left_integer_nullspace(matrix):
 
+    if not np.issubdtype(matrix.dtype,np.integer):
+        raise TypeError("The Matrix is not integer.")
+
     n_0 = matrix.shape[0]
     m_0 = matrix.shape[1]
 
@@ -101,7 +104,7 @@ cpdef left_integer_nullspace(matrix):
     for i in range(n):
         for j in range(m):
             entry = fmpq_mat_entry(matrix_t, i, j)
-            q.num = int(matrix[i,j])
+            q.num = matrix[i,j]
             q.den = 1
             fmpq_set(entry ,q )
 

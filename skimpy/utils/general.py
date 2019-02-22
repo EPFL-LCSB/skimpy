@@ -55,7 +55,9 @@ def get_stoichiometry(kinetic_model, variables):
 
                 N = sum([this_stoich for this_var, this_stoich in reaction_items
                          if str(this_variable) == this_var.name])
-
+                #Convert to real integer i
+                if float(N).is_integer():
+                    N = int(N)
                 values.append(N)
                 rows.append(row_ix)
                 columns.append(column_ix)
