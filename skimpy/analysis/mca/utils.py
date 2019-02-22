@@ -223,6 +223,8 @@ def make_elasticity_fun_multicore(expressions,respective_variables ,variables, p
     inputs = [(i,e,respective_variables) for i,e in enumerate(expressions)]
 
     all_row_slices = pool.map(make_elasticity_single_row,inputs)
+    pool.close()
+    pool.join()
 
     elasticity_expressions = join_dicts(all_row_slices)
 

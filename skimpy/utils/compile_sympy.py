@@ -76,13 +76,15 @@ def generate_vectorized_code(inputs, expressions, simplify=True, ncpu=1):
 
     pool = multiprocessing.Pool(ncpu)
     if simplify:
-        cython_code = pool.map_async(generate_a_code_line, enumerate(expressions))
+        cython_code = pool.map(generate_a_code_line, enumerate(expressions))
 
     else:
         #ToDo make this also parallel not urgenet though
         cython_code = ["output_array[{}] = {} ".format(i, ccode(e))
                        for i, e in enumerate(expressions)]
 
+    pool.close()
+    pool.join()
     cython_code = '\n'.join(cython_code)
 
     for str_sym, array_sym in input_subs.items():
@@ -98,5 +100,4 @@ def generate_vectorized_code(inputs, expressions, simplify=True, ncpu=1):
 
 def generate_a_code_line(input):
     i, e = input
-    print(i)
     return "output_array[{}] = {} ".format(i,ccode(e.simplify()))
