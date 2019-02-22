@@ -98,7 +98,7 @@ class ElasticityFunction:
         # The current L0 gives the relation L0*[xi|xd] = C
 
         # Concentrations
-        X = concentration_vector
+        X = array(concentration_vector)
         Xi = X[all_independent_ix]
         Xd = X[all_dependent_ix]
 
