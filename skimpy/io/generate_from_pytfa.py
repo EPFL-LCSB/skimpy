@@ -79,15 +79,25 @@ class FromPyTFA(FromCobra):
                                                             name=this_reaction.id)
 
                 if this_skimpy_reaction is not None:
-                    # get delta_Gstd variable name
+                    # get delta_Gstd variable name from LC and Delta G
+                    temp = pytfa_model.TEMPERATURE
+                    gas_constant = pytfa_model.GAS_CONSTANT
+                    RT = pytfa_model.RT
+
+                    # We here calculate the delta G from
                     try:
-                        var_delta_g_std = pytfa_model.delta_gstd.get_by_id(this_reaction.id).name
-                        deltag0 = pytfa_solution.raw[var_delta_g_std]
+                        var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
+                        deltag0 = pytfa_solution.raw[var_delta_g]
+                        # TODO CAN WE DO BETTER
+                        for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
+                            if met.formula is not "H2O":
+                                var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
+                                met_lc = pytfa_solution.raw[var_met_lc]
+                                deltag0 -= s*RT*met_lc
+
                     except KeyError:
                         deltag0 = self.dummy_dgo
 
-                    temp = pytfa_model.TEMPERATURE
-                    gas_constant = pytfa_model.GAS_CONSTANT
                     k_eq = deltag0_to_keq(deltag0,
                                           temp,
                                           gas_constant=gas_constant)
