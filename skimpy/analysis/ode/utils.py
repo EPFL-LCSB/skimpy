@@ -32,7 +32,7 @@ from skimpy.utils import iterable_to_tabdict, TabDict
 from skimpy.utils.namespace import *
 
 
-def make_ode_fun(kinetic_model, sim_type):
+def make_ode_fun(kinetic_model, sim_type, ncpu=1):
     """
 
     :param kinetic_model:
@@ -109,6 +109,7 @@ def make_ode_fun(kinetic_model, sim_type):
 
     # Mass balance
     # Sum up all rate expressions
+    # Todo Add here the parralel option interm of two functions
     for this_reaction in all_expr:
         for this_variable_key in this_reaction:
             try:

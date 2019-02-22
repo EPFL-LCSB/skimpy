@@ -29,6 +29,8 @@ import Cython
 import re
 import os
 
+import multiprocessing
+
 from sympy.printing import ccode
 
 CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False, language_level=3"+\
@@ -49,9 +51,12 @@ def _set_cflags():
 
 
 
-def make_cython_function(symbols, expressions, quiet=True , simplify=True):
+def make_cython_function(symbols, expressions, quiet=True , simplify=True, ncpu=1):
 
-    code_expressions = generate_vectorized_code(symbols, expressions, simplify=simplify)
+    code_expressions = generate_vectorized_code(symbols,
+                                                expressions,
+                                                simplify=simplify,
+                                                ncpu=ncpu)
 
     _set_cflags()
 
@@ -64,15 +69,17 @@ def make_cython_function(symbols, expressions, quiet=True , simplify=True):
     return this_function
 
 
-def generate_vectorized_code(inputs, expressions, simplify=True):
+def generate_vectorized_code(inputs, expressions, simplify=True, ncpu=1):
     # input substitution dict:
-    input_subs = {str(e):"input_array[{}]".format(i)
-                  for i,e in enumerate(inputs)}
+    input_subs = {str(e): "input_array[{}]".format(i)
+                  for i, e in enumerate(inputs)}
 
+    pool = multiprocessing.Pool(ncpu)
     if simplify:
-        cython_code = ["output_array[{}] = {} ".format(i,ccode(e.simplify()))
-                       for i,e in enumerate(expressions)]
+        cython_code = pool.map_async(generate_a_code_line, enumerate(expressions))
+
     else:
+        #ToDo make this also parallel not urgenet though
         cython_code = ["output_array[{}] = {} ".format(i, ccode(e))
                        for i, e in enumerate(expressions)]
 
@@ -87,3 +94,9 @@ def generate_vectorized_code(inputs, expressions, simplify=True):
                          r"\1 \2.0 \3 ",
                          cython_code)
     return cython_code
+
+
+def generate_a_code_line(input):
+    i, e = input
+    print(i)
+    return "output_array[{}] = {} ".format(i,ccode(e.simplify()))

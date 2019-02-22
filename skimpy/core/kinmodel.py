@@ -160,7 +160,9 @@ class KineticModel(object):
         self._modified = True
 
     def compile_ode(self,
-                    sim_type=QSSA,):
+                    sim_type=QSSA,
+                    ncpu=1,
+                    ):
 
         # For security
         self.update()
@@ -170,7 +172,7 @@ class KineticModel(object):
         # Recompile only if modified or simulation
         if self._modified or self.sim_type != sim_type:
             # Compile ode function
-            ode_fun, variables = make_ode_fun(self, sim_type)
+            ode_fun, variables = make_ode_fun(self, sim_type, ncpu=ncpu)
             # TODO define the init properly
             self.ode_fun = ode_fun
             self.variables = variables
@@ -221,7 +223,7 @@ class KineticModel(object):
 
         return ODESolution(self, solution)
 
-    def compile_mca(self, parameter_list=[], sim_type=QSSA):
+    def compile_mca(self, parameter_list=[], sim_type=QSSA, ncpu=1):
             """
             Compile MCA expressions: elasticities, jacobian
             and control coeffcients
@@ -240,8 +242,10 @@ class KineticModel(object):
                 independent_variables_ix,\
                 dependent_variables_ix,\
                     = make_mca_functions(self,
-                                                     parameter_list,
-                                                     sim_type=sim_type)
+                                         parameter_list,
+                                         sim_type=sim_type,
+                                         ncpu=ncpu,
+                                        )
 
                 self.independent_elasticity_fun = independent_elasticity_fun
                 self.dependent_elasticity_fun = dependent_elasticity_fun

@@ -28,6 +28,8 @@ limitations under the License.
 from collections import defaultdict, OrderedDict
 import numpy as np
 
+import multiprocessing
+
 from scipy.sparse import csr_matrix, csc_matrix
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import diff, simplify, Matrix, eye, zeros
@@ -44,7 +46,7 @@ from ...utils.namespace import *
 
 sparse_matrix = csc_matrix
 
-def make_mca_functions(kinetic_model,parameter_list,sim_type):
+def make_mca_functions(kinetic_model,parameter_list,sim_type, ncpu=1):
     """ Create the elasticity and flux functions for MCA
     :param kinmodel:
     :param parameter_list:
@@ -132,7 +134,8 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
         parameter_elasticities_fun = make_elasticity_fun(all_flux_expressions,
                                                          parameter_list,
                                                          all_variables,
-                                                         all_parameters)
+                                                         all_parameters,
+                                                         ncpu)
     else:
         parameter_elasticities_fun = None
 
@@ -140,13 +143,15 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
     independent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
                                                       all_independent_variables,
                                                       all_variables,
-                                                      all_parameters)
+                                                      all_parameters,
+                                                      ncpu)
 
     if all_dependent_variables:
         dependent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
                                                         all_dependent_variables,
                                                         all_variables,
-                                                        all_parameters)
+                                                        all_parameters,
+                                                        ncpu)
     else:
         dependent_elasticity_fun = None
 
@@ -163,28 +168,40 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
 
 
-def make_elasticity_fun(expressions,respective_variables ,variables, parameters):
+def make_elasticity_fun(expressions,respective_variables ,variables, parameters, ncpu=1):
     """
     Create an ElasticityFunction with elasticity = dlog(expression)/dlog(respective_variable)
     :param expressions  tab_dict of expressions (e.g. forward and backward fluxes)
     :param variables    list of variables as string (e.g. concentrations or parameters)
     
     """
+    if ncpu == 1:
+        elasticity_fun = make_elasticity_fun_single_cpu(expressions,
+                                                       respective_variables,
+                                                       variables,
+                                                       parameters)
+    else:
+        elasticity_fun = make_elasticity_fun_multicore(expressions,
+                                                      respective_variables,
+                                                      variables,
+                                                      parameters,
+                                                      ncpu)
 
+
+    return elasticity_fun
+
+
+def make_elasticity_fun_single_cpu(expressions,respective_variables ,variables, parameters):
     # Get the derivative of expression x vs variable y
     elasticity_expressions = {}
-    column = 0
-    row = 0
 
-    for this_expression in expressions:
+    for row, this_expression in enumerate(expressions):
 
-        column = 0
-        for this_variable in respective_variables.values():
+        for column,this_variable in enumerate(respective_variables.values()):
+
             if this_variable in this_expression.free_symbols:
                 this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
                 elasticity_expressions[(row, column)] = this_elasticity
-            column += 1
-        row += 1
 
     # Shape of the matrix
     shape = (len(expressions), len(respective_variables))
@@ -195,8 +212,49 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters)
                                         variables,
                                         parameters,
                                         shape, )
-
     return elasticity_fun
+
+
+def make_elasticity_fun_multicore(expressions,respective_variables ,variables, parameters, ncpu):
+    # Get the derivative of expression x vs variable y
+
+    pool = multiprocessing.Pool(ncpu)
+
+    inputs = [(i,e,respective_variables) for i,e in enumerate(expressions)]
+
+    all_row_slices = pool.map(make_elasticity_single_row,inputs)
+
+    elasticity_expressions = join_dicts(all_row_slices)
+
+    # Shape of the matrix
+    shape = (len(expressions), len(respective_variables))
+
+    # Create the elasticity function
+    elasticity_fun = ElasticityFunction(elasticity_expressions,
+                                        respective_variables,
+                                        variables,
+                                        parameters,
+                                        shape,
+                                        ncpu=ncpu)
+    return elasticity_fun
+
+
+def make_elasticity_single_row(input):
+    """
+    Halter function to compute a full row of the elasticity matrix
+    :param input: input tuple of row, expression and all respective vars
+    :return:
+    """
+    elasticity_expressions_row_slice = {}
+    this_row, this_expression, respective_variables = input
+
+    for column, this_variable in enumerate(respective_variables.values()):
+
+        if this_variable in this_expression.free_symbols:
+            this_elasticity = get_dlogx_dlogy(this_expression, this_variable)
+            elasticity_expressions_row_slice[(this_row, column)] = this_elasticity
+
+    return elasticity_expressions_row_slice
 
 
 def get_dlogx_dlogy(sympy_expression, variable):

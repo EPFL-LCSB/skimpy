@@ -34,7 +34,7 @@ from skimpy.utils.tabdict import TabDict
 from skimpy.utils.compile_sympy import make_cython_function
 
 class ElasticityFunction:
-    def __init__(self, expressions, respective_variables, variables,  parameters, shape):
+    def __init__(self, expressions, respective_variables, variables,  parameters, shape, ncpu=1):
         """
         Constructor for a precompiled function to compute elasticities
         numerically
@@ -72,7 +72,7 @@ class ElasticityFunction:
         # self.function = theano_function(sym_vars, expressions,
         #                                 on_unused_input='ignore')
 
-        self.function = make_cython_function(sym_vars, expressions)
+        self.function = make_cython_function(sym_vars, expressions, ncpu=ncpu)
 
     def __call__(self, variables, parameters):
         """
