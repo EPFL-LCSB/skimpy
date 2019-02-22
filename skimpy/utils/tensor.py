@@ -150,7 +150,7 @@ class Tensor(object):
         the_data = self._data.std(axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
-    def quantile(self, slicer, *args, **kwargs):
+    def quantile(self, slicer, quantile, *args, **kwargs):
         """
         Flatten using the standard deviation along an index
         :param slicer:
@@ -161,7 +161,7 @@ class Tensor(object):
 
         axis = self.get_slice_index(slicer)
         index1, index2 = self.complementary_indexes[slicer]
-        the_data = np.percentile(self._data, axis=axis, *args, **kwargs)
+        the_data = np.percentile(self._data, quantile*100.0, axis=axis, *args, **kwargs)
         return self.make_df(the_data, index1, index2)
 
     def make_df(self, data, index1, index2):
