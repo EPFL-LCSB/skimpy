@@ -278,7 +278,23 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
     S = full_stoichiometry.todense()
     # Left basis dimensions: rows are metabolites, columns are moieties
     # L0*S = 0 -> L0 is the left null space matrix
-    left_basis = left_integer_nullspace(S)
+    S_non_integer = None
+    try:
+        left_basis = left_integer_nullspace(S)
+    except TypeError:
+        # Get reactions containing non integers
+        non_integer_rxn_idx = set([j for i in range(S.shape[0])
+                                   for j in range(S.shape[1])
+                                   if not float(S[i, j]).is_integer()])
+        integer_rxn_idx = set(range(S.shape[1])).difference(non_integer_rxn_idx)
+        S_non_integer = S[:,list(non_integer_rxn_idx)]
+
+        non_integer_rxns = [kinetic_model.reactions.iloc(i)[0] for i in non_integer_rxn_idx]
+        kinetic_model.logger.warning('Non integer stoichiometries found {} '
+                                      'do not consider for linear dependencies'.format(non_integer_rxns))
+
+        S = S[:,list(integer_rxn_idx)].astype(int)
+        left_basis = left_integer_nullspace(S)
 
     if left_basis.any():
 
@@ -373,6 +389,18 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         all_independent_ix = range(full_stoichiometry.shape[0])
         all_dependent_ix = []
         conservation_relation = sparse_matrix(np.array([]),dtype=np.float)
+
+    # Reconstruct with non integer reactions
+    if S_non_integer is not None:
+        reduced_stoichiometry_int = reduced_stoichiometry.todense()
+        reduced_stoichiometry = np.zeros((reduced_stoichiometry.shape[0],
+                                          S.shape[1]+S_non_integer.shape[1]))
+        for i,ix in enumerate(integer_rxn_idx):
+            reduced_stoichiometry[:,ix] = reduced_stoichiometry_int[:,i].T
+        for i,ix in enumerate(non_integer_rxn_idx):
+            reduced_stoichiometry[:,ix] = S_non_integer[all_independent_ix,i].T
+        # Reconvert to sparse
+        reduced_stoichiometry = sparse_matrix(np.array(reduced_stoichiometry), dtype=np.float)
 
     return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 
