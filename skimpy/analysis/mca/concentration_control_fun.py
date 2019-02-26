@@ -62,10 +62,12 @@ class ConcentrationControlFunction:
         #
 
         fluxes = [flux_dict[r] for r in self.model.reactions]
+
+        # Only consider independent concentrations
         concentrations = [concentration_dict[r] for r in self.model.reactants]
 
         num_parameters = len(self.parameter_elasticity_function.expressions)
-        num_concentration = len(concentrations)
+        num_concentration = len(self.independent_variable_ix)
         population_size = len(parameter_population)
 
         concentration_control_coefficients = zeros((num_concentration,num_parameters,population_size))
@@ -81,7 +83,7 @@ class ConcentrationControlFunction:
                 elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
 
             else:
-                # If there are moieties
+                # If there are omieties
                 ix = self.independent_variable_ix
 
                 elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
@@ -108,7 +110,8 @@ class ConcentrationControlFunction:
             this_cc = - N_E_V_inv.dot(N_E_P)
             concentration_control_coefficients[:,:,i] = this_cc.todense()
 
-        concentration_index = pd.Index(self.model.reactants.keys(), name="concentration")
+        concentration_index = pd.Index([self.model.reactants.iloc(i) for i in self.independent_variable_ix],
+                                       name="concentration")
         parameter_index = pd.Index(self.parameter_elasticity_function.respective_variables, name="parameter")
         sample_index = pd.Index(range(population_size), name="sample")
 
