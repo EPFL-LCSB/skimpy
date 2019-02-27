@@ -46,7 +46,7 @@ from ...utils.namespace import *
 
 sparse_matrix = csc_matrix
 
-def make_mca_functions(kinetic_model,parameter_list,sim_type, ncpu=1):
+def make_mca_functions(kinetic_model,parameter_list,sim_type):
     """ Create the elasticity and flux functions for MCA
     :param kinmodel:
     :param parameter_list:
@@ -135,7 +135,8 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type, ncpu=1):
                                                          parameter_list,
                                                          all_variables,
                                                          all_parameters,
-                                                         ncpu)
+                                                         kinetic_model.pool
+                                                         )
     else:
         parameter_elasticities_fun = None
 
@@ -144,14 +145,16 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type, ncpu=1):
                                                       all_independent_variables,
                                                       all_variables,
                                                       all_parameters,
-                                                      ncpu)
+                                                      kinetic_model.pool
+                                                     )
 
     if all_dependent_variables:
         dependent_elasticity_fun = make_elasticity_fun(all_flux_expressions,
                                                         all_dependent_variables,
                                                         all_variables,
                                                         all_parameters,
-                                                        ncpu)
+                                                        kinetic_model.pool
+                                                       )
     else:
         dependent_elasticity_fun = None
 
@@ -168,14 +171,14 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type, ncpu=1):
 
 
 
-def make_elasticity_fun(expressions,respective_variables ,variables, parameters, ncpu=1):
+def make_elasticity_fun(expressions,respective_variables ,variables, parameters, pool=None):
     """
     Create an ElasticityFunction with elasticity = dlog(expression)/dlog(respective_variable)
     :param expressions  tab_dict of expressions (e.g. forward and backward fluxes)
     :param variables    list of variables as string (e.g. concentrations or parameters)
     
     """
-    if ncpu == 1:
+    if pool is None:
         elasticity_fun = make_elasticity_fun_single_cpu(expressions,
                                                        respective_variables,
                                                        variables,
@@ -185,7 +188,7 @@ def make_elasticity_fun(expressions,respective_variables ,variables, parameters,
                                                       respective_variables,
                                                       variables,
                                                       parameters,
-                                                      ncpu)
+                                                      pool)
 
 
     return elasticity_fun
@@ -215,16 +218,12 @@ def make_elasticity_fun_single_cpu(expressions,respective_variables ,variables, 
     return elasticity_fun
 
 
-def make_elasticity_fun_multicore(expressions,respective_variables ,variables, parameters, ncpu):
+def make_elasticity_fun_multicore(expressions,respective_variables ,variables, parameters, pool):
     # Get the derivative of expression x vs variable y
-
-    pool = multiprocessing.Pool(ncpu)
 
     inputs = [(i,e,respective_variables) for i,e in enumerate(expressions)]
 
     all_row_slices = pool.map(make_elasticity_single_row,inputs)
-    pool.close()
-    pool.join()
 
     elasticity_expressions = join_dicts(all_row_slices)
 
@@ -237,7 +236,7 @@ def make_elasticity_fun_multicore(expressions,respective_variables ,variables, p
                                         variables,
                                         parameters,
                                         shape,
-                                        ncpu=ncpu)
+                                        pool=pool)
     return elasticity_fun
 
 

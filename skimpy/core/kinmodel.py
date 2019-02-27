@@ -35,6 +35,7 @@ from .solution import ODESolution
 from ..utils import TabDict, iterable_to_tabdict
 from ..utils.namespace import *
 
+from multiprocessing import Pool
 
 class KineticModel(object):
     """
@@ -228,6 +229,8 @@ class KineticModel(object):
             Compile MCA expressions: elasticities, jacobian
             and control coeffcients
             """
+            if not hasattr(self, 'pool'):
+                self.pool = Pool(ncpu)
 
             # Recompile only if modified or simulation
             if self._modified or self.sim_type != sim_type:
@@ -243,8 +246,7 @@ class KineticModel(object):
                 dependent_variables_ix,\
                     = make_mca_functions(self,
                                          parameter_list,
-                                         sim_type=sim_type,
-                                         ncpu=ncpu,
+                                         sim_type=sim_type
                                         )
 
                 self.independent_elasticity_fun = independent_elasticity_fun

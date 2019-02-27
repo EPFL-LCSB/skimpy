@@ -32,7 +32,7 @@ from sympy import symbols,Symbol
 from skimpy.utils.compile_sympy import make_cython_function
 
 class SaturationParameterFunction():
-    def __init__(self,parameters,concentrations):
+    def __init__(self,model,parameters,concentrations):
 
 
         sym_concentrations = [c for c in concentrations]
@@ -54,7 +54,7 @@ class SaturationParameterFunction():
 
         sym_vars = sym_saturations + sym_concentrations
 
-        self.function = make_cython_function(sym_vars, expressions, simplify=False)
+        self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
 
     def __call__(self,parameters,concentrations):
         _saturations = sample(len(self.sym_saturations))

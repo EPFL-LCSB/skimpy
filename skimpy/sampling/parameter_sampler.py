@@ -146,7 +146,8 @@ class SimpleParameterSampler(ParameterSampler):
         Compliles the function for sampling using theano
         :param model:
         """
-        model.saturation_parameter_function = SaturationParameterFunction(model.parameters,
+        model.saturation_parameter_function = SaturationParameterFunction(model,
+                                                                          model.parameters,
                                                                          concentrations)
 
         model.flux_parameter_function = FluxParameterFunction(model,

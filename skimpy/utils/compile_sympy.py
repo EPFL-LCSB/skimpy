@@ -51,12 +51,12 @@ def _set_cflags():
 
 
 
-def make_cython_function(symbols, expressions, quiet=True , simplify=True, ncpu=1):
+def make_cython_function(symbols, expressions, quiet=True , simplify=True, pool=None):
 
     code_expressions = generate_vectorized_code(symbols,
                                                 expressions,
                                                 simplify=simplify,
-                                                ncpu=ncpu)
+                                                pool=pool)
 
     _set_cflags()
 
@@ -69,35 +69,58 @@ def make_cython_function(symbols, expressions, quiet=True , simplify=True, ncpu=
     return this_function
 
 
-def generate_vectorized_code(inputs, expressions, simplify=True, ncpu=1):
+def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
     # input substitution dict:
     input_subs = {str(e): "input_array[{}]".format(i)
                   for i, e in enumerate(inputs)}
 
-    pool = multiprocessing.Pool(ncpu)
+    if pool is None:
+        raise RuntimeError()
+
     if simplify:
-        cython_code = pool.map(generate_a_code_line, enumerate(expressions))
+        input_subs_input = [input_subs, ]*len(expressions)
+        i,e =zip(*enumerate(expressions))
+        cython_code = pool.map(generate_a_code_line_simplfied, zip(i,e,input_subs_input) )
 
     else:
-        #ToDo make this also parallel not urgenet though
-        cython_code = ["output_array[{}] = {} ".format(i, ccode(e))
-                       for i, e in enumerate(expressions)]
+        input_subs_input = [input_subs, ] * len(expressions)
+        i, e = zip(*enumerate(expressions))
+        cython_code = pool.map(generate_a_code_line, zip(i, e, input_subs_input))
 
-    pool.close()
-    pool.join()
+    #pool.close()
+    #pool.join()
     cython_code = '\n'.join(cython_code)
+
+    return cython_code
+
+
+def generate_a_code_line_simplfied(input):
+    i, e, input_subs = input
+    cython_code = "output_array[{}] = {} ".format(i,ccode(e.simplify()))
+    # Substitute integers in the cython code
+    cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
+                         r"\1 \2.0 \3 ",
+                         cython_code)
 
     for str_sym, array_sym in input_subs.items():
         cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)({})(\ |\+|\-|\*|\(|\)|\/|\,)".format(str_sym),
                              r"\1 {} \3 ".format(array_sym),
                              cython_code)
-    # Substitute integers in the cython code
-    cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
-                         r"\1 \2.0 \3 ",
-                         cython_code)
+
     return cython_code
 
 
 def generate_a_code_line(input):
-    i, e = input
-    return "output_array[{}] = {} ".format(i,ccode(e.simplify()))
+    i, e, input_subs = input
+    cython_code = "output_array[{}] = {} ".format(i,ccode(e))
+    # Substitute integers in the cython code
+    cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
+                         r"\1 \2.0 \3 ",
+                         cython_code)
+
+    for str_sym, array_sym in input_subs.items():
+        cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)({})(\ |\+|\-|\*|\(|\)|\/|\,)".format(str_sym),
+                             r"\1 {} \3 ".format(array_sym),
+                             cython_code)
+
+    return cython_code
