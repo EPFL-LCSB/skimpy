@@ -28,7 +28,7 @@ from .utils import get_reduced_stoichiometry
 from skimpy.utils.tabdict import TabDict
 
 
-def prepare_mca(kinetic_model):
+def prepare_mca(kinetic_model, **kwargs):
 
     # Better since this is implemented now
     all_variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
@@ -36,6 +36,7 @@ def prepare_mca(kinetic_model):
     #Get depedent variables (i.e. concentrations)
     reduced_stoichiometry, dependent_weights, independent_ix, dependent_ix = \
         get_reduced_stoichiometry(kinetic_model, all_variables)
+
 
     return reduced_stoichiometry,\
            dependent_weights,\

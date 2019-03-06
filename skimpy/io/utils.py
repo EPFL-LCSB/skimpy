@@ -40,8 +40,8 @@ def create_reaction_from_stoich(name,
     small_molecules = model_generator.small_molecules
     reactant_relations = model_generator.reactant_relations
 
-    this_reaction_small_molecules = {}
-    this_reaction_reactants = {}
+    this_reaction_small_molecules = TabDict([])
+    this_reaction_reactants = TabDict([])
 
     """ 
     Split into small molecules and reactants

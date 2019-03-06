@@ -161,7 +161,7 @@ class KineticModel(object):
         self._simtype = value
         self._modified = True
 
-    def prepare(self, mca=True, ode=True):
+    def prepare(self, mca=True, ode=True, **kwargs):
         """
         Model preparation for different analysis types. The preparation is done before the compiling steo
         to be able to curate the model in between
@@ -170,16 +170,19 @@ class KineticModel(object):
         :param ode:
         :return:
         """
+        self.variables = TabDict([(k, v.symbol) for k, v in self.reactants.items()])
+
         if mca:
             reduced_stoichometriy,\
             conservation_relation, \
             independent_variables_ix, \
-            dependent_variables_ix = prepare_mca(kinetic_model=self)
+            dependent_variables_ix = prepare_mca(kinetic_model=self, **kwargs)
 
             self.conservation_relation = conservation_relation
             self.reduced_stoichiometry = reduced_stoichometriy
             self.dependent_variables_ix = dependent_variables_ix
             self.independent_variables_ix = independent_variables_ix
+
 
         if ode:
             pass

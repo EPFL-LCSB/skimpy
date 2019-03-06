@@ -28,6 +28,7 @@ limitations under the License.
 import yaml
 from yaml.representer import SafeRepresenter
 from re import sub as re_sub
+import re
 
 from skimpy.utils import TabDict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
@@ -158,9 +159,15 @@ def get_mechanism(classdict):
         if any(map(_find, ALL_MODIFIER_SUBCLASSES)):
             return ALL_MECHANISM_SUBCLASSES[classname]
 
+        #todo Make this realiable and nice !!!!
+        # TODO the way we create the mechanism can be easily
         stoich_dict = classdict.pop('mechanism_stoichiometry')
         make_mechanism = get_generic_constructor(classname)
-        stoichiometry = list(stoich_dict.values())
+
+        index_stoich = [(int(re.findall(r'\d+',k)[0]), v)
+                        for k, v in stoich_dict.items()]
+
+        stoichiometry = [v for k,v in sorted(index_stoich)]
         return make_mechanism(stoichiometry)
 
     except KeyError:
