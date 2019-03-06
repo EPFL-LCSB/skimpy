@@ -110,7 +110,7 @@ class ConcentrationControlFunction:
             this_cc = - N_E_V_inv.dot(N_E_P)
             concentration_control_coefficients[:,:,i] = this_cc.todense()
 
-        concentration_index = pd.Index([self.model.reactants.iloc(i) for i in self.independent_variable_ix],
+        concentration_index = pd.Index([self.model.reactants.iloc(i)[0] for i in self.independent_variable_ix],
                                        name="concentration")
         parameter_index = pd.Index(self.parameter_elasticity_function.respective_variables, name="parameter")
         sample_index = pd.Index(range(population_size), name="sample")
