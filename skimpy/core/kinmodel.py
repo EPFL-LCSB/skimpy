@@ -27,7 +27,8 @@ limitations under the License.
 
 from scikits.odes import ode
 from skimpy.analysis.ode.utils import make_ode_fun
-from skimpy.analysis.mca.utils import make_mca_functions
+from skimpy.analysis.mca.make import make_mca_functions
+from skimpy.analysis.mca.prepare import prepare_mca
 from skimpy.analysis.mca import *
 from ..utils.logger import get_bistream_logger
 from .solution import ODESolution
@@ -160,6 +161,29 @@ class KineticModel(object):
         self._simtype = value
         self._modified = True
 
+    def prepare(self, mca=True, ode=True):
+        """
+        Model preparation for different analysis types. The preparation is done before the compiling steo
+        to be able to curate the model in between
+
+        :param mca:
+        :param ode:
+        :return:
+        """
+        if mca:
+            reduced_stoichometriy,\
+            conservation_relation, \
+            independent_variables_ix, \
+            dependent_variables_ix = prepare_mca(kinetic_model=self)
+
+            self.conservation_relation = conservation_relation
+            self.reduced_stoichiometry = reduced_stoichometriy
+            self.dependent_variables_ix = dependent_variables_ix
+            self.independent_variables_ix = independent_variables_ix
+
+        if ode:
+            pass
+
     def compile_ode(self,
                     sim_type=QSSA,
                     ncpu=1,
@@ -236,14 +260,9 @@ class KineticModel(object):
             if self._modified or self.sim_type != sim_type:
 
                 # Get the model expressions
-                reduced_stoichometriy,\
                 independent_elasticity_fun, \
                 dependent_elasticity_fun, \
                 parameter_elasticities_fun, \
-                conservation_relation, \
-                all_variables, \
-                independent_variables_ix,\
-                dependent_variables_ix,\
                     = make_mca_functions(self,
                                          parameter_list,
                                          sim_type=sim_type
@@ -251,41 +270,37 @@ class KineticModel(object):
 
                 self.independent_elasticity_fun = independent_elasticity_fun
                 self.dependent_elasticity_fun = dependent_elasticity_fun
-                self.dependent_variables_ix = dependent_variables_ix
-                self.independent_variables_ix = independent_variables_ix
                 self.parameter_elasticities_fun = parameter_elasticities_fun
-                self.conservation_relation = conservation_relation
-                self.variables = all_variables
-                self.reduced_stoichiometry = reduced_stoichometriy
+
 
                 # Build functions for stability and control coefficient's
                 self.jacobian_fun = JacobianFunction(
-                    reduced_stoichometriy,
-                    independent_elasticity_fun,
-                    dependent_elasticity_fun,
-                    conservation_relation,
-                    independent_variables_ix,
-                    dependent_variables_ix)
+                    self.reduced_stoichiometry,
+                    self.independent_elasticity_fun,
+                    self.dependent_elasticity_fun,
+                    self.conservation_relation,
+                    self.independent_variables_ix,
+                    self.dependent_variables_ix)
 
                 self.concentration_control_fun = ConcentrationControlFunction(
                     self,
-                    reduced_stoichometriy,
-                    independent_elasticity_fun,
-                    dependent_elasticity_fun,
-                    parameter_elasticities_fun,
-                    conservation_relation,
-                    independent_variables_ix,
-                    dependent_variables_ix)
+                    self.reduced_stoichiometry,
+                    self.independent_elasticity_fun,
+                    self.dependent_elasticity_fun,
+                    self.parameter_elasticities_fun,
+                    self.conservation_relation,
+                    self.independent_variables_ix,
+                    self.dependent_variables_ix)
 
                 self.flux_control_fun = FluxControlFunction(
                     self,
-                    reduced_stoichometriy,
-                    independent_elasticity_fun,
-                    dependent_elasticity_fun,
-                    parameter_elasticities_fun,
-                    conservation_relation,
-                    independent_variables_ix,
-                    dependent_variables_ix,
+                    self.reduced_stoichiometry,
+                    self.independent_elasticity_fun,
+                    self.dependent_elasticity_fun,
+                    self.parameter_elasticities_fun,
+                    self.conservation_relation,
+                    self.independent_variables_ix,
+                    self.dependent_variables_ix,
                     self.concentration_control_fun)
 
 
