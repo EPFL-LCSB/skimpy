@@ -56,8 +56,8 @@ class SaturationParameterFunction():
 
         self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
 
-    def __call__(self,parameters,concentrations):
-        _saturations = sample(len(self.sym_saturations))
+    def __call__(self,saturations,parameters,concentrations):
+        _saturations = saturations
         _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
 
         input = np.concatenate((_saturations,_concentrations))
