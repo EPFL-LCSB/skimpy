@@ -51,7 +51,7 @@ def robust_index(in_var):
         raise TypeError('Value should be of type str or sympy.Symbol')
 
 class ODEFunction:
-    def __init__(self, model, variables, expr, parameters, ncpu=1):
+    def __init__(self, model, variables, expr, parameters, pool=None):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
@@ -82,7 +82,7 @@ class ODEFunction:
         expressions = [self.expr[x] for x in self.variables.values()]
 
         # Awsome magic
-        self.function = make_cython_function(sym_vars, expressions, simplify=False, ncpu=ncpu)
+        self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=pool)
 
     @property
     def parameters(self):

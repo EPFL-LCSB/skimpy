@@ -32,7 +32,7 @@ from skimpy.utils import iterable_to_tabdict, TabDict
 from skimpy.utils.namespace import *
 
 
-def make_ode_fun(kinetic_model, sim_type, ncpu=1):
+def make_ode_fun(kinetic_model, sim_type, pool=None):
     """
 
     :param kinetic_model:
@@ -129,7 +129,7 @@ def make_ode_fun(kinetic_model, sim_type, ncpu=1):
     #     this_boundary_condition(expr)
 
     # Make vector function from expressions
-    ode_fun = ODEFunction(kinetic_model, variables, expr, all_parameters)
+    ode_fun = ODEFunction(kinetic_model, variables, expr, all_parameters, pool=pool)
 
     return ode_fun, variables
 
@@ -168,7 +168,3 @@ def make_flux_fun(kinetic_model):
     flux_fun._parameter_values = kinetic_model.ode_fun.parameter_values
 
     return flux_fun
-
-
-
-

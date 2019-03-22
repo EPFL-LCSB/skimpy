@@ -197,10 +197,13 @@ class KineticModel(object):
 
         self.sim_type = sim_type
 
+        if not hasattr(self, 'pool'):
+            self.pool = Pool(ncpu)
+
         # Recompile only if modified or simulation
         if self._modified or self.sim_type != sim_type:
             # Compile ode function
-            ode_fun, variables = make_ode_fun(self, sim_type, ncpu=ncpu)
+            ode_fun, variables = make_ode_fun(self, sim_type, pool=self.pool)
             # TODO define the init properly
             self.ode_fun = ode_fun
             self.variables = variables
@@ -231,6 +234,7 @@ class KineticModel(object):
         """
         extra_options = {'old_api': False}
         kwargs.update(extra_options)
+
         # Choose a solver
         if not hasattr(self, 'solver')\
            or self._recompiled:
@@ -305,7 +309,3 @@ class KineticModel(object):
                     self.independent_variables_ix,
                     self.dependent_variables_ix,
                     self.concentration_control_fun)
-
-
-
-
