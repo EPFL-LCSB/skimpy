@@ -1,4 +1,7 @@
 # Skimpy
+# Igonre file in the work folder
+./docker/work/*
+
 # Ignore generated c files
 skimpy/cython/nullspace.c
 # Ignore model files by default
