@@ -70,7 +70,7 @@ this_model.parametrize_by_reaction({'E1': parameters_1,
                         'E2': parameters_2,
                         'E3': parameters_3})
 
-
+this_model.prepare(mca=True)
 this_model.compile_mca()
 
 flux_dict = {'E1': 1.0, 'E2': 1.0, 'E3': 1.0}

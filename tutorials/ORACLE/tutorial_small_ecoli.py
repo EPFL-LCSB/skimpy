@@ -149,7 +149,7 @@ kmodel.update()
 """
 Compile the model
 """
-
+this_model.prepare(mca=True)
 # Compile MCA functions
 kmodel.compile_mca(sim_type=QSSA)
 
