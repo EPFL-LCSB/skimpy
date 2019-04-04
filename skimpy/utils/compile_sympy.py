@@ -93,8 +93,6 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
             i, e = zip(*enumerate(expressions))
             cython_code = pool.map(generate_a_code_line, zip(i, e, input_subs_input))
 
-    #pool.close()
-    #pool.join()
     cython_code = '\n'.join(cython_code)
 
     return cython_code
