@@ -1,4 +1,4 @@
-FROM python:3.5
+FROM python:3.5-stretch
 # Install missing deps
 USER root
 # Install unix requirements for the docker
