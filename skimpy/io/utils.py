@@ -33,7 +33,8 @@ def create_reaction_from_stoich(name,
                                 met_stoich_dict,
                                 model_generator,
                                 inhibitors=None,
-                                reaction_group=None):
+                                reaction_group=None,
+                                irrev=None):
 
     water = model_generator.water
     hydrogen = model_generator.hydrogen
@@ -86,7 +87,7 @@ def create_reaction_from_stoich(name,
 
 
     # Determine mechanism
-    mechanism = guess_mechanism(this_reaction_reactants, inhibitors)
+    mechanism = guess_mechanism(this_reaction_reactants, inhibitors, irrev=irrev)
     # Determine reactant order
     reactants = make_reactant_set(mechanism,
                                   this_reaction_reactants,
@@ -126,27 +127,36 @@ def create_reaction_from_data(name,
     raise NotImplmentendError
 
 
-def guess_mechanism(reactants,inhibitors):
+def guess_mechanism(reactants,inhibitors,irrev=None):
+
+    stoich = [i for i in reactants.values()]
+    stoich.sort(reverse=True)
+
+    if irrev:
+        return make_irrev_m_n_michaelis_menten(stoich)
+
     if inhibitors is not None:
-        stoich = [i for i in reactants.values()]
         stoich_inhibitors = [1 for i in inhibitors]
         return make_convenience_with_inhibition(stoich,stoich_inhibitors)
-    # 1) Reversible Michaelis Menten kinetics
+    # 2) Reversible Michaelis Menten kinetics
     mechanism = check_rev_michaelis_menten(reactants)
     if mechanism is not None:
         return mechanism
-    # Else convineince or irrevv MM
+    # 3) Test for Generalized Reversible hill
+    # Stoichiometry needs to be equal to 1/-1 and same number of products
+    # and substrates
+    abs_eqal = lambda x: abs(x) == 1
+    if all(map(abs_eqal,stoich)) and sum(stoich) == 0:
+        return make_generalized_reversible_hill_n_n(stoich)
+    # Else Conv-kinetics
     else:
-        stoich = [i for i in reactants.values()]
-        stoich.sort(reverse=True)
-        if max(stoich) > 3 or len(stoich) > 5:
-            return make_irrev_m_n_michaelis_menten(stoich)
-        else:
-            return make_convenience(stoich)
+        return make_convenience(stoich)
+
+
 
 def check_boundary_reaction(cobra_reaction):
     stoich = [i for i in cobra_reaction.metabolites.values()]
-    if all([i < 0for i in stoich] ) or all([i > 0for i in stoich]):
+    if all([i < 0 for i in stoich] ) or all([i > 0for i in stoich]):
         return True
     else:
         return False

@@ -92,7 +92,7 @@ class FromCobra(ModelGenerator):
         skimpy_model.parametrize_by_reaction(parameters)
         return skimpy_model
 
-    def import_reaction(self, cobra_model, cobra_reaction, name=None):
+    def import_reaction(self, cobra_model, cobra_reaction, name=None, irrev_direction=0):
 
         if name is None:
             name = cobra_reaction.id
@@ -144,11 +144,25 @@ class FromCobra(ModelGenerator):
                 inhibitors = None
                 reaction_group = None
 
+            if irrev_direction > 0:
+                #Irreversible in forward direction
+                irrev = True
+            elif irrev_direction < 0:
+                #Irreversible in backward direction
+                # invert the assumed forward stoichiometry
+                irrev  = True
+                met_stoich_dict = {k:-v for k,v in met_stoich_dict}
+            else:
+                # Not irreverisble
+                irrev = False
+                pass
+
             skimpy_reaction = create_reaction_from_stoich(name,
                                                           met_stoich_dict,
                                                           self,
                                                           inhibitors=inhibitors,
-                                                          reaction_group=reaction_group)
+                                                          reaction_group=reaction_group,
+                                                          irrev=irrev)
 
         return skimpy_reaction
 

@@ -45,6 +45,7 @@ class FromPyTFA(FromCobra):
                  water=None,
                  hydrogen=None,
                  reaction_groups=None,
+                 max_revesible_deltag_0 = 100,
                  ):
 
         ModelGenerator.__init__(self,
@@ -55,6 +56,8 @@ class FromPyTFA(FromCobra):
                                 hydrogen=hydrogen,
                                 reaction_groups=reaction_groups,
                                 )
+
+        self.max_revesible_deltag_0 = max_revesible_deltag_0
 
     def import_model(self, pytfa_model, pytfa_solution):
         """
@@ -74,33 +77,25 @@ class FromPyTFA(FromCobra):
         parameters = {}
         for this_reaction in pytfa_model.reactions:
             if not check_boundary_reaction(this_reaction):
+
+                k_eq, deltag0 = self.get_equlibrium_constant(pytfa_model, pytfa_solution, this_reaction)
+
+                # Check the reversibility of the reaction
+                if deltag0 < -self.max_revesible_deltag_0:
+                    # Forward
+                    irrev_direction = 1
+                elif deltag0 > self.max_revesible_deltag_0:
+                    # Barckwards
+                    irrev_direction = -1
+                else:
+                    irrev_direction = 0
+
                 this_skimpy_reaction = self.import_reaction(pytfa_model,
                                                             this_reaction,
-                                                            name=this_reaction.id)
+                                                            name=this_reaction.id,
+                                                            irrev_direction=irrev_direction)
 
                 if this_skimpy_reaction is not None:
-                    # get delta_Gstd variable name from LC and Delta G
-                    temp = pytfa_model.TEMPERATURE
-                    gas_constant = pytfa_model.GAS_CONSTANT
-                    RT = pytfa_model.RT
-
-                    # We here calculate the delta G from
-                    try:
-                        var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
-                        deltag0 = pytfa_solution.raw[var_delta_g]
-                        # TODO CAN WE DO BETTER
-                        for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
-                            if met.formula is not "H2O":
-                                var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
-                                met_lc = pytfa_solution.raw[var_met_lc]
-                                deltag0 -= s*RT*met_lc
-
-                    except KeyError:
-                        deltag0 = self.dummy_dgo
-
-                    k_eq = deltag0_to_keq(deltag0,
-                                          temp,
-                                          gas_constant=gas_constant)
 
                     this_mechanism = this_skimpy_reaction.mechanism
                     parameters[this_skimpy_reaction.name] = this_mechanism.Parameters(k_equilibrium=k_eq)
@@ -124,6 +119,29 @@ class FromPyTFA(FromCobra):
         skimpy_model.parametrize_by_reaction(parameters)
 
         return skimpy_model
+
+    def get_equlibrium_constant(self, pytfa_model, pytfa_solution, this_reaction):
+        # get delta_Gstd variable name from LC and Delta G
+        temp = pytfa_model.TEMPERATURE
+        gas_constant = pytfa_model.GAS_CONSTANT
+        RT = pytfa_model.RT
+        # We here calculate the delta G from
+        try:
+            var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
+            deltag0 = pytfa_solution.raw[var_delta_g]
+            # TODO CAN WE DO BETTER
+            for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
+                if met.formula is not "H2O":
+                    var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
+                    met_lc = pytfa_solution.raw[var_met_lc]
+                    deltag0 -= s * RT * met_lc
+
+        except KeyError:
+            deltag0 = self.dummy_dgo
+        k_eq = deltag0_to_keq(deltag0,
+                              temp,
+                              gas_constant=gas_constant)
+        return k_eq, deltag0
 
 
 
