@@ -29,6 +29,10 @@ from bokeh.plotting import figure, output_file, show, curdoc
 from bokeh.layouts import column
 from bokeh.palettes import Spectral11, viridis
 
+import numpy as np
+import pandas as pd
+
+
 def timetrace_plot(time,data,filename='out.html', legend = None):
     """
     Classic time vs. Y-value plot.
@@ -67,6 +71,55 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
 
         # show the results
         show(p)
+
+
+def boxplot(df, filename):
+
+        mean = df.mean()
+        not_nan = [i for i,e in enumerate(mean) if e is not np.nan]
+        cats = df.mean().dropna().index.values
+        # find the quartiles and IQR for each category
+        groups = df[cats]
+        q1 = groups.quantile(q=0.25)
+        q2 = groups.quantile(q=0.5)
+        q3 = groups.quantile(q=0.75)
+        iqr = q3 - q1
+        upper = q3 + 1.5 * iqr
+        lower = q1 - 1.5 * iqr
+
+        qmin = groups.quantile(q=0.00)
+        qmax = groups.quantile(q=1.00)
+        upper = [min([x, y]) for (x, y) in zip(list(qmax.loc[:]), upper)]
+        lower = [max([x, y]) for (x, y) in zip(list(qmin.loc[:]), lower)]
+
+        p = figure(tools="",
+                   plot_height=1000,
+                   plot_width=20*len(cats),
+                   y_axis_type="log",
+                   background_fill_color="#efefef",
+                   y_range=(qmin.min(), qmax.max()),
+                   x_range=cats,
+                   toolbar_location=None)
+
+
+
+        # stems
+        p.segment(cats, upper, cats, q3, line_color="black")
+        p.segment(cats, lower, cats, q1, line_color="black")
+
+        # boxes
+        p.vbar(cats, 0.7, q2, q3, fill_color="#E08E79", line_color="black")
+        p.vbar(cats, 0.7, q1, q2, fill_color="#3B8686", line_color="black")
+
+        p.xgrid.grid_line_color = None
+        p.ygrid.grid_line_color = "white"
+        p.grid.grid_line_width = 2
+        p.xaxis.major_label_text_font_size = "12pt"
+        p.xaxis.major_label_orientation = np.pi / 2.
+
+        output_file(filename)
+        show(p)
+
 
 
 def plot_population_per_variable(data, filename, stride = 1):
