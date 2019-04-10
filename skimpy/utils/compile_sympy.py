@@ -75,20 +75,24 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
                   for i, e in enumerate(inputs)}
 
     if pool is None:
-        raise RuntimeError()
-
-    if simplify:
-        input_subs_input = [input_subs, ]*len(expressions)
-        i,e =zip(*enumerate(expressions))
-        cython_code = pool.map(generate_a_code_line_simplfied, zip(i,e,input_subs_input) )
+        cython_code = []
+        for i,e in enumerate(expressions):
+            if simplify:
+                cython_code.append(generate_a_code_line_simplfied((i,e,input_subs_input)))
+            else:
+                cython_code.append(generate_a_code_line((i, e, input_subs)))
 
     else:
-        input_subs_input = [input_subs, ] * len(expressions)
-        i, e = zip(*enumerate(expressions))
-        cython_code = pool.map(generate_a_code_line, zip(i, e, input_subs_input))
+        if simplify:
+            input_subs_input = [input_subs, ]*len(expressions)
+            i,e =zip(*enumerate(expressions))
+            cython_code = pool.map(generate_a_code_line_simplfied, zip(i,e,input_subs_input) )
 
-    #pool.close()
-    #pool.join()
+        else:
+            input_subs_input = [input_subs, ] * len(expressions)
+            i, e = zip(*enumerate(expressions))
+            cython_code = pool.map(generate_a_code_line, zip(i, e, input_subs_input))
+
     cython_code = '\n'.join(cython_code)
 
     return cython_code

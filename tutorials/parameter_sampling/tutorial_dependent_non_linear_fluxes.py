@@ -169,6 +169,7 @@ this_model.parametrize_by_reaction({'PGK'   : parameters_pgk,
                         'ENO'   : parameters_eno})
 
 
+this_model.prepare(mca=True)
 this_model.compile_mca()
 
 

@@ -137,7 +137,7 @@ concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items
 """
 Sample the kinetic parameters using MCA
 """
-
+this_model.prepare(mca=True)
 # Compile MCA functions
 this_skimpy_model.compile_mca(sim_type=QSSA)
 
