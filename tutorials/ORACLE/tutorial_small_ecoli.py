@@ -34,7 +34,7 @@ from pytfa.io.viz import get_reaction_data
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.utils.namespace import *
-from skimpy.sampling import SimpleParameterSampler
+from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
 from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars

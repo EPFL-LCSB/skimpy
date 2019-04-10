@@ -29,7 +29,7 @@ import numpy as np
 
 from skimpy.core import *
 from skimpy.mechanisms import *
-from skimpy.sampling import SimpleParameterSampler
+from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
 from skimpy.io.generate_from_cobra import FromCobra
 

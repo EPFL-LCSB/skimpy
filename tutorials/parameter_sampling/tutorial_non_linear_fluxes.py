@@ -28,7 +28,7 @@ limitations under the License.
 # Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
-from skimpy.sampling import SimpleParameterSampler
+from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 
 # Build linear Pathway model
 metabolites_1 = ReversibleMichaelisMenten.Reactants(substrate='A', product='B')

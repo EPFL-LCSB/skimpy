@@ -30,7 +30,7 @@ import numpy as np
 # Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
-from skimpy.sampling import SimpleParameterSampler
+from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
 
 # 'DM_13dpg'        10
