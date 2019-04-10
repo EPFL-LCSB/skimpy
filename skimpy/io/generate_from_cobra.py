@@ -35,20 +35,10 @@ class FromCobra(ModelGenerator):
     Class to generate Kinetic models from cobra
     """
     def __init__(self,
-                 reaction_to_mechanisms={},
-                 reactant_relations={},
-                 small_molecules=None,
-                 water=None,
-                 hydrogen=None,
-                 reaction_groups=None,
-                 ):
+                 **kwargs):
+
         ModelGenerator.__init__(self,
-                                reaction_to_mechanisms=reaction_to_mechanisms,
-                                reactant_relations=reactant_relations,
-                                small_molecules=small_molecules,
-                                water=water,
-                                hydrogen=hydrogen,
-                                reaction_groups=reaction_groups
+                                **kwargs
                                 )
 
     def import_model(self,cobra_model):
