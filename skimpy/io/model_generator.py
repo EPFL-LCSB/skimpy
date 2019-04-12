@@ -46,7 +46,11 @@ class ModelGenerator(ABC):
         :param water: id of the water molecule
 
         """
-        self.reaction_to_mechanisms = reaction_to_mechanisms
+        if reaction_to_mechanisms is not None:
+            self.reaction_to_mechanisms = reaction_to_mechanisms
+        else:
+            self.reaction_to_mechanisms = dict()
+
         self.reactant_relations = reactant_relations
         self.reaction_groups = reaction_groups
         if reaction_groups is not None:
