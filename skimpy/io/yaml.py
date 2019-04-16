@@ -30,12 +30,17 @@ from yaml.representer import SafeRepresenter
 from re import sub as re_sub
 import re
 
-from skimpy.utils import TabDict
+import numpy as np
+from scipy.sparse import csr_matrix, csc_matrix
+
+from skimpy.utils import TabDict, iterable_to_tabdict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
     ConstantConcentration, KineticModel, ExpressionModifier
 from skimpy.mechanisms import *
-from skimpy.utils.general import make_subclasses_dict
+from skimpy.utils.general import make_subclasses_dict, get_stoichiometry
 from skimpy.utils.namespace import PARAMETER, VARIABLE
+
+from skimpy.analysis.mca.utils import get_reduced_stoichiometry
 
 ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
 ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
@@ -62,7 +67,9 @@ FIELDS_TO_SERIALIZE = [
                        'reactions',
                        # '_modified',
                        'name',
-                       'initial_conditions']
+                       'initial_conditions',
+                       'dependent_reactants',
+                        ]
 
 #----------------------------------------------------------------
 #                       Model serialization
@@ -243,4 +250,27 @@ def load_yaml_model(path):
     # Do not forget to update parameters
     new.update()
 
+    #If the model the model has computed moieties we reconstruct them too
+    if 'dependent_reactants' in the_dict.keys():
+        rebuild_dependent_mets(new, the_dict)
+
     return new
+
+
+def rebuild_dependent_mets(new, the_dict):
+    new.dependent_reactants = iterable_to_tabdict([new.reactants[r]
+                                                   for r in the_dict["dependent_reactants"]])
+    new.dependent_variables_ix = [i for i, e in enumerate(new.reactants.keys())
+                                  if e in new.dependent_reactants.keys()]
+    new.independent_variables_ix = [i for i, e in enumerate(new.reactants.keys())
+                                    if e not in new.dependent_reactants.keys()]
+
+    new.variables = TabDict([(k, v.symbol) for k, v in new.reactants.items()])
+
+    reduced_stoichiometry, conservation_relation, _, _ \
+        = get_reduced_stoichiometry(new,
+                                    new.variables,
+                                    all_dependent_ix=new.dependent_variables_ix)
+
+    new.reduced_stoichiometry = reduced_stoichiometry
+    new.conservation_relation = conservation_relation

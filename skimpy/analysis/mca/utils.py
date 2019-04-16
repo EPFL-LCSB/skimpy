@@ -58,7 +58,7 @@ def get_dlogx_dlogy(sympy_expression, variable):
     return expression
 
 
-def get_reduced_stoichiometry(kinetic_model, all_variables):
+def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=None):
 
     #TODO IMPLEMENT THE MOIJETY DETECTION
     full_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
@@ -101,36 +101,45 @@ def get_reduced_stoichiometry(kinetic_model, all_variables):
         for k, v in zip(nonzero_rows, nonzero_cols):
             row_dict[k].append(v)
 
-        # The first independent variables are those involved in no moieties
-        all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
-        # Indices for dependent metabolites indices
-        all_dependent_ix = []
+            # The first independent variables are those involved in no moieties
+            all_independent_ix = [x for x in range(L0.shape[1]) if not x in nonzero_cols]
+        if all_dependent_ix is None:
+            # Indices for dependent metabolites indices
+            all_dependent_ix = []
 
-        # For each line, get an exclusive representative.
-        # There should be at least as many exclusive representatives as lines
+            # For each line, get an exclusive representative.
+            # There should be at least as many exclusive representatives as lines
 
-        # Iterate over mojeties and start with the ones with least members
-        for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
-            mojetie_vars = row_dict[row]
-            # Get all unassigned metabolites participating in this mojetie
-            unassigned_vars = [x for x in set(mojetie_vars)
-                .difference(all_independent_ix+all_dependent_ix)]
-            # Get the metabolite that participates in least mojeties:
-            unassigned_vars_sorted = sorted(unassigned_vars,
-                   key=lambda k: L0_sparse[:,row].count_nonzero())
+            # Iterate over mojeties and start with the ones with least members
+            for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
+                mojetie_vars = row_dict[row]
+                # Get all unassigned metabolites participating in this mojetie
+                unassigned_vars = [x for x in set(mojetie_vars)
+                    .difference(all_independent_ix+all_dependent_ix)]
+                # Get the metabolite that participates in least mojeties:
+                unassigned_vars_sorted = sorted(unassigned_vars,
+                       key=lambda k: L0_sparse[:,row].count_nonzero())
 
-            # Choose a representative dependent metabolite:
-            if unassigned_vars_sorted:
-                all_dependent_ix.append(unassigned_vars_sorted[0])
-            else:
-                raise Exception('Could not find an dependent var that is not already used'
-                                ' in {}'.format(mojetie_vars))
+                # Choose a representative dependent metabolite:
+                if unassigned_vars_sorted:
+                    all_dependent_ix.append(unassigned_vars_sorted[0])
+                else:
+                    raise Exception('Could not find an dependent var that is not already used'
+                                    ' in {}'.format(mojetie_vars))
+
+        else:
+            # The depednent ix are defined as an input
+            pass
 
         # The independent mets is the set difference from the dependent
         all_independent_ix = [x for x in set(range(L0.shape[1]))
             .difference(all_dependent_ix)]
 
+
+
+
         # Reindex S in N, N0
+
         #S = Matrix(S[all_independent_ix+all_dependent_ix,:])
 
         # If we reindex S, then so should be L0

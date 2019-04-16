@@ -183,6 +183,8 @@ class KineticModel(object):
             self.dependent_variables_ix = dependent_variables_ix
             self.independent_variables_ix = independent_variables_ix
 
+            self.dependent_reactants = TabDict([self.reactants.iloc(ix)
+                                        for ix in self.dependent_variables_ix])
 
         if ode:
             pass
