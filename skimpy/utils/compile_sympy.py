@@ -78,7 +78,7 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
         cython_code = []
         for i,e in enumerate(expressions):
             if simplify:
-                cython_code.append(generate_a_code_line_simplfied((i,e,input_subs_input)))
+                cython_code.append(generate_a_code_line_simplfied((i,e,input_subs)))
             else:
                 cython_code.append(generate_a_code_line((i, e, input_subs)))
 
