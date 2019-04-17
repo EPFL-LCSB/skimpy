@@ -33,5 +33,7 @@ from .generalized_reversible_hill_n_n import *
 from .irrev_m_n_michaelis_menten import *
 from .irrev_massaction import *
 from .rev_massaction import *
+from .bi_uni_reversible_hill import *
+from .uni_bi_reversible_hill import *
 
 from .mechanism import KineticMechanism
