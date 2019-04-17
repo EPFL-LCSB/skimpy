@@ -27,11 +27,82 @@ limitations under the License.
 
 
 
-def make_sampling_functions():
-    pass
+def calc_max_eigenvalue(saturations,
+                        compiled_model,
+                        concentration_dict,
+                        flux_dict):
+
+    """
+    Sample one set of staturations using theano complied functions
+    :param compiled_model:
+    :param concentration_dict:
+    :param flux_dict:
+    :return:
+    """
+    symbolic_concentrations_dict = {Symbol(k):v
+                                    for k,v in concentration_dict.items()}
+
+    parameter_sample = calc_parameters( saturations,
+                                        compiled_model,
+                                        symbolic_concentrations_dict,
+                                        flux_dict)
+
+    fluxes = [flux_dict[this_reaction.name] for this_reaction in
+              compiled_model.reactions.values()]
+    concentrations = np.array([concentration_dict[this_variable] for
+                               this_variable in compiled_model.variables.keys()])
+
+    # Check stability: real part of all eigenvalues of the jacobian is <= 0
+    this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
+                                                parameter_sample)
+
+    # largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
+    #                                 return_eigenvectors=False)
+    # Test suggests that this is apparently much faster ....
+    largest_eigenvalue = np.real(sorted(
+        eigenvalues(this_jacobian.todense()))[-1])
+
+    return largest_eigenvalue
+
+
+def calc_parameters( saturations,
+                     compiled_model,
+                     concentration_dict,
+                     flux_dict):
+
+    parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
+
+    # Update the concentrations which are parameters (Boundaries)
+    for k,v in concentration_dict.items():
+        parameter_sample[k] = v
+
+
+    #Set all vmax/flux parameters to 1.
+    # TODO Generalize into Flux and Saturation parameters
+    for this_reaction in compiled_model.reactions.values():
+        vmax_param = this_reaction.parameters.vmax_forward
+        parameter_sample[vmax_param.symbol] = 1
+
+    if not hasattr(compiled_model,'saturation_parameter_function')\
+       or not hasattr(compiled_model,'flux_parameter_function'):
+        raise RuntimeError("Function for sampling not complied")
 
 
 
 
+    # Calcualte the Km's
+    compiled_model.saturation_parameter_function(
+        saturations,
+        parameter_sample,
+        concentration_dict
+    )
 
+    # Calculate the Vmax's
+    compiled_model.flux_parameter_function(
+        compiled_model,
+        parameter_sample,
+        concentration_dict,
+        flux_dict
+    )
 
+    return parameter_sample
