@@ -28,7 +28,7 @@ limitations under the License.
 import numpy as np
 from sympy import Symbol
 
-from scipy.linalg import eigvals as eigenvalues
+from numpy.linalg import eig as eigenvalues
 
 
 def calc_max_eigenvalue(saturations,
@@ -64,7 +64,7 @@ def calc_max_eigenvalue(saturations,
     #                                 return_eigenvectors=False)
     # Test suggests that this is apparently much faster ....
     largest_eigenvalue = np.real(sorted(
-        eigenvalues(this_jacobian.todense()))[-1])
+        eigenvalues(this_jacobian.todense())[0]))[-1]
 
     return largest_eigenvalue
 
