@@ -59,7 +59,7 @@ def make_irrev_massaction(stoichiometry):
         suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
         reactant_list = []
-        parameter_list = {'k_forward': [ODE, MCA, QSSA],}
+        parameter_list = {'vmax_forward': [ODE, MCA, QSSA],}
 
         parameter_reactant_links = {}
         reactant_stoichiometry = {}
@@ -99,7 +99,7 @@ def make_irrev_massaction(stoichiometry):
             products= {k:r for k,r in self.reactants.items()
                           if k.startswith('product')}
 
-            kf = self.parameters.k_forward.symbol
+            kf = self.parameters.vmax_forward.symbol
 
             forward_rate_expression = kf
             backward_rate_expression = 0
