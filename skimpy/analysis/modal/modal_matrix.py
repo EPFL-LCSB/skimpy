@@ -26,6 +26,7 @@ limitations under the License.
 """
 
 from pandas import DataFrame, Index
+import numpy as np 
 
 from numpy.linalg import eig
 from skimpy.utils import TabDict
@@ -58,7 +59,8 @@ def modal_matrix(kmodel,concentration_dict,parameters):
                             for p in rxn.mechanism.expression_parameters])
         kmodel.flux_fun = FluxFunction(kmodel.variables,
                                        flux_expressions,
-                                       flux_parameters)
+                                       flux_parameters,
+                                       kmodel.pool)
 
 
 
