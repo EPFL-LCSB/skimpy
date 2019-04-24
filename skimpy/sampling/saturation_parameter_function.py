@@ -56,8 +56,34 @@ class SaturationParameterFunction():
 
         self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
 
-    def __call__(self,saturations,parameters,concentrations):
-        _saturations = saturations
+    def __call__(self, saturations, parameters, concentrations):
+
+        # Transform the sample to bounds accroding to the bounds of the parameters respective to
+        # their concentrations
+        lower_saturations = []
+        upper_saturations = []
+
+        for p in self.saturation_parameters:
+            # The lower bound of the parameter fixes the upper bound on the
+            # concentration and vice versa
+
+            the_lower_bound_saturation = 0.0 if p._upper_bound is None \
+                else concentrations[p.hook.symbol] / \
+                     (p._upper_bound + concentrations[p.hook.symbol])
+
+            the_upper_bound_saturation = 1.0 if p._lower_bound is None \
+                else concentrations[p.hook.symbol] / \
+                     (p._lower_bound + concentrations[p.hook.symbol])
+
+            lower_saturations.append(the_lower_bound_saturation)
+            upper_saturations.append(the_upper_bound_saturation)
+
+        _lower_saturations = np.array(lower_saturations)
+        _upper_saturations = np.array(upper_saturations)
+
+        _saturations = _lower_saturations + saturations * (upper_saturations - _lower_saturations)
+
+
         _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
 
         input = np.concatenate((_saturations,_concentrations))

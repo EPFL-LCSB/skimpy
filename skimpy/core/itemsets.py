@@ -57,6 +57,8 @@ class Item(object):
         self._generate_symbol()
         self.hook = None
         self.type = None
+        self._lower_bound = None
+        self._upper_bound = None
 
     def _generate_symbol(self):
         if self.suffix:
@@ -76,6 +78,17 @@ class Item(object):
     def suffix(self, value):
         self._suffix = value
         self._generate_symbol()
+
+    @property
+    def bounds(self):
+        return (self._lower_bound, self._upper_bound)
+
+    @bounds.setter
+    def bounds(self, value):
+        lower_bound, upper_bound = value
+        self._lower_bound = lower_bound
+        self._upper_bound = upper_bound
+
 
     def __str__(self):
         return str(self.symbol)
