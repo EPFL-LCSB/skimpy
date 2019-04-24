@@ -26,7 +26,7 @@ limitations under the License.
 """
 
 from pandas import DataFrame, Index
-import numpy as np 
+import numpy as np
 
 from numpy.linalg import eig
 from skimpy.utils import TabDict
@@ -76,6 +76,7 @@ def modal_matrix(kmodel,concentration_dict,parameters):
     _,W = eig(jacobian.todense().T)
 
     index = Index([np.real(v) for v in lam], name ='eigenvalues')
-    columns = kmodel.variables.keys()
+
+    columns = [kmodel.reactants.iloc(i)[0] for i in kmodel.independent_variables_ix]
 
     return DataFrame(W, index=index, columns=columns)
