@@ -107,7 +107,6 @@ class GaParameterSampler(ParameterSampler):
         creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
         creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-        #Todo Calculate boundaries on parameter atributes
         n_dim = len(compiled_model.saturation_parameter_function.sym_saturations)
         bound_low = [0.0,]*n_dim
         bound_up  = [1.0,]*n_dim
@@ -162,7 +161,6 @@ class GaParameterSampler(ParameterSampler):
         :param model:
         """
 
-
         model.saturation_parameter_function = SaturationParameterFunction(model,
                                                                           model.parameters,
                                                                          concentrations)
@@ -172,11 +170,17 @@ class GaParameterSampler(ParameterSampler):
                                                               concentrations,)
 
     def fitness(self,saturations):
-        lambda_max = calc_max_eigenvalue(saturations,
+        parameter_sample = calc_parameters(saturations,
+                                           self.compiled_model,
+                                           self.concentration_dict,
+                                           self.flux_dict)
+
+        lambda_max = calc_max_eigenvalue(parameter_sample,
                                          self.compiled_model,
                                          self.concentration_dict,
                                          self.flux_dict)
         if lambda_max < self.max_eigenvalue :
+
             return (self.max_eigenvalue,)
         else :
             return (lambda_max,)

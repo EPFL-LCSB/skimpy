@@ -31,7 +31,7 @@ from sympy import Symbol
 from numpy.linalg import eig as eigenvalues
 
 
-def calc_max_eigenvalue(saturations,
+def calc_max_eigenvalue(parameter_sample,
                         compiled_model,
                         concentration_dict,
                         flux_dict):
@@ -43,13 +43,7 @@ def calc_max_eigenvalue(saturations,
     :param flux_dict:
     :return:
     """
-    symbolic_concentrations_dict = {Symbol(k):v
-                                    for k,v in concentration_dict.items()}
 
-    parameter_sample = calc_parameters( saturations,
-                                        compiled_model,
-                                        symbolic_concentrations_dict,
-                                        flux_dict)
 
     fluxes = [flux_dict[this_reaction.name] for this_reaction in
               compiled_model.reactions.values()]
@@ -74,10 +68,13 @@ def calc_parameters( saturations,
                      concentration_dict,
                      flux_dict):
 
+    symbolic_concentrations_dict = {Symbol(k):v
+                                    for k,v in concentration_dict.items()}
+
     parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
 
     # Update the concentrations which are parameters (Boundaries)
-    for k,v in concentration_dict.items():
+    for k,v in symbolic_concentrations_dict.items():
         parameter_sample[k] = v
 
 
@@ -85,27 +82,25 @@ def calc_parameters( saturations,
     # TODO Generalize into Flux and Saturation parameters
     for this_reaction in compiled_model.reactions.values():
         vmax_param = this_reaction.parameters.vmax_forward
-        parameter_sample[vmax_param.symbol] = 1
+        parameter_sample[vmax_param.symbol] = 1.0
 
     if not hasattr(compiled_model,'saturation_parameter_function')\
        or not hasattr(compiled_model,'flux_parameter_function'):
         raise RuntimeError("Function for sampling not complied")
 
 
-
-
     # Calcualte the Km's
     compiled_model.saturation_parameter_function(
         saturations,
         parameter_sample,
-        concentration_dict
+        symbolic_concentrations_dict
     )
 
     # Calculate the Vmax's
     compiled_model.flux_parameter_function(
         compiled_model,
         parameter_sample,
-        concentration_dict,
+        symbolic_concentrations_dict,
         flux_dict
     )
 
