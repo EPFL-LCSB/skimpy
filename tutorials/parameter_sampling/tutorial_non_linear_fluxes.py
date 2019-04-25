@@ -93,7 +93,7 @@ this_model.initial_conditions.D = 0.5
 solutions = []
 for parameters in parameter_population:
     # TODO system is too small for sparse eig handle properly
-    this_model.ode_fun.parameters = parameter_population[0]
+    this_model.parameters = parameter_population[0]
     #
     this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
     solutions.append(this_sol_qssa)
