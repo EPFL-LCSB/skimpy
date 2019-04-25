@@ -29,3 +29,4 @@ limitations under the License.
 from .parameter_sampler import *
 from .simple_parameter_sampler import *
 from .ga_parameter_sampler import *
+from .cma_es_parameter_sampler import *
