@@ -1,0 +1,153 @@
+boundary_conditions:
+  CC__13dpg_e:
+    class: ConstantConcentration
+    reactant: _13dpg_e
+  CC__2h3oppan_e:
+    class: ConstantConcentration
+    reactant: _2h3oppan_e
+  CC_adp_c:
+    class: ConstantConcentration
+    reactant: adp_c
+  CC_atp_c:
+    class: ConstantConcentration
+    reactant: atp_c
+  CC_nad_c:
+    class: ConstantConcentration
+    reactant: nad_c
+  CC_nadh_c:
+    class: ConstantConcentration
+    reactant: nadh_c
+  CC_pep_e:
+    class: ConstantConcentration
+    reactant: pep_e
+constraints: {}
+initial_conditions:
+  _2pg_c: 0.0
+  _3pg_c: 0.0
+  glyc_R_c: 0.0
+name: Unnamed
+parameters:
+  _13dpg_e: null
+  _2h3oppan_e: null
+  adp_c: null
+  atp_c: null
+  k1_bwd_ENO: null
+  k1_bwd_PGM: null
+  k1_fwd_ENO: null
+  k1_fwd_PGM: null
+  k2_bwd_ENO: null
+  k2_bwd_PGM: null
+  k2_fwd_ENO: null
+  k2_fwd_PGM: null
+  k_equilibrium_ENO: null
+  k_equilibrium_GLYCK: null
+  k_equilibrium_GLYCK2: null
+  k_equilibrium_PGK: null
+  k_equilibrium_PGM: null
+  k_equilibrium_TRSARr: null
+  ki_product1_GLYCK: null
+  ki_product1_GLYCK2: null
+  ki_product1_PGK: null
+  ki_product1_TRSARr: null
+  ki_product2_GLYCK: null
+  ki_product2_GLYCK2: null
+  ki_product2_PGK: null
+  ki_product2_TRSARr: null
+  ki_substrate1_GLYCK: null
+  ki_substrate1_GLYCK2: null
+  ki_substrate1_PGK: null
+  ki_substrate1_TRSARr: null
+  ki_substrate2_GLYCK: null
+  ki_substrate2_GLYCK2: null
+  ki_substrate2_PGK: null
+  ki_substrate2_TRSARr: null
+  km_product1_GLYCK: null
+  km_product1_GLYCK2: null
+  km_product1_PGK: null
+  km_product1_TRSARr: null
+  km_product_ENO: null
+  km_product_PGM: null
+  km_substrate2_GLYCK: null
+  km_substrate2_GLYCK2: null
+  km_substrate2_PGK: null
+  km_substrate2_TRSARr: null
+  km_substrate_ENO: null
+  km_substrate_PGM: null
+  nad_c: null
+  nadh_c: null
+  pep_e: null
+  total_enzyme_concentration_ENO: null
+  total_enzyme_concentration_GLYCK: null
+  total_enzyme_concentration_GLYCK2: null
+  total_enzyme_concentration_PGK: null
+  total_enzyme_concentration_PGM: null
+  total_enzyme_concentration_TRSARr: null
+  vmax_backward_ENO: null
+  vmax_backward_GLYCK: null
+  vmax_backward_GLYCK2: null
+  vmax_backward_PGK: null
+  vmax_backward_PGM: null
+  vmax_backward_TRSARr: null
+  vmax_forward_ENO: null
+  vmax_forward_GLYCK: null
+  vmax_forward_GLYCK2: null
+  vmax_forward_PGK: null
+  vmax_forward_PGM: null
+  vmax_forward_TRSARr: null
+reactions:
+  ENO:
+    enzyme: null
+    mechanism:
+      class: ReversibleMichaelisMenten
+      product: pep_e
+      substrate: _2pg_c
+    modifiers: {}
+    name: ENO
+  GLYCK:
+    enzyme: null
+    mechanism:
+      class: RandBiBiReversibleMichaelisMenten
+      product1: atp_c
+      product2: glyc_R_c
+      substrate1: _3pg_c
+      substrate2: adp_c
+    modifiers: {}
+    name: GLYCK
+  GLYCK2:
+    enzyme: null
+    mechanism:
+      class: RandBiBiReversibleMichaelisMenten
+      product1: _2pg_c
+      product2: adp_c
+      substrate1: atp_c
+      substrate2: glyc_R_c
+    modifiers: {}
+    name: GLYCK2
+  PGK:
+    enzyme: null
+    mechanism:
+      class: RandBiBiReversibleMichaelisMenten
+      product1: atp_c
+      product2: _3pg_c
+      substrate1: _13dpg_e
+      substrate2: adp_c
+    modifiers: {}
+    name: PGK
+  PGM:
+    enzyme: null
+    mechanism:
+      class: ReversibleMichaelisMenten
+      product: _2pg_c
+      substrate: _3pg_c
+    modifiers: {}
+    name: PGM
+  TRSARr:
+    enzyme: null
+    mechanism:
+      class: RandBiBiReversibleMichaelisMenten
+      product1: _2h3oppan_e
+      product2: nadh_c
+      substrate1: nad_c
+      substrate2: glyc_R_c
+    modifiers: {}
+    name: TRSARr
