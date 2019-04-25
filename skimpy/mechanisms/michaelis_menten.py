@@ -39,19 +39,19 @@ class ReversibleMichaelisMenten(KineticMechanism):
 
     Reactants = make_reactant_set(__name__, ['substrate', 'product'])
 
-    Parameters = make_parameter_set(    __name__,
-                                        {
-                                        'vmax_forward':[ODE,MCA,QSSA],
-                                        'k_equilibrium':[ODE,MCA,QSSA],
-                                        'km_substrate':[ODE,MCA,QSSA],
-                                        'km_product':[ODE,MCA,QSSA],
-                                        'vmax_backward':[ODE,QSSA],
-                                        'total_enzyme_concentration':[ODE,ELEMENTARY],
-                                        'k1_fwd':[ODE,ELEMENTARY],
-                                        'k1_bwd':[ODE,ELEMENTARY],
-                                        'k2_fwd':[ODE,ELEMENTARY],
-                                        'k2_bwd':[ODE,ELEMENTARY],
-                                        })
+    Parameters = make_parameter_set(__name__,
+                                    {
+                                    'vmax_forward':[ODE,MCA,QSSA],
+                                    'k_equilibrium':[ODE,MCA,QSSA],
+                                    'km_substrate':[ODE,MCA,QSSA],
+                                    'km_product':[ODE,MCA,QSSA],
+                                    'vmax_backward':[ODE,QSSA],
+                                    'total_enzyme_concentration':[ODE,ELEMENTARY],
+                                    'k1_fwd':[ODE,ELEMENTARY],
+                                    'k1_bwd':[ODE,ELEMENTARY],
+                                    'k2_fwd':[ODE,ELEMENTARY],
+                                    'k2_bwd':[ODE,ELEMENTARY],
+                                    })
 
     reactant_stoichiometry = {'substrate':-1,
                               'product':1}

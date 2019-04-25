@@ -189,10 +189,7 @@ class KineticModel(object):
         if ode:
             pass
 
-    def compile_ode(self,
-                    sim_type=QSSA,
-                    ncpu=1,
-                    ):
+    def compile_ode(self, sim_type=QSSA, ncpu=1,):
 
         # For security
         self.update()
@@ -219,10 +216,7 @@ class KineticModel(object):
             # serialization)
             self.initial_conditions.update(old_initial_conditions)
 
-    def solve_ode(self,
-                  time_out,
-                  solver_type='cvode',
-                  **kwargs):
+    def solve_ode(self, time_out, solver_type='cvode', **kwargs):
         """
 
         The solver types are from ::scikits.odes::, and can be found at
