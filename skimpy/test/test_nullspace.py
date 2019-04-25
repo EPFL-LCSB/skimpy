@@ -21,4 +21,5 @@ print(ns)
 null = ns @ S.todense()
 
 print(null)
-print(np.any(null))
+assert(np.any(null) == True)
+
