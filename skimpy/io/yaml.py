@@ -42,9 +42,14 @@ from skimpy.utils.namespace import PARAMETER, VARIABLE
 
 from skimpy.analysis.mca.utils import get_reduced_stoichiometry
 
-ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
-ALL_BOUNDARY_SUBCLASSES = make_subclasses_dict(BoundaryCondition)
-ALL_MODIFIER_SUBCLASSES = make_subclasses_dict(ExpressionModifier)
+def get_mechanism_subclasses():
+    return make_subclasses_dict(KineticMechanism)
+
+def get_boundary_subclasses():
+    return make_subclasses_dict(BoundaryCondition)
+
+def get_modifier_subclasses():
+    return make_subclasses_dict(ExpressionModifier)
 
 #TODO We need to do better?
 ALL_GENERIC_MECHANISM_SUBCLASSES = {'Convenience': make_convenience,
@@ -99,7 +104,7 @@ def mechanism_representer(dumper, data):
         #Clean the class name (will be reconstructed from stoichometry)
         the_dict['class'] = re_sub(data.__class__.suffix,'',the_dict['class'])
 
-    elif any(map(_find , ALL_MODIFIER_SUBCLASSES)):
+    elif any(map(_find , get_modifier_subclasses())):
         the_dict['mechanism_stoichiometry'] = data.reactant_stoichiometry
 
     return dumper.represent_dict(the_dict)
@@ -122,19 +127,26 @@ def boundary_condition_representer(dumper, data):
     return dumper.represent_dict(the_dict)
 
 
+def refresh_representers():
+    """
+    This function refreshes the representers of custom-made reaction mechanisms 
+    (n-to-m Convenience Kinetics for example)
+    """
+    yaml.add_representer(TabDict, SafeRepresenter.represent_dict)
+    yaml.add_representer(Reactant, reactant_representer)
+    yaml.add_representer(Parameter, parameter_representer)
+    yaml.add_representer(Reaction, reaction_representer)
 
-yaml.add_representer(TabDict, SafeRepresenter.represent_dict)
-yaml.add_representer(Reactant, reactant_representer)
-yaml.add_representer(Parameter, parameter_representer)
-yaml.add_representer(Reaction, reaction_representer)
-
-for the_class in ALL_MECHANISM_SUBCLASSES.values():
-    yaml.add_representer(the_class, mechanism_representer)
-for the_class in ALL_BOUNDARY_SUBCLASSES.values():
-    yaml.add_representer(the_class, boundary_condition_representer)
+    for the_class in get_mechanism_subclasses().values():
+        yaml.add_representer(the_class, mechanism_representer)
+    for the_class in get_boundary_subclasses().values():
+        yaml.add_representer(the_class, boundary_condition_representer)
 
 
 def export_to_yaml(model, path=None, **kwargs):
+
+    # In case new custom mechanisms have been made 
+    refresh_representers()
 
     dict_model = vars(model)
     fields_not_to_serialize = [x for x in dict_model if not x in FIELDS_TO_SERIALIZE]
@@ -156,17 +168,26 @@ def get_mechanism(classdict):
     #TODO Make nice and more readable
     """
     This function should construct mechanism for the generic types
-    and get the mechanism for modifiers and the defined types 
-    :param classdict:
+    and get the mechanism for modifiers and the defined types
+
+    :param classdict: Looks like {'class':'MichaelisMenten',
+                                  'substrate1':'atp_c',
+                                  'product1'  :'gtp_c',
+                                  }
+
     :return:
     """
     classname = classdict.pop('class')
+
+    # Checks if the classname is a modifier (Modifiers are subclasses of Mechanisms)
+    # SPLIT FOR MECHANISM vs Modifier
     _find = lambda s: classname.find(s) >= 0
     try:
-        if any(map(_find, ALL_MODIFIER_SUBCLASSES)):
-            return ALL_MECHANISM_SUBCLASSES[classname]
+        if any(map(_find, get_modifier_subclasses())):
+            # If the class name is indeed a modifier, get the actual
+            return get_mechanism_subclasses()[classname]
 
-        #todo Make this realiable and nice !!!!
+        # TODO Make this realiable and nice !!!!
         # TODO the way we create the mechanism can be easily
         stoich_dict = classdict.pop('mechanism_stoichiometry')
         make_mechanism = get_generic_constructor(classname)
@@ -178,7 +199,7 @@ def get_mechanism(classdict):
         return make_mechanism(stoichiometry)
 
     except KeyError:
-        return ALL_MECHANISM_SUBCLASSES[classname]
+        return get_mechanism_subclasses()[classname]
 
 
 def get_generic_constructor(s):
@@ -223,7 +244,7 @@ def load_yaml_model(path):
 
     # Boundary Conditions
     for the_bc_dict in the_dict['boundary_conditions'].values():
-        TheBoundaryCondition = ALL_BOUNDARY_SUBCLASSES[the_bc_dict.pop('class')]
+        TheBoundaryCondition = get_boundary_subclasses()[the_bc_dict.pop('class')]
         reactant = new.reactants[the_bc_dict.pop('reactant')]
         the_bc = TheBoundaryCondition(reactant, **the_bc_dict)
         new.add_boundary_condition(the_bc)
