@@ -147,7 +147,8 @@ class SimpleParameterSampler(ParameterSampler):
 
         # Update the concentrations which are parameters (Boundaries)
         for k,v in concentration_dict.items():
-            parameter_sample[k] = v
+            if str(k) in compiled_model.parameters:
+                parameter_sample[k] = v
 
 
         #Set all vmax/flux parameters to 1.
