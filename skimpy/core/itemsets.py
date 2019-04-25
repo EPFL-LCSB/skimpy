@@ -31,6 +31,7 @@ from sympy import sympify, Symbol
 
 from ..utils.tabdict import TabDict
 from ..utils.namespace import *
+from warnings import warn
 
 """
 
@@ -161,10 +162,15 @@ class ReactantSet(ItemSet):
         ItemSet.__init__(self, mechanism=mechanism)
 
         if set(reactant_declaration) != set(reactant_values.keys()):
-            raise KeyError('The reactants provided do not match the signature of '
-                           'the mechanism - should contain: {} not {}'
-                            .format(set(reactant_declaration),
-                                    set(reactant_values)))
+            if set(reactant_values.keys()).issuperset(reactant_declaration):
+                warn('More reactants provided than declared in the signature of '
+                               'the mechanism - {} ignored'
+                                .format(set(reactant_values).difference(reactant_declaration)))
+            else:
+                raise KeyError('The reactants provided do not match the signature of '
+                               'the mechanism - should contain: {} not {}'
+                                .format(set(reactant_declaration),
+                                        set(reactant_values)))
 
         for s,v in reactant_values.items():
             self[s] = Reactant(v)
