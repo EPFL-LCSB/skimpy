@@ -1,8 +1,9 @@
 from skimpy.io.yaml import export_to_yaml, load_yaml_model
+import os.path
 from os.path import join
 import pytest
 
-#model = None#load_yaml_model()
+file_dir = os.path.dirname(os.path.abspath(__file__))
 
 ###############
 # Dummy model #
@@ -61,7 +62,7 @@ def test_cobra_import():
     from skimpy.io.generate_from_cobra import FromCobra
     from cobra.io.mat import load_matlab_model
 
-    this_cobra_model = load_matlab_model(join('..','models','toy_model.mat'), 'ToyModel_DP')
+    this_cobra_model = load_matlab_model(join(file_dir,'..','models','toy_model.mat'), 'ToyModel_DP')
 
     model_gen = FromCobra()
     this_skimpy_model = model_gen.import_model(this_cobra_model)
