@@ -43,10 +43,9 @@ def calc_max_eigenvalue(parameter_sample,
     :param flux_dict:
     :return:
     """
-
-
     fluxes = [flux_dict[this_reaction.name] for this_reaction in
               compiled_model.reactions.values()]
+
     concentrations = np.array([concentration_dict[this_variable] for
                                this_variable in compiled_model.variables.keys()])
 
@@ -75,7 +74,8 @@ def calc_parameters( saturations,
 
     # Update the concentrations which are parameters (Boundaries)
     for k,v in symbolic_concentrations_dict.items():
-        parameter_sample[k] = v
+        if str(k) in compiled_model.parameters:
+            parameter_sample[k] = v
 
 
     #Set all vmax/flux parameters to 1.

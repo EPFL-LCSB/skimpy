@@ -62,7 +62,7 @@ class KineticModel(object):
         self._modified = True
         self._recompiled = False
 
-        self.parameters = TabDict()
+        #self.parameters = TabDict()
 
     @property
     def reactants(self):
@@ -71,6 +71,30 @@ class KineticModel(object):
             this_rectants = TabDict([(v.name,v) for v in this_reaction.reactants.values()])
             reactants.update(this_rectants)
         return reactants
+
+    @property
+    def parameters(self):
+        parameters = TabDict([])
+        for this_reaction in self.reactions.values():
+            reaction_params = TabDict({str(p.symbol): p for p in this_reaction.parameters.values()})
+            parameters.update(reaction_params)
+        return parameters
+
+    @parameters.setter
+    def parameters(self,value_dict):
+        """
+
+        :param value_dict:
+        :return: Nothing
+        """
+        parameters = TabDict([])
+        for this_reaction in self.reactions.values():
+            reaction_params = TabDict({str(p.symbol): p for p in this_reaction.parameters.values()})
+            parameters.update(reaction_params)
+
+        for key,value in value_dict.items():
+            parameters[str(key)].value = value
+
 
     def add_reaction(self, reaction):
         """
@@ -141,16 +165,12 @@ class KineticModel(object):
             the_reaction = self.reactions[reaction_name]
             the_reaction.parametrize(the_params)
 
-        self.update()
+        #self.update()
 
     def parametrize(self, param_dict):
         raise NotImplemented('We have to do some thinking OK')
         pass
 
-    def update(self):
-        for r in self.reactions.values():
-            reaction_params = TabDict({str(p.symbol): p for p in r.parameters.values()})
-            self.parameters.update(reaction_params)
 
     @property
     def sim_type(self):
@@ -189,13 +209,10 @@ class KineticModel(object):
         if ode:
             pass
 
-    def compile_ode(self,
-                    sim_type=QSSA,
-                    ncpu=1,
-                    ):
+    def compile_ode(self, sim_type=QSSA, ncpu=1,):
 
         # For security
-        self.update()
+        # self.update()
 
         self.sim_type = sim_type
 
@@ -219,10 +236,7 @@ class KineticModel(object):
             # serialization)
             self.initial_conditions.update(old_initial_conditions)
 
-    def solve_ode(self,
-                  time_out,
-                  solver_type='cvode',
-                  **kwargs):
+    def solve_ode(self, time_out, solver_type='cvode', **kwargs):
         """
 
         The solver types are from ::scikits.odes::, and can be found at

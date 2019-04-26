@@ -268,8 +268,6 @@ def load_yaml_model(path):
     for the_ic, value in the_dict['initial_conditions'].items():
         new.initial_conditions[the_ic] = value
 
-    # Do not forget to update parameters
-    new.update()
 
     #If the model the model has computed moieties we reconstruct them too
     if 'dependent_reactants' in the_dict.keys():
