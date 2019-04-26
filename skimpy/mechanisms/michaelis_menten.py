@@ -42,6 +42,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
     Parameters = make_parameter_set(__name__,
                                     {
                                     'vmax_forward':[ODE,MCA,QSSA],
+                                    'kcat_forward': [ODE, MCA, QSSA],
                                     'k_equilibrium':[ODE,MCA,QSSA],
                                     'km_substrate':[ODE,MCA,QSSA],
                                     'km_product':[ODE,MCA,QSSA],
@@ -81,7 +82,12 @@ class ReversibleMichaelisMenten(KineticMechanism):
         kmp = self.parameters.km_product.symbol
 
         keq = self.parameters.k_equilibrium.symbol
-        vmaxf = self.parameters.vmax_forward.symbol
+        if self.with_catalyst_concentration:
+            enzyme = self.reactants.enzyme.symbol
+            kcat = self.parameters.kcat_forward.symbol
+            vmaxf = kcat*enzyme
+        else:
+            vmaxf = self.parameters.vmax_forward.symbol
 
         common_denominator = 1 + s/kms + p/kmp
 

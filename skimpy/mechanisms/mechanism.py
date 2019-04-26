@@ -25,24 +25,36 @@ limitations under the License.
 
 """
 from abc import ABC, abstractmethod
+from skimpy.core.itemsets import Reactant
 from skimpy.utils.namespace import *
+
 
 class KineticMechanism(ABC):
 
     parameter_reactant_links = {}
 
-    def __init__(self, name, reactants, parameters=None, inhibitors=None):
+    def __init__(self,
+                 name,
+                 reactants,
+                 parameters=None,
+                 inhibitors=None,
+                 with_catalyst_concentration=False):
+
         # ABC.__init__()
         self.name = name
         self.reactants = reactants
         self.inhibitors = None
         self._parameters = None
+        self.with_catalyst_concentration = with_catalyst_concentration
 
         if parameters is not None:
             self._parameters = parameters
             # self.set_dynamic_attribute_links(self._parameters)
         if inhibitors is not None:
             self.inhibitors = inhibitors
+
+        if with_catalyst_concentration:
+            self.reactants['enzyme'] = Reactant(self.name)
 
     def link_parameters_and_reactants(self):
         for p,r in self.parameter_reactant_links.items():
