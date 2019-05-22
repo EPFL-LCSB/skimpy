@@ -42,19 +42,28 @@ class SaturationParameterFunction():
         self.saturation_parameters = [v for k,v in parameters.items()
                                      if (v.hook is not None) \
                                      and (v.value is None) ]
-        sym_saturations = []
-        expressions = []
-        for p in self.saturation_parameters:
-            this_sat_symbol = Symbol("sigma_"+str(p.symbol))
-            sym_saturations.append(this_sat_symbol )
-            expressions.append((1-this_sat_symbol)*p.hook.symbol/this_sat_symbol)
 
-        self.expressions = expressions
-        self.sym_saturations = sym_saturations
+        if not self.saturation_parameters:
+            # If there are no saturation parameters in the model
+            # dont compile the function
+            self.expressions = None
+            self.sym_saturations = None
+            self.function = None
+        else:
+            sym_saturations = []
+            expressions = []
+            for p in self.saturation_parameters:
+                this_sat_symbol = Symbol("sigma_"+str(p.symbol))
+                sym_saturations.append(this_sat_symbol )
+                expressions.append((1-this_sat_symbol)*p.hook.symbol/this_sat_symbol)
 
-        sym_vars = sym_saturations + sym_concentrations
+            self.expressions = expressions
+            self.sym_saturations = sym_saturations
 
-        self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
+            sym_vars = sym_saturations + sym_concentrations
+
+            self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
+
 
     def __call__(self, saturations, parameters, concentrations):
 
@@ -62,35 +71,38 @@ class SaturationParameterFunction():
         # their concentrations
         lower_saturations = []
         upper_saturations = []
+        if self.function is None:
+            pass
 
-        for p in self.saturation_parameters:
-            # The lower bound of the parameter fixes the upper bound on the
-            # concentration and vice versa
+        else:
+            for p in self.saturation_parameters:
+                # The lower bound of the parameter fixes the upper bound on the
+                # concentration and vice versa
 
-            the_lower_bound_saturation = 0.0 if p._upper_bound is None \
-                else concentrations[p.hook.symbol] / \
-                     (p._upper_bound + concentrations[p.hook.symbol])
+                the_lower_bound_saturation = 0.0 if p._upper_bound is None \
+                    else concentrations[p.hook.symbol] / \
+                         (p._upper_bound + concentrations[p.hook.symbol])
 
-            the_upper_bound_saturation = 1.0 if p._lower_bound is None \
-                else concentrations[p.hook.symbol] / \
-                     (p._lower_bound + concentrations[p.hook.symbol])
+                the_upper_bound_saturation = 1.0 if p._lower_bound is None \
+                    else concentrations[p.hook.symbol] / \
+                         (p._lower_bound + concentrations[p.hook.symbol])
 
-            lower_saturations.append(the_lower_bound_saturation)
-            upper_saturations.append(the_upper_bound_saturation)
+                lower_saturations.append(the_lower_bound_saturation)
+                upper_saturations.append(the_upper_bound_saturation)
 
-        _lower_saturations = np.array(lower_saturations)
-        _upper_saturations = np.array(upper_saturations)
+            _lower_saturations = np.array(lower_saturations)
+            _upper_saturations = np.array(upper_saturations)
 
-        _saturations = _lower_saturations + saturations * (upper_saturations - _lower_saturations)
+            _saturations = _lower_saturations + saturations * (upper_saturations - _lower_saturations)
 
 
-        _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
+            _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
 
-        input = np.concatenate((_saturations,_concentrations))
-        saturation_parameter_values = np.zeros(len(self.saturation_parameters))
+            input = np.concatenate((_saturations,_concentrations))
+            saturation_parameter_values = np.zeros(len(self.saturation_parameters))
 
-        self.function(input,saturation_parameter_values)
+            self.function(input,saturation_parameter_values)
 
-        # Assing saturation parameters
-        for p,v in zip(self.saturation_parameters, saturation_parameter_values):
-            parameters[p.symbol] = v
+            # Assing saturation parameters
+            for p,v in zip(self.saturation_parameters, saturation_parameter_values):
+                parameters[p.symbol] = v

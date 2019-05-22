@@ -161,11 +161,16 @@ class SimpleParameterSampler(ParameterSampler):
            or not hasattr(compiled_model,'flux_parameter_function'):
             raise RuntimeError("Function for sampling not complied")
 
-        n_sats = len(compiled_model.saturation_parameter_function.sym_saturations)
+        if not compiled_model.saturation_parameter_function.sym_saturations:
+            n_stats = 0
+            saturations = []
+        else:
+            n_sats = len(compiled_model.saturation_parameter_function.sym_saturations)
+            saturations = sample(n_sats)
 
         # Calcualte the Km's
         compiled_model.saturation_parameter_function(
-            sample(n_sats),
+            saturations,
             parameter_sample,
             concentration_dict
         )
