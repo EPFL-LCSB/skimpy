@@ -39,3 +39,8 @@ VARIABLE  = 'variable'
 KCAL = 'kcal'
 KJ   = 'kJ'
 JOULE = 'JOULE'
+
+
+""" OTHER """
+
+WATER_FORMULA = 'H2O'

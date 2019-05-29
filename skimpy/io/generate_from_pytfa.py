@@ -28,7 +28,8 @@ limitations under the License.
 from skimpy.core import *
 from skimpy.utils.conversions import deltag0_to_keq
 from skimpy.utils.general import sanitize_cobra_vars
-from .model_generator import ModelGenerator
+from skimpy.utils.namespace import WATER_FORMULA
+from .model_generator import ModelGenerator, MetWithStoich
 from .generate_from_cobra import FromCobra
 
 from .utils import create_reaction_from_stoich, check_boundary_reaction
@@ -95,12 +96,12 @@ class FromPyTFA(FromCobra):
             # TODO Check wtf id vs name in pytfa
             if check_boundary_reaction(this_reaction):
                 for this_met in this_reaction.metabolites:
-                    met = sanitize_cobra_vars(this_met.id)
-
                     # If the metabolite does not correspond to water as water is
-                    # omited from the reactions
-                    if not met.startswith("{}_".format(self.water)) \
-                    and not met.startswith("{}_".format(self.hydrogen)):
+                    # omitted from the reactions or if we force the reactant to
+                    # be excluded
+                    if (this_met .formula is not WATER_FORMULA) \
+                        and (this_met .id not in self.reactants_to_exclude):
+                        met = sanitize_cobra_vars(this_met.id)
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
@@ -118,15 +119,18 @@ class FromPyTFA(FromCobra):
         try:
             var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
             deltag0 = pytfa_solution.raw[var_delta_g]
-            # TODO CAN WE DO BETTER
+            # Calculate the deltaG0 based on the reactants that will
+            # be part in the model
             for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
-                if met.formula is not "H2O":
+                if met.formula is not WATER_FORMULA and \
+                   met.id not in self.reactants_to_exclude:
                     var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
                     met_lc = pytfa_solution.raw[var_met_lc]
                     deltag0 -= s * RT * met_lc
 
         except KeyError:
             deltag0 = self.dummy_dgo
+
         k_eq = deltag0_to_keq(deltag0,
                               temp,
                               gas_constant=gas_constant)

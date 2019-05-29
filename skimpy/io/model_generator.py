@@ -25,7 +25,11 @@ limitations under the License.
 
 """
 from abc import ABC, abstractmethod
+from collections import namedtuple
 from skimpy.core import *
+from skimpy.utils.namespace import WATER_FORMULA
+
+MetWithStoich = namedtuple('MetWithStoich', ['metabolite', 'stoichiometry'])
 
 class ModelGenerator(ABC):
     def __init__(self,
@@ -33,8 +37,7 @@ class ModelGenerator(ABC):
                  reactant_relations=None,
                  small_molecules=None,
                  small_molecule_modifier=None,
-                 water=None,
-                 hydrogen=None,
+                 reactants_to_exclude=None,
                  reaction_groups=None):
         """
         This class defines the rules to build a kinetic models from
@@ -69,15 +72,10 @@ class ModelGenerator(ABC):
         else:
             self.small_molecule_modifier = small_molecule_modifier
 
-        if water is None:
-            self.water = 'h2o'
+        if reactants_to_exclude is None:
+            self.reactants_to_exclude = []
         else:
-            self.water = water
-
-        if hydrogen is None:
-            self.hydrogen = 'h'
-        else:
-            self.hydrogen = hydrogen
+            self.reactants_to_exclude = reactants_to_exclude
 
         self.dummy_dgo = -10.0
 

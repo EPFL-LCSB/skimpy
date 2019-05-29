@@ -24,11 +24,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
 from skimpy.core import *
-from .model_generator import ModelGenerator
+from .model_generator import ModelGenerator, MetWithStoich
 from .utils import create_reaction_from_stoich, check_boundary_reaction
 from skimpy.utils.general import sanitize_cobra_vars
+from skimpy.utils.namespace import WATER_FORMULA
 
 class FromCobra(ModelGenerator):
     """
@@ -69,12 +69,12 @@ class FromCobra(ModelGenerator):
 
             if check_boundary_reaction(this_reaction):
                 for this_met in this_reaction.metabolites:
-                    met = sanitize_cobra_vars(this_met.id)
-
                     # If the metabolite does not correspond to water as water is
-                    # omitted from the reactions
-                    if not met.startswith("{}_".format(self.water)) \
-                    and not met.startswith("{}_".format(self.hydrogen)):
+                    # omitted from the reactions or if we force the reactant to
+                    # be excluded
+                    if (this_met .formula is not WATER_FORMULA) \
+                        and (this_met .id not in self.reactants_to_exclude):
+                        met = sanitize_cobra_vars(this_met.id)
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
                         skimpy_model.add_boundary_condition(this_const_met)
@@ -88,11 +88,11 @@ class FromCobra(ModelGenerator):
             name = cobra_reaction.id
 
         # Ignore if only water is participating
-        is_water = all([met.id.startswith("{}_".format(self.water))
+        is_water = all([met.formula is  WATER_FORMULA
                         for met in cobra_reaction.metabolites])
 
-        # Ignore if only hydrogen is participating
-        is_hydrogen = all([met.id.startswith("{}_".format(self.hydrogen))
+        # Ignore if only reactants participate that will be ignored
+        is_hydrogen = all([met.id in self.reactants_to_exclude
                         for met in cobra_reaction.metabolites])
 
 
@@ -105,9 +105,10 @@ class FromCobra(ModelGenerator):
                                                         reaction_data)
         except KeyError:
             met_stoich_dict = {}
-            for k,v in cobra_reaction.metabolites.items():
-                k = sanitize_cobra_vars(k.id)
-                met_stoich_dict[k] = v
+            for this_met, this_stoich in cobra_reaction.metabolites.items():
+                this_met_id = sanitize_cobra_vars(this_met)
+                met_stoich_dict[this_met_id ] = MetWithStoich(metabolite=this_met,
+                                                              stoichiometry=this_stoich)
             # Get inhibitors from reaction groups
             if self.reactions_to_reaction_groups is not None:
                 try:
@@ -125,7 +126,7 @@ class FromCobra(ModelGenerator):
 
                     inhibitors = products.difference(this_products)\
                         .union(reactants.difference(this_reactants))
-                    inhibitors = [i.id for i in inhibitors]
+                    inhibitors = [i for i in inhibitors]
 
                 except KeyError:
                     inhibitors = None
@@ -141,7 +142,9 @@ class FromCobra(ModelGenerator):
                 #Irreversible in backward direction
                 # invert the assumed forward stoichiometry
                 irrev  = True
-                met_stoich_dict = {k:-v for k,v in met_stoich_dict}
+                for this_met_id, metstoich in met_stoich_dict:
+                    metstoich.stoichiometry *= -1
+
             else:
                 # Not irreverisble
                 irrev = False

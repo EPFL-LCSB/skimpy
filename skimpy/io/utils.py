@@ -26,6 +26,7 @@ limitations under the License.
 """
 
 from skimpy.mechanisms import *
+from skimpy.utils.general import sanitize_cobra_vars
 from operator import itemgetter
 import re
 
@@ -36,8 +37,6 @@ def create_reaction_from_stoich(name,
                                 reaction_group=None,
                                 irrev=None):
 
-    water = model_generator.water
-    hydrogen = model_generator.hydrogen
     small_molecules = model_generator.small_molecules
     reactant_relations = model_generator.reactant_relations
 
@@ -49,30 +48,31 @@ def create_reaction_from_stoich(name,
     and omit water 
     """
 
-    for this_met, stoich in met_stoich_dict.items():
-        # TODO the detection needs to be better !!!
-        is_small_molecule = any([this_met.startswith(s) for s in small_molecules])
-        # TODO the detection needs to be better !!!
-        if not this_met.startswith("{}_".format(water)) \
-           and not this_met.startswith("{}_".format(hydrogen)) \
+    for this_met_id, met_with_stoich in met_stoich_dict.items():
+        this_met = met_with_stoich.metabolite
+        stoich   = met_with_stoich.stoichiometry
+        is_small_molecule = this_met.id in small_molecules
+        if this_met.formula is not WATER_FORMULA \
+           and this_met.id not in model_generator.reactants_to_exclude \
            and is_small_molecule:
 
-            this_reaction_small_molecules[this_met] = stoich
+            this_reaction_small_molecules[this_met_id] = stoich
 
-        elif not this_met.startswith("{}_".format(water)) \
-             and not this_met.startswith("{}_".format(hydrogen)) \
+        elif this_met.formula is not WATER_FORMULA \
+           and this_met.id not in model_generator.reactants_to_exclude \
              and not is_small_molecule:
 
-            this_reaction_reactants[this_met] = stoich
+            this_reaction_reactants[this_met_id] = stoich
 
     # Filter inhibitors
     if inhibitors is not None:
-        inhibitors = [inh for inh in inhibitors
-                      if not inh.startswith("{}_".format(water))
-                      and not inh.startswith("{}_".format(hydrogen))
-                      and not is_small_molecule]
-        if inhibitors == []:
-            inhibitors = None
+        inhibitors = [sanitize_cobra_vars(inh.id)
+                      for inh in inhibitors \
+                        if inh.formula is not WATER_FORMULA \
+                        and inh.id not in model_generator.reactants_to_exclude \
+                        and not is_small_molecule]
+    if inhibitors == []:
+        inhibitors = None
 
     # TODO this currently catches transport of small molecules
     # create proper transports
