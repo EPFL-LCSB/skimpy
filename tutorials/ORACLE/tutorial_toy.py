@@ -111,7 +111,7 @@ Get a Kinetic Model
 # substrates and products
 small_molecules = ['h_c','h_e']
 
-model_gen = FromPyTFA(water='h2o', small_molecules=small_molecules)
+model_gen = FromPyTFA(small_molecules=small_molecules)
 this_skimpy_model = model_gen.import_model(this_pytfa_model,solution)
 
 """
@@ -119,7 +119,7 @@ Sanitize the solution to match with the skimpy model
 """
 
 # Map fluxes back to reaction variables
-this_flux_solution = get_reaction_data(this_pytfa_model, solution)
+this_flux_solution = get_reaction_data(this_pytfa_model, solution.raw)
 # Create the flux dict
 flux_dict = this_flux_solution[[i for i in this_skimpy_model.reactions.keys()]].to_dict()
 
@@ -127,7 +127,7 @@ flux_dict = this_flux_solution[[i for i in this_skimpy_model.reactions.keys()]].
 variable_names = this_pytfa_model.log_concentration.list_attr('name')
 metabolite_ids = this_pytfa_model.log_concentration.list_attr('id')
 
-temp_concentration_dict = np.exp(solution[variable_names]).to_dict()
+temp_concentration_dict = np.exp(solution.raw[variable_names]).to_dict()
 
 # Map concentration names
 mapping_dict = {k:sanitize_cobra_vars(v) for k,v in zip(variable_names,metabolite_ids)}
@@ -137,7 +137,7 @@ concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items
 """
 Sample the kinetic parameters using MCA
 """
-this_model.prepare(mca=True)
+this_skimpy_model.prepare(mca=True)
 # Compile MCA functions
 this_skimpy_model.compile_mca(sim_type=QSSA)
 
