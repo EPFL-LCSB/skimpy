@@ -50,23 +50,23 @@ from skimpy.core.solution import ODESolutionPopulation
 # 'TRSARr'           2
 # 'ENO'              8
 
-flux_dict = {'PGK'          : 10.0,
-             'PGM'          : 1.0,
-             'GLYCK'        : 9.0,
-             'GLYCK2'       : 7.0,
-             'TRSARr'       : 2.0,
-             'ENO'          : 8.0,
-             'DM_13dpg'     : 10,
-             'DM_2h3oppan'  :-2,
-             'DM_pep'       :-8,
-             'DM_atp'       :-12,
-             'DM_adp'       :12,
-             'DM_nadh'      :-2,
-             'DM_nad'       :2,
+flux_dict = {'PGK'         : 10.0,
+             'PGM'         : 1.0,
+             'GLYCK'       : 9.0,
+             'GLYCK2'      : 7.0,
+             'TRSARr'      : 2.0,
+             'ENO'         : 8.0,
+             'DM_13dpg'    : 10,
+             'DM_2h3oppan' : -2,
+             'DM_pep'      : -8,
+             'DM_atp'      : -12,
+             'DM_adp'      : 12,
+             'DM_nadh'     : -2,
+             'DM_nad'      : 2,
              }
 
 # Build linear Pathway model
-metabolites_pgk    =  RandBiBiReversibleMichaelisMenten.Reactants(
+metabolites_pgk    = RandBiBiReversibleMichaelisMenten.Reactants(
     substrate1     = '_13dpg',
     substrate2     = 'adp',
     product1       = '_3pg',
@@ -105,30 +105,30 @@ parameters_glyck2 = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=k
 parameters_trsarr = RandBiBiReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-3.7509))
 parameters_eno    = ReversibleMichaelisMenten.Parameters(k_equilibrium=keq(-1.6601))
 
-pgk     =   Reaction(name='PGK',
-               mechanism=RandBiBiReversibleMichaelisMenten,
-               reactants=metabolites_pgk,
-             )
-pgm     =   Reaction(name='PGM',
-               mechanism=ReversibleMichaelisMenten,
-               reactants=metabolites_pgm,
-               )
-glyck   =   Reaction(name='GLYCK',
-               mechanism=RandBiBiReversibleMichaelisMenten,
-               reactants=metabolites_glyck,
-               )
-glyck2  =   Reaction(name='GLYCK2',
-               mechanism=RandBiBiReversibleMichaelisMenten,
-               reactants=metabolites_glyck2,
-               )
-trsarr  =   Reaction(name='TRSARr',
-               mechanism=RandBiBiReversibleMichaelisMenten,
-               reactants=metabolites_trsarr,
-               )
-eno     =   Reaction(name='ENO',
-               mechanism=ReversibleMichaelisMenten,
-               reactants=metabolites_eno,
-               )
+pgk    = Reaction(name='PGK',
+                  mechanism=RandBiBiReversibleMichaelisMenten,
+                  reactants=metabolites_pgk,
+                 )
+pgm    = Reaction(name='PGM',
+                  mechanism=ReversibleMichaelisMenten,
+                  reactants=metabolites_pgm,
+                  )
+glyck  = Reaction(name='GLYCK',
+                  mechanism=RandBiBiReversibleMichaelisMenten,
+                  reactants=metabolites_glyck,
+                  )
+glyck2 = Reaction(name='GLYCK2',
+                  mechanism=RandBiBiReversibleMichaelisMenten,
+                  reactants=metabolites_glyck2,
+                  )
+trsarr = Reaction(name='TRSARr',
+                  mechanism=RandBiBiReversibleMichaelisMenten,
+                  reactants=metabolites_trsarr,
+                  )
+eno    = Reaction(name='ENO',
+                  mechanism=ReversibleMichaelisMenten,
+                  reactants=metabolites_eno,
+                  )
 
 
 this_model = KineticModel()
@@ -210,7 +210,6 @@ this_model.logger.setLevel('INFO')
 solutions = []
 for parameters in parameter_population:
     this_model.ode_fun.parameter_values = parameters
-    #
     this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
     solutions.append(this_sol_qssa)
 

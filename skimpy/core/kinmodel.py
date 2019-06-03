@@ -183,7 +183,7 @@ class KineticModel(object):
 
     def prepare(self, mca=True, ode=True, **kwargs):
         """
-        Model preparation for different analysis types. The preparation is done before the compiling steo
+        Model preparation for different analysis types. The preparation is done before the compiling step
         to be able to curate the model in between
 
         :param mca:
@@ -259,7 +259,7 @@ class KineticModel(object):
 
         # Order the initial conditions according to variables
         ordered_initial_conditions = [self.initial_conditions[variable]
-                                    for variable in self.variables]
+                                      for variable in self.variables]
 
         # #if parameters are empty try to fetch from model
         # if not self.ode_fun._parameter_values:

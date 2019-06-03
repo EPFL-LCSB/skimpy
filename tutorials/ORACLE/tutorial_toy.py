@@ -69,27 +69,27 @@ this_pytfa_model.convert(add_displacement=True)
 # We choose a flux directionality profile (FDP)
 # with minium fluxes of 1e-3
 
-this_bounds = {  'DM_13dpg': (-10.0, -2.0),
-                 'DM_2h3oppan': (1e-3, 100.0),
-                 'DM_adp':      (-100.0, -1e-3),
-                 'DM_atp':      (1e-3, 100.0),
-                 'DM_h':        (1e-3, 100.0),
-                 'DM_h2o':      (1e-3, 100.0),
-                 'DM_nad':      (-100.0, -1e-3),
-                 'DM_nadh':     (1e-3, 100.0),
-                 'DM_pep':      (1e-3, 100.0),
-                 'ENO':         (2.0, 100.0),
-                 'GLYCK':       (1e-3, 100.0),
-                 'GLYCK2':      (-100, -1e-3),
-                 'PGK':         (1e-3, 100.0),
-                 'PGM':         (1e-3, 100.0),
-                 'TRSARr':      (2.0, 10.0),
-                 'Trp_adp':     (-100.0, 100.0),
-                 'Trp_atp':     (-100.0, 100.0),
-                 'Trp_h':       (-100.0, 100.0),
-                 'Trp_h2o':     (-100.0, 100.0),
-                 'Trp_nad':     (-100.0, 100.0),
-                 'Trp_nadh':    (-100.0, 100.0)}
+this_bounds = {'DM_13dpg': (-10.0, -2.0),
+               'DM_2h3oppan': (1e-3, 100.0),
+               'DM_adp':      (-100.0, -1e-3),
+               'DM_atp':      (1e-3, 100.0),
+               'DM_h':        (1e-3, 100.0),
+               'DM_h2o':      (1e-3, 100.0),
+               'DM_nad':      (-100.0, -1e-3),
+               'DM_nadh':     (1e-3, 100.0),
+               'DM_pep':      (1e-3, 100.0),
+               'ENO':         (2.0, 100.0),
+               'GLYCK':       (1e-3, 100.0),
+               'GLYCK2':      (-100, -1e-3),
+               'PGK':         (1e-3, 100.0),
+               'PGM':         (1e-3, 100.0),
+               'TRSARr':      (2.0, 10.0),
+               'Trp_adp':     (-100.0, 100.0),
+               'Trp_atp':     (-100.0, 100.0),
+               'Trp_h':       (-100.0, 100.0),
+               'Trp_h2o':     (-100.0, 100.0),
+               'Trp_nad':     (-100.0, 100.0),
+               'Trp_nadh':    (-100.0, 100.0)}
 # Find a solution for this FDP
 solution = this_pytfa_model.optimize()
 

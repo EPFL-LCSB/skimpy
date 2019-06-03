@@ -46,9 +46,10 @@ the set. The make_* functions return the custom classes constructors
 
 """
 
+
 class Item(object):
 
-    def __init__(self, name, value = None, model=None, suffix = ''):
+    def __init__(self, name, value=None, model=None, suffix=''):
 
         self.name = name
         self.model = model
@@ -155,7 +156,6 @@ class Reactant(Item):
         self.type = VARIABLE
 
 
-
 class ReactantSet(ItemSet):
     def __init__(self, mechanism, reactant_declaration, reactant_values):
 
@@ -174,7 +174,7 @@ class ReactantSet(ItemSet):
 
         for s,v in reactant_values.items():
             self[s] = Reactant(v)
-            # TODO should this be in the Reactnat init? or in ItemsSet
+            # TODO should this be in the Reactant init? or in ItemsSet
             self[s].type = VARIABLE
 
 

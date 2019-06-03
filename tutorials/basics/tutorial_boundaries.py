@@ -31,8 +31,7 @@ from skimpy.mechanisms import *
 from skimpy.utils.namespace import ELEMENTARY
 
 name = 'pfk'
-metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
-                                                   product = 'B')
+metabolites = ReversibleMichaelisMenten.Reactants(substrate='A', product='B')
 
 ## ELEMENTARY Method
 parameters = ReversibleMichaelisMenten.Parameters(
@@ -47,7 +46,7 @@ import warnings
 warnings.warn('We still need to implement vmax to elementary')
 
 pfk = Reaction(name=name,
-               mechanism = ReversibleMichaelisMenten,
+               mechanism=ReversibleMichaelisMenten,
                reactants=metabolites,
                )
 
@@ -72,6 +71,6 @@ this_model.initial_conditions.A = 10.0
 this_model.initial_conditions.B = 1.0
 this_model.initial_conditions.pfk = 1.0
 
-this_sol_full = this_model.solve_ode([0,100.0], solver_type = 'cvode')
+this_sol_full = this_model.solve_ode([0, 100.0], solver_type='cvode')
 
 this_sol_full.plot('output/boundary_out_full.html')

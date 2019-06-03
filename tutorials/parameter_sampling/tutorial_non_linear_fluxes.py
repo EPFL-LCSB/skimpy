@@ -67,8 +67,8 @@ the_boundary_condition = ConstantConcentration(this_model.reactants['D'])
 this_model.add_boundary_condition(the_boundary_condition)
 
 this_model.parametrize_by_reaction({'E1': parameters_1,
-                        'E2': parameters_2,
-                        'E3': parameters_3})
+                                    'E2': parameters_2,
+                                    'E3': parameters_3})
 
 this_model.prepare(mca=True)
 this_model.compile_mca()
@@ -93,8 +93,7 @@ this_model.initial_conditions.D = 0.5
 solutions = []
 for parameters in parameter_population:
     # TODO system is too small for sparse eig handle properly
-    this_model.parameters = parameter_population[0]
-    #
+    this_model.parameters = parameters
     this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
     solutions.append(this_sol_qssa)
 

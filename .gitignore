@@ -1,5 +1,5 @@
 # Skimpy
-# Igonre file in the work folder
+# Ignore file in the work folder
 ./docker/work/*
 
 # Ignore generated c files

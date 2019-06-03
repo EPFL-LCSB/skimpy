@@ -31,6 +31,7 @@ from ..mechanisms.mechanism import KineticMechanism
 from ..core.itemsets import make_parameter_set, make_reactant_set
 from ..utils.namespace import *
 
+
 class ExpressionModifier(object):
     """
     This class describes a modifier to an expression, like a boundary condition
@@ -58,7 +59,6 @@ class ExpressionModifier(object):
     def modifier(self):
         return self._modifier
 
-
     def link(self,model):
         """
         Link the modifier to a model, to gain awareness of the inner/outer
@@ -78,6 +78,7 @@ class ExpressionModifier(object):
         if value.startswith(self.prefix):
             value = value[len(self.prefix):]
         self._name = value
+
 
 class BoundaryCondition(ExpressionModifier):
     """
@@ -118,6 +119,7 @@ class ConstantConcentration(BoundaryCondition):
         """
         expressions[self.reactant.symbol] = expressions[self.reactant.symbol] * 0.0
 
+
 class AdditiveConcentrationRate(ExpressionModifier):
     """
     Add a concentration rate term to your rate expression
@@ -144,6 +146,7 @@ class AdditiveConcentrationRate(ExpressionModifier):
         """
         sym_value = sympify(self.flux_value)
         expressions[self.reactant.symbol] = expressions[self.reactant.symbol] + sym_value
+
 
 class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
 
@@ -223,7 +226,6 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         raise NotImplementedError
 
 
-
 class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     prefix = "DSM"
@@ -269,7 +271,6 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     def update_qssa_rate_expression(self):
         return None
-
 
     def get_full_rate_expression(self):
         raise NotImplementedError
