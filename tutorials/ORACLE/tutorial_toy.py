@@ -171,7 +171,7 @@ this_skimpy_model.initial_conditions = TabDict([(k,v)for k,v in concentration_di
 
 solutions = []
 for parameters in parameter_population:
-    this_skimpy_model.ode_fun.parameter_values = parameters
+    this_skimpy_model.parameters = parameters
     this_sol_qssa = this_skimpy_model.solve_ode(np.linspace(0.0, 0.5, 1000), solver_type='cvode')
     solutions.append(this_sol_qssa)
 

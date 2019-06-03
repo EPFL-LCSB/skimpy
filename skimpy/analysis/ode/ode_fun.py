@@ -71,7 +71,7 @@ class ODEFunction:
 
         # Set values
         for k,v in parameters.items():
-            self.parameter_values[robust_index(k)] = v
+            self.parameters[robust_index(k)] = v
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self._parameters]
@@ -86,46 +86,46 @@ class ODEFunction:
 
     @property
     def parameters(self):
-        return TabDict((k,self.model.parameters[robust_index(k)])
+        return TabDict((k,self.model.parameters[robust_index(k)].value)
                                    for k in self._parameters)
 
     @parameters.setter
     def parameters(self, value):
         self._parameters = value
 
-    @property
-    def parameter_values(self):
-        # if not self._parameter_values:
-        #     raise Exception('No parameters have been set')
-        # else:
-        return TabDict((k,self.parameters[robust_index(k)].value)
-                       for k in self.parameters)
-
-    @parameter_values.setter
-    def parameter_values(self,value):
-        """
-        Would-be optimization hack to avoid looking up thr whole dict at each
-        iteration step in __call__
-
-        :param value:
-        :return:
-        """
-        #self._parameters = value
-        # self._parameter_values = [value[x] for x in self.parameters.values()]
-
-        for k,v in value.items():
-            if v is None:
-                # No assignment is to be done
-                continue
-
-            try:
-                self.parameters[robust_index(k)].value = v
-            except KeyError:
-                # raise KeyError('Parameter is not in the model.')
-                warn('Tried to assign a value to parameter {}. '
-                     'Parameter is not in the model'.format(k))
-                self.parameters[robust_index(k)] = v
+    # @property
+    # def parameter_values(self):
+    #     # if not self._parameter_values:
+    #     #     raise Exception('No parameters have been set')
+    #     # else:
+    #     return TabDict((k,self.model.parameters[robust_index(k)].value)
+    #                    for k in self.parameters)
+    #
+    # @parameter_values.setter
+    # def parameter_values(self,value):
+    #     """
+    #     Would-be optimization hack to avoid looking up thr whole dict at each
+    #     iteration step in __call__
+    #
+    #     :param value:
+    #     :return:
+    #     """
+    #     #self._parameters = value
+    #     # self._parameter_values = [value[x] for x in self.parameters.values()]
+    #
+    #     for k,v in value.items():
+    #         if v is None:
+    #             # No assignment is to be done
+    #             continue
+    #
+    #         try:
+    #             self.parameters[robust_index(k)].value = v
+    #         except KeyError:
+    #             # raise KeyError('Parameter is not in the model.')
+    #             warn('Tried to assign a value to parameter {}. '
+    #                  'Parameter is not in the model'.format(k))
+    #             self.parameters[robust_index(k)] = v
 
     def __call__(self, t, y, ydot):
-        input_vars = list(y)+list(self.parameter_values.values())
+        input_vars = list(y)+list(self.parameters.values())
         self.function(input_vars,ydot)
