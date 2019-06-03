@@ -46,7 +46,6 @@ class ModelGenerator(ABC):
         :param reaction_to_mechanisms: definition of kinetic mechanisms
         :param reactant_relations: relations of reactants e.g. S1 to P1 and P2
         :param small_molecules: list of small molecules ids
-        :param water: id of the water molecule
 
         """
         if reaction_to_mechanisms is not None:

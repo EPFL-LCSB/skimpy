@@ -85,10 +85,10 @@ parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 this_model.compile_ode(sim_type = QSSA)
 
 #
-this_model.initial_conditions.A = 3.0
-this_model.initial_conditions.B = 2.0
-this_model.initial_conditions.C = 2.0
-this_model.initial_conditions.D = 0.5
+this_model.initial_conditions['A'] = 3.0
+this_model.initial_conditions['B'] = 2.0
+this_model.initial_conditions['C'] = 3.0
+this_model.initial_conditions['D'] = 0.5
 
 solutions = []
 for parameters in parameter_population:
