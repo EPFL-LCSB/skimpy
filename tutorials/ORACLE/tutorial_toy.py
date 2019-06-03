@@ -142,7 +142,7 @@ this_skimpy_model.prepare(mca=True)
 this_skimpy_model.compile_mca(sim_type=QSSA)
 
 # Initialize parameter sampler
-sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
+sampling_parameters = SimpleParameterSampler.Parameters(n_samples=5)
 sampler = SimpleParameterSampler(sampling_parameters)
 
 parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentration_dict)
