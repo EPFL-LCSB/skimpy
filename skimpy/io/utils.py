@@ -52,13 +52,13 @@ def create_reaction_from_stoich(name,
         this_met = met_with_stoich.metabolite
         stoich   = met_with_stoich.stoichiometry
         is_small_molecule = this_met.id in small_molecules
-        if this_met.formula is not WATER_FORMULA \
+        if not (this_met.formula == WATER_FORMULA) \
            and this_met.id not in model_generator.reactants_to_exclude \
            and is_small_molecule:
 
             this_reaction_small_molecules[this_met_id] = stoich
 
-        elif this_met.formula is not WATER_FORMULA \
+        elif not (this_met.formula == WATER_FORMULA) \
            and this_met.id not in model_generator.reactants_to_exclude \
              and not is_small_molecule:
 
@@ -68,7 +68,7 @@ def create_reaction_from_stoich(name,
     if inhibitors is not None:
         inhibitors = [sanitize_cobra_vars(inh.id)
                       for inh in inhibitors \
-                        if inh.formula is not WATER_FORMULA \
+                        if not (inh.formula == WATER_FORMULA) \
                         and inh.id not in model_generator.reactants_to_exclude \
                         and not is_small_molecule]
     if inhibitors == []:

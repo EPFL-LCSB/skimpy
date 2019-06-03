@@ -99,7 +99,7 @@ class FromPyTFA(FromCobra):
                     # If the metabolite does not correspond to water as water is
                     # omitted from the reactions or if we force the reactant to
                     # be excluded
-                    if (this_met .formula is not WATER_FORMULA) \
+                    if  not (this_met .formula == WATER_FORMULA) \
                         and (this_met .id not in self.reactants_to_exclude):
                         met = sanitize_cobra_vars(this_met.id)
                         this_reactant = skimpy_model.reactants[met]
@@ -122,7 +122,7 @@ class FromPyTFA(FromCobra):
             # Calculate the deltaG0 based on the reactants that will
             # be part in the model
             for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
-                if met.formula is not WATER_FORMULA and \
+                if not (met.formula == WATER_FORMULA) and \
                    met.id not in self.reactants_to_exclude:
                     var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
                     met_lc = pytfa_solution.raw[var_met_lc]

@@ -72,7 +72,7 @@ class FromCobra(ModelGenerator):
                     # If the metabolite does not correspond to water as water is
                     # omitted from the reactions or if we force the reactant to
                     # be excluded
-                    if (this_met .formula is not WATER_FORMULA) \
+                    if  not (this_met .formula == WATER_FORMULA) \
                         and (this_met .id not in self.reactants_to_exclude):
                         met = sanitize_cobra_vars(this_met.id)
                         this_reactant = skimpy_model.reactants[met]
@@ -88,15 +88,15 @@ class FromCobra(ModelGenerator):
             name = cobra_reaction.id
 
         # Ignore if only water is participating
-        is_water = all([met.formula is  WATER_FORMULA
+        is_water = all([met.formula == WATER_FORMULA
                         for met in cobra_reaction.metabolites])
 
         # Ignore if only reactants participate that will be ignored
-        is_hydrogen = all([met.id in self.reactants_to_exclude
+        is_ignored = all([met.id in self.reactants_to_exclude
                         for met in cobra_reaction.metabolites])
 
 
-        if is_hydrogen or is_water:
+        if is_ignored or is_water:
             return None
 
         try:
@@ -156,6 +156,8 @@ class FromCobra(ModelGenerator):
                                                           inhibitors=inhibitors,
                                                           reaction_group=reaction_group,
                                                           irrev=irrev)
+
+
 
         return skimpy_reaction
 
