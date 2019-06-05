@@ -51,18 +51,18 @@ def robust_index(in_var):
         raise TypeError('Value should be of type str or sympy.Symbol')
 
 class ODEFunction:
-    def __init__(self, model, variables, expr, parameters, pool=None):
+    def __init__(self, model, variables, expressions, parameters, pool=None):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
         :param variables: a list of strings with variables names
-        :param expr: dict of sympy expressions for the rate of
+        :param expressions: dict of sympy expressions for the rate of
                      change of a variable indexed by the variable name
         :param parameters: dict of parameters
 
         """
         self.variables = variables
-        self.expr = expr
+        self.expressions = expressions
         self.model = model
         # self._parameter_values = TabDict([])
 
@@ -79,7 +79,7 @@ class ODEFunction:
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
         # Sort the expressions
-        expressions = [self.expr[x] for x in self.variables.values()]
+        expressions = [self.expressions[x] for x in self.variables.values()]
 
         # Awsome magic
         self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=pool)
