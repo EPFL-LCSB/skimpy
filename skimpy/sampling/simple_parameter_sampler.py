@@ -145,9 +145,10 @@ class SimpleParameterSampler(ParameterSampler):
 
         parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
 
+        model_parameters = compiled_model.parameters
         # Update the concentrations which are parameters (Boundaries)
         for k,v in concentration_dict.items():
-            if str(k) in compiled_model.parameters:
+            if str(k) in model_parameters:
                 parameter_sample[k] = v
 
 
