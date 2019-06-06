@@ -33,9 +33,8 @@ import multiprocessing
 
 from sympy.printing import ccode
 
-CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False, language_level=3"+\
-                     "nonecheck=True, initializecheck=False , optimize=False\n"+\
-                     "# distutils: language = c++ \n"
+CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
+                     "nonecheck=True, initializecheck=False , optimize=False, language=c++\n"
 
 SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
 
@@ -51,7 +50,7 @@ def _set_cflags():
 
 
 
-def make_cython_function(symbols, expressions, quiet=True , simplify=True, pool=None):
+def make_cython_function(symbols, expressions, quiet=True, simplify=True, pool=None):
 
     code_expressions = generate_vectorized_code(symbols,
                                                 expressions,
@@ -61,10 +60,12 @@ def make_cython_function(symbols, expressions, quiet=True , simplify=True, pool=
     _set_cflags()
 
     def this_function(input_array,output_array):
-        Cython.inline(CYTHON_DECLARATION\
-                      +SQRT_FUNCTION\
-                      +code_expressions,
-                      quiet=quiet)
+
+        code = CYTHON_DECLARATION+SQRT_FUNCTION+code_expressions
+
+        Cython.inline(code,
+                     language_level=3,
+                     quiet=quiet,)
 
     return this_function
 
