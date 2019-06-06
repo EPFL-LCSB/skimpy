@@ -69,10 +69,6 @@ class ODEFunction:
         # Link to the model
         self._parameters = parameters
 
-        # Set values
-        for k,v in parameters.items():
-            self.parameters[robust_index(k)] = v
-
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self._parameters]
         the_variable_keys = [x for x in variables]
