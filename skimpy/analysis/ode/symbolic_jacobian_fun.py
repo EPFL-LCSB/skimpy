@@ -33,6 +33,7 @@ from sympy import diff
 from scipy.sparse import coo_matrix
 
 from skimpy.utils.compile_sympy import make_cython_function
+from skimpy.utils.general import join_dicts
 
 
 class SymbolicJacobianFunction:
@@ -64,7 +65,7 @@ class SymbolicJacobianFunction:
         # Make a function to compute every non zero entry in the matrix
 
         # Compute the Jacobian
-        self.expressions = make_symbolic_jacobian(self.variables.values(),ode_expressions)
+        self.expressions = make_symbolic_jacobian(self.variables.values(),ode_expressions, pool=pool)
 
 
         coordinates, expressions= zip(*[ (coord, expr) for coord, expr in self.expressions.items()])
@@ -76,7 +77,7 @@ class SymbolicJacobianFunction:
         # self.function = theano_function(sym_vars, expressions,
         #                                 on_unused_input='ignore')
 
-        self.function = make_cython_function(sym_vars, expressions, pool=pool, simplify=True)
+        self.function = make_cython_function(sym_vars, expressions, pool=pool, simplify=False)
 
     def __call__(self, fluxes, concentrations, parameters):
         """
@@ -91,21 +92,44 @@ class SymbolicJacobianFunction:
         self.function(input_vars, values)
 
         jacobian = coo_matrix((values,
-                                      (self.rows, self.columns)),
-                                       shape=self.shape).tocsc()
+                              (self.rows, self.columns)),
+                               shape=self.shape).tocsc()
 
         return jacobian
 
 
-def make_symbolic_jacobian(variables,ode_expressions):
+def make_symbolic_jacobian(variables,ode_expressions, pool=None):
     # List of Vars and ode_
 
-    expressions = {}
-    for i, var_i in enumerate(variables):
-        for j, var_j in enumerate(variables):
-            derivative = diff(ode_expressions[var_j], var_i)
-            if derivative != 0:
-                expressions[(i,j)] = derivative
+    if pool is None:
+        expressions = {}
+        for i, var_i in enumerate(variables):
+            for j, var_j in enumerate(variables):
+                derivative = diff(ode_expressions[var_j], var_i)
+                if derivative != 0:
+                    expressions[(i,j)] = derivative
+    else:
+
+        pickled_variables = [v for v in variables]
+        pickled_ode_expressions = {k:v for k,v in ode_expressions.items()}
+
+        inputs = [(i,var_i,pickled_variables,pickled_ode_expressions)
+                  for i,var_i in enumerate(variables) ]
+
+        row_slices = pool.map(make_symbolic_jacobian_row, inputs)
+
+        expressions = join_dicts(row_slices)
 
     return expressions
 
+
+
+def make_symbolic_jacobian_row(input):
+    i, var_i, variables, ode_expressions = input
+    expressions_row_slice = {}
+    for j, var_j in enumerate(variables):
+        derivative = diff(ode_expressions[var_j], var_i)
+        if derivative != 0:
+            expressions_row_slice[(i, j)] = derivative
+
+    return expressions_row_slice
