@@ -28,6 +28,7 @@ import numpy as np
 # Test models
 from skimpy.core import *
 from skimpy.mechanisms import *
+from skimpy.core.solution import ODESolutionPopulation
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 
 # Build linear Pathway model
@@ -82,11 +83,13 @@ concentration_dict = {'A': 3.0, 'B': 2.0, 'C': 1.0, 'D': 0.5}
 parameters = SimpleParameterSampler.Parameters(n_samples=10)
 sampler = SimpleParameterSampler(parameters)
 
-parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
+parameter_population = sampler.sample(this_model, flux_dict,
+                                      concentration_dict)
 
 #this_model.compile_ode(sim_type = QSSA)
 
-#
+# TODO can change this back to this_modl.initial_conditions.A = 3.0 once
+# tabdict is fixed
 this_model.initial_conditions['A'] = 3.0
 this_model.initial_conditions['B'] = 2.0
 this_model.initial_conditions['C'] = 3.0
@@ -96,9 +99,11 @@ solutions = []
 for parameters in parameter_population:
     # TODO system is too small for sparse eig handle properly
     this_model.parameters = parameters
-    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500), solver_type='cvode')
+    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500),
+                                         solver_type='cvode')
     solutions.append(this_sol_qssa)
 
 this_sol_qssa.plot('output/non_linear_qssa.html')
 
-
+solpop = ODESolutionPopulation(solutions)
+solpop.plot('output/non_linea_pop_{}.html')
