@@ -24,12 +24,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from sympy import sympify
+from sympy import simplify
 
 from skimpy.analysis.ode.ode_fun import ODEFunction
 from skimpy.analysis.ode.flux_fun import FluxFunction
 from skimpy.utils import iterable_to_tabdict, TabDict
 from skimpy.utils.namespace import *
+from skimpy.utils.general import join_dicts
 
 
 def make_ode_fun(kinetic_model, sim_type, pool=None):
@@ -103,19 +104,7 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     # Better since this is implemented now
     variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
 
-    #TODO If the model has mojeties only account for the independent vars
-
-    expr = dict.fromkeys(variables.values(), 0.0)
-
-    # Mass balance
-    # Sum up all rate expressions
-    # Todo Add here the parralel option interm of two functions
-    for this_reaction in all_expr:
-        for this_variable_key in this_reaction:
-            try:
-                expr[this_variable_key] += this_reaction[this_variable_key]
-            except KeyError:
-                pass
+    expr = make_expressions(variables,all_expr, pool=pool)
 
     # Apply constraints. Constraints are modifiers that act on
     # expressions
@@ -132,6 +121,43 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     ode_fun = ODEFunction(kinetic_model, variables, expr, all_parameters, pool=pool)
 
     return ode_fun, variables
+
+
+def make_expressions(variables, all_flux_expr, pool=None):
+
+    if pool is None:
+        expr = dict.fromkeys(variables.values(), 0.0)
+
+        for this_reaction in all_flux_expr:
+            for this_variable_key in this_reaction:
+                try:
+                    expr[this_variable_key] += this_reaction[this_variable_key]
+                except KeyError:
+                    pass
+
+    else:
+
+        inputs = [(v,all_flux_expr) for v in variables.values()]
+
+        list_expressions = pool.map(make_expresson_single_var, inputs)
+
+        expr = join_dicts(list_expressions)
+
+    return expr
+
+def make_expresson_single_var(input):
+    var, all_flux_expr = input
+
+    this_expr = dict()
+    this_expr[var] = 0.0
+
+    for this_reaction in all_flux_expr:
+        for this_variable_key in this_reaction:
+            if this_variable_key == var:
+                this_expr[this_variable_key] += this_reaction[this_variable_key]
+
+    return this_expr
+
 
 
 def make_flux_fun(kinetic_model):

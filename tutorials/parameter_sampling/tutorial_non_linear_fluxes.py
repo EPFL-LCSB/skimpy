@@ -71,7 +71,9 @@ this_model.parametrize_by_reaction({'E1': parameters_1,
                                     'E3': parameters_3})
 
 this_model.prepare(mca=True)
-this_model.compile_mca()
+#this_model.compile_mca()
+
+this_model.compile_jacobian(type=SYMBOLIC,sim_type = QSSA)
 
 flux_dict = {'E1': 1.0, 'E2': 1.0, 'E3': 1.0}
 concentration_dict = {'A': 3.0, 'B': 2.0, 'C': 1.0, 'D': 0.5}
@@ -82,7 +84,7 @@ sampler = SimpleParameterSampler(parameters)
 
 parameter_population = sampler.sample(this_model, flux_dict, concentration_dict)
 
-this_model.compile_ode(sim_type = QSSA)
+#this_model.compile_ode(sim_type = QSSA)
 
 #
 this_model.initial_conditions['A'] = 3.0

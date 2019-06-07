@@ -27,6 +27,7 @@ limitations under the License.
 
 from scikits.odes import ode
 from skimpy.analysis.ode.utils import make_ode_fun
+from skimpy.analysis.ode.symbolic_jacobian_fun import SymbolicJacobianFunction
 from skimpy.analysis.mca.make import make_mca_functions
 from skimpy.analysis.mca.prepare import prepare_mca
 from skimpy.analysis.mca import *
@@ -208,6 +209,24 @@ class KineticModel(object):
 
         if ode:
             pass
+
+
+    def compile_jacobian(self, type=NUMERICAL ,sim_type=QSSA, ncpu=1):
+
+        self.sim_type = sim_type
+
+        if not hasattr(self, 'pool'):
+            self.pool = Pool(ncpu)
+
+        if type == NUMERICAL:
+            self.compile_mca(parameter_list=[], sim_type=sim_type, ncpu=ncpu)
+
+        if type == SYMBOLIC:
+            self.compile_ode(sim_type=sim_type, ncpu=ncpu)
+            self.jacobian_fun = SymbolicJacobianFunction(self.ode_fun.variables,
+                                                         self.ode_fun.expressions,
+                                                         self.parameters,
+                                                         self.pool)
 
     def compile_ode(self, sim_type=QSSA, ncpu=1,):
 

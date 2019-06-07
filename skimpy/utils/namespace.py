@@ -31,6 +31,12 @@ MCA  = 'mca'
 ODE  = 'ode'
 ELEMENTARY = 'elementary'
 
+
+""" Jacobian Types"""
+NUMERICAL = 'numerical'
+SYMBOLIC = 'symbolic'
+
+
 """ Item types """
 PARAMETER = 'parameter'
 VARIABLE  = 'variable'
@@ -44,3 +50,4 @@ JOULE = 'JOULE'
 """ OTHER """
 
 WATER_FORMULA = 'H2O'
+
