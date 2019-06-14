@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 
 
-def timetrace_plot(time,data,filename='out.html', legend = None):
+def timetrace_plot(time, data, filename='out.html', legend=None):
     """
     Classic time vs. Y-value plot.
 
@@ -101,8 +101,6 @@ def boxplot(df, filename):
                    x_range=cats,
                    toolbar_location=None)
 
-
-
         # stems
         p.segment(cats, upper, cats, q3, line_color="black")
         p.segment(cats, lower, cats, q1, line_color="black")
@@ -121,7 +119,6 @@ def boxplot(df, filename):
         show(p)
 
 
-
 def plot_population_per_variable(data, filename, stride = 1):
     """
 
@@ -138,16 +135,16 @@ def plot_population_per_variable(data, filename, stride = 1):
     # colors = viridis(len(grouped))
 
     for var in data.columns:
-        if var in ['solution_id','time']:
+        if var in ['solution_id', 'time']:
             continue
 
-        p = figure(x_axis_type = 'datetime')
+        p = figure(x_axis_type='datetime')
 
-        for group,this_data in grouped:
+        for group, this_data in grouped:
             this_data = this_data.iloc[::stride]
             p.line(this_data['time'], this_data[var],
                    # line_color = colors[group],
-                   line_alpha = 0.2)
+                   line_alpha=0.2)
 
         p.title.text = var
 

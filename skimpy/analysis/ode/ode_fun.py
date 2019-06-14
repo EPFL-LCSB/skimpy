@@ -32,6 +32,7 @@ from skimpy.utils.compile_sympy import make_cython_function
 from ...utils.tabdict import TabDict
 from warnings import warn
 
+
 def robust_index(in_var):
     """
     Indexing can be done with symbols or strings representing the symbol,
@@ -49,6 +50,7 @@ def robust_index(in_var):
         return in_var.name
     else:
         raise TypeError('Value should be of type str or sympy.Symbol')
+
 
 class ODEFunction:
     def __init__(self, model, variables, expressions, parameters, pool=None):
