@@ -29,3 +29,4 @@ from .kinmodel import KineticModel
 from .modifiers import *
 from .reactions import Reaction
 from .itemsets import *
+from .parameters import *
