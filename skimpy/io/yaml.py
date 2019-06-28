@@ -149,6 +149,8 @@ def export_to_yaml(model, path=None, **kwargs):
     refresh_representers()
 
     dict_model = vars(model)
+    # Add parameters that are properties
+    dict_model['parameters'] = model.parameters
     fields_not_to_serialize = [x for x in dict_model if not x in FIELDS_TO_SERIALIZE]
     [dict_model.pop(k) for k in fields_not_to_serialize]
 
