@@ -100,3 +100,22 @@ def make_subclasses_dict(cls):
     the_dict = {x.__name__:x for x in get_all_subclasses(cls)}
     the_dict[cls.__name__] = cls
     return the_dict
+
+
+def robust_index(in_var):
+    """
+    Indexing can be done with symbols or strings representing the symbol,
+    so we harmonize it by returning the name of the symbol if the input is of
+    type symbol
+
+    :param in_var:
+    :type in_var: str or sympy.Symbol
+    :return:
+    """
+
+    if isinstance(in_var, str):
+        return in_var
+    elif isinstance(in_var, Symbol):
+        return in_var.name
+    else:
+        raise TypeError('Value should be of type str or sympy.Symbol')
