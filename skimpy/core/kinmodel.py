@@ -280,6 +280,9 @@ class KineticModel(object):
         ordered_initial_conditions = [self.initial_conditions[variable]
                                       for variable in self.variables]
 
+        #Update fixed parameters
+        self.ode_fun.get_parames()
+
         # #if parameters are empty try to fetch from model
         # if not self.ode_fun._parameter_values:
         #     self.ode_fun.parameter_values = {v.symbol:v.value

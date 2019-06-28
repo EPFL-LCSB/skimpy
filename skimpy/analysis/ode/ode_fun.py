@@ -71,6 +71,9 @@ class ODEFunction:
     def parameters(self, value):
         self._parameters = value
 
+    def get_parames(self):
+        self._parameters_values = self.parameters.values()
+
     # @property
     # def parameter_values(self):
     #     # if not self._parameter_values:
@@ -105,5 +108,5 @@ class ODEFunction:
     #             self.parameters[robust_index(k)] = v
 
     def __call__(self, t, y, ydot):
-        input_vars = list(y)+list(self.parameters.values())
+        input_vars = list(y)+list(self._parameters_values)
         self.function(input_vars,ydot)
