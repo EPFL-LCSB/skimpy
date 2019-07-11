@@ -43,6 +43,7 @@ class FluxFunction:
         """
         self.variables = variables
         self.expr = expr
+        self.flux_names = list(expr.keys())
         self.parameters = parameters
 
         # Unpacking is needed as ufuncify only take ArrayTypes
@@ -85,4 +86,4 @@ class FluxFunction:
 
         self.function(input_vars, fluxes)
 
-        return fluxes
+        return {k: v for k, v in zip(self.flux_names, fluxes)}
