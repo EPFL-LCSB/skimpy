@@ -96,6 +96,16 @@ class KineticModel(object):
         for key,value in value_dict.items():
             parameters[str(key)].value = value
 
+    @property
+    def moieties(self):
+        ms = []
+        if hasattr(self,'conservation_relation'):
+            for row in self.conservation_relation.toarray():
+                ms.append({self.reactants.iloc(j)[0]: e for j, e in enumerate(row) if not e == 0})
+        else:
+            raise AttributeError('Model not prepared for MCA')
+
+        return ms
 
     def add_reaction(self, reaction):
         """
