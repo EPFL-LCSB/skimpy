@@ -25,10 +25,10 @@ limitations under the License.
 
 """
 
-from numpy import array, double
-from sympy import symbols, Symbol
+from sympy import symbols
 
 from skimpy.utils.compile_sympy import make_cython_function
+from skimpy.utils.general import robust_index
 from ...utils.tabdict import TabDict
 from warnings import warn
 
@@ -91,6 +91,9 @@ class ODEFunction:
     def parameters(self, value):
         self._parameters = value
 
+    def get_parames(self):
+        self._parameters_values = self.parameters.values()
+
     # @property
     # def parameter_values(self):
     #     # if not self._parameter_values:
@@ -125,5 +128,5 @@ class ODEFunction:
     #             self.parameters[robust_index(k)] = v
 
     def __call__(self, t, y, ydot):
-        input_vars = list(y)+list(self.parameters.values())
+        input_vars = list(y)+list(self._parameters_values)
         self.function(input_vars,ydot)

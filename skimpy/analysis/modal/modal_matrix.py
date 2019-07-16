@@ -55,7 +55,7 @@ def modal_matrix(kmodel,concentration_dict,parameters):
 
         flux_expressions = TabDict([ (rxn.name,rxn.mechanism.reaction_rates['v_net'])
                              for rxn in kmodel.reactions.values()])
-        flux_parameters = TabDict([(str(p),p) for rxn in kmodel.reactions.values()
+        flux_parameters = TabDict([(p.name,p) for rxn in kmodel.reactions.values()
                             for p in rxn.mechanism.expression_parameters])
         kmodel.flux_fun = FluxFunction(kmodel.variables,
                                        flux_expressions,
@@ -67,6 +67,9 @@ def modal_matrix(kmodel,concentration_dict,parameters):
     fluxes = kmodel.flux_fun(concentration_dict,parameters=parameters)
 
     concentrations= [concentration_dict[str(k)] for k in kmodel.variables]
+
+    # Sort flux according to reactions
+    fluxes = [fluxes[rxn] for rxn in kmodel.reactions]
     jacobian = kmodel.jacobian_fun(fluxes, concentrations, parameters)
 
     # The transformation matrix W is given by the eigenrows of the jacobian M,

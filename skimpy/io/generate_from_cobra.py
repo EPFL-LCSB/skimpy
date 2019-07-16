@@ -142,7 +142,12 @@ class FromCobra(ModelGenerator):
                 #Irreversible in backward direction
                 # invert the assumed forward stoichiometry
                 irrev  = True
-                for this_met_id, metstoich in met_stoich_dict:
+                for this_met_id, metstoich in met_stoich_dict.items():
+
+                    raise NotImplementedError('FIX ME SEE COMMENT')
+                    # The attribute of the namedtuple cant be changed
+                    # find solution for this!!!
+
                     metstoich.stoichiometry *= -1
 
             else:

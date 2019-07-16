@@ -25,6 +25,8 @@ limitations under the License.
 
 """
 
+from math import log
+
 from skimpy.core import *
 from skimpy.utils.conversions import deltag0_to_keq
 from skimpy.utils.general import sanitize_cobra_vars
@@ -49,7 +51,7 @@ class FromPyTFA(FromCobra):
 
         self.max_revesible_deltag_0 = max_revesible_deltag_0
 
-    def import_model(self, pytfa_model, pytfa_solution):
+    def import_model(self, pytfa_model, pytfa_solution, concentration_scaling_factor = 1.0):
         """
         Function to create a kinetic model from a constraint based model
 
@@ -68,7 +70,10 @@ class FromPyTFA(FromCobra):
         for this_reaction in pytfa_model.reactions:
             if not check_boundary_reaction(this_reaction):
 
-                k_eq, deltag0 = self.get_equlibrium_constant(pytfa_model, pytfa_solution, this_reaction)
+                k_eq, deltag0 = self.get_equlibrium_constant(pytfa_model,
+                                                             pytfa_solution,
+                                                             this_reaction,
+                                                             scaling_factor=concentration_scaling_factor)
 
                 # Check the reversibility of the reaction
                 if deltag0 < -self.max_revesible_deltag_0:
@@ -110,13 +115,15 @@ class FromPyTFA(FromCobra):
 
         return skimpy_model
 
-    def get_equlibrium_constant(self, pytfa_model, pytfa_solution, this_reaction):
+    def get_equlibrium_constant(self, pytfa_model, pytfa_solution, this_reaction, scaling_factor = 1.0):
         # get delta_Gstd variable name from LC and Delta G
         temp = pytfa_model.TEMPERATURE
         gas_constant = pytfa_model.GAS_CONSTANT
         RT = pytfa_model.RT
         # We here calculate the delta G from
         try:
+            scaling_order = sum(this_reaction.metabolites.values() )
+
             var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
             deltag0 = pytfa_solution.raw[var_delta_g]
             # Calculate the deltaG0 based on the reactants that will
@@ -126,7 +133,7 @@ class FromPyTFA(FromCobra):
                    met.id not in self.reactants_to_exclude:
                     var_met_lc = pytfa_model.log_concentration.get_by_id(met.id).name
                     met_lc = pytfa_solution.raw[var_met_lc]
-                    deltag0 -= s * RT * met_lc
+                    deltag0 -= s * RT * (met_lc + log(scaling_factor))
 
         except KeyError:
             deltag0 = self.dummy_dgo

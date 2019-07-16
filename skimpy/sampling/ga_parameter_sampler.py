@@ -145,7 +145,7 @@ class GaParameterSampler(ParameterSampler):
         for this_sat in result_saturations:
             parameter_population.append(calc_parameters(this_sat,
                                                         compiled_model,
-                                                        symbolic_concentrations_dict,
+                                                        concentration_dict,
                                                         flux_dict)
                                         )
         # Plot pareto fronts
