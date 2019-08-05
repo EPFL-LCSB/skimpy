@@ -34,11 +34,13 @@ COPY src/ /src/
 
 # Copy python package requirements
 COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 
 # Install python packages
-COPY install_pytfa_dev.sh .
-RUN /bin/bash install_pytfa_dev.sh
-RUN pip install -r requirements.txt
+#COPY install_pytfa_dev.sh .
+#RUN /bin/bash install_pytfa_dev.sh
+
 
 COPY ./utils /utils
 # Make executable
@@ -83,5 +85,5 @@ WORKDIR ./work
 
 
 # Load your package in development mode on startup
-ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && $0 $*"]
+ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy/docker/pytfa && pip install --user -e /skimpy[ORACLE] && $0 $*"]
 CMD /bin/bash
