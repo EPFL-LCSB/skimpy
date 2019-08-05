@@ -56,6 +56,9 @@ class KineticMechanism(ABC):
         if with_catalyst_concentration:
             self.reactants['enzyme'] = Reactant(self.name)
 
+    def __reduce__(self):
+            return KineticMechanism.__class__.__name__
+
     def link_parameters_and_reactants(self):
         for p,r in self.parameter_reactant_links.items():
             try:
