@@ -61,6 +61,11 @@ cdef extern from "nullspace.pyh":
     cdef slong fmpz_get_ui(fmpz_t A);
     cdef void fmpz_mat_clear(fmpz_mat_t A);
 
+    cdef void fmpz_clear(fmpz_t x)
+    cdef void fmpz_init(fmpz_t x)
+    cdef void fmpz_set(fmpz_t dest , const fmpz_t src)
+
+
     cdef void fmpq_mat_init(fmpq_mat_t A, int rows, int columns);
     cdef fmpq_t fmpq_mat_entry(fmpq_mat_t A, int row, int column);
     cdef void fmpq_init(fmpq_t x)
@@ -69,6 +74,9 @@ cdef extern from "nullspace.pyh":
     cdef void fmpq_mat_clear(fmpq_mat_t A);
 
     cdef slong fmpq_mat_rref(fmpq_mat_t B, const fmpq_mat_t A)
+
+    cdef slong fmpz_mat_nullspace ( fmpz_mat_t B , const fmpz_mat_t A )
+
 
 
 cdef int get_fmpz_mat_entry(fmpz_mat_t A, int row, int column):
@@ -106,7 +114,7 @@ cpdef left_integer_nullspace(matrix):
             entry = fmpq_mat_entry(matrix_t, i, j)
             q.num = matrix[i,j]
             q.den = 1
-            fmpq_set(entry ,q )
+            fmpq_set(entry , q )
 
     cdef slong* perm
     cdef fmpz_t den
@@ -133,3 +141,42 @@ cpdef left_integer_nullspace(matrix):
 
     return left_nullspace
 
+
+cpdef right_integer_nullspace(matrix):
+
+    if not np.issubdtype(matrix.dtype,np.integer):
+        raise TypeError("The Matrix is not integer.")
+
+    n = matrix.shape[0]
+    m = matrix.shape[1]
+
+
+    cdef fmpz_mat_t matrix_t;
+    cdef fmpz_mat_t nullspace_t;
+
+
+    fmpz_mat_init(matrix_t, n, m)
+    fmpz_mat_init(nullspace_t, m, m)
+
+    cdef fmpz_t z
+    fmpz_init(z)
+
+    for i in range(n):
+        for j in range(m):
+            fmpz_set_ui ( fmpz_mat_entry (matrix_t , i , j ) , matrix[i,j] )
+
+    cdef rank = fmpz_mat_nullspace(nullspace_t, matrix_t)
+
+    nullspace = np.zeros( (rank,m) )
+
+    for i in range(rank):
+        for j in range(m):
+            z = fmpz_mat_entry(nullspace_t,i,j)
+            value =fmpz_get_ui(z)
+            nullspace[i,j] = value
+
+    fmpz_mat_clear(nullspace_t)
+    fmpz_mat_clear(matrix_t)
+    fmpz_clear(z)
+
+    return nullspace
