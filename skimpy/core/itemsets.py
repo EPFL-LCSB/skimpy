@@ -108,6 +108,9 @@ class ItemSet(ABC, TabDict):
         self.mechanism = mechanism
 
         TabDict.__init__(self)
+
+    def __reduce__(self):
+        return self.__class__.__name__ + self.mechanism.__class__.__name__
         
 
 class Parameter(Item):
