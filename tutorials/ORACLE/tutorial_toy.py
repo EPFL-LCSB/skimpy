@@ -69,7 +69,7 @@ this_pytfa_model.convert(add_displacement=True)
 # We choose a flux directionality profile (FDP)
 # with minium fluxes of 1e-3
 
-this_bounds = {'DM_13dpg': (-10.0, -2.0),
+this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'DM_2h3oppan': (1e-3, 100.0),
                'DM_adp':      (-100.0, -1e-3),
                'DM_atp':      (1e-3, 100.0),

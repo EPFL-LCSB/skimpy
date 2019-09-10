@@ -88,7 +88,7 @@ parameter_population = sampler.sample(this_model, flux_dict,
 
 #this_model.compile_ode(sim_type = QSSA)
 
-# TODO can change this back to this_modl.initial_conditions.A = 3.0 once
+# TODO can change this back to this_model.initial_conditions.A = 3.0 once
 # tabdict is fixed
 this_model.initial_conditions['A'] = 3.0
 this_model.initial_conditions['B'] = 2.0

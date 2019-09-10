@@ -43,7 +43,7 @@ def timetrace_plot(time, data, filename='out.html', legend=None):
     :param legend:
     :return:
     """
-    # Make cool plot functions maype there is also a cooler way?
+    # Make cool plot functions maybe there is also a cooler way?
     if filename == '':
         # show the plot
         pass
@@ -74,6 +74,8 @@ def timetrace_plot(time, data, filename='out.html', legend=None):
 
 
 def boxplot(df, filename):
+        # TODO document, short explanation of usage
+        # Adapted from: https://bokeh.pydata.org/en/latest/docs/gallery/boxplot.html
 
         mean = df.mean()
         not_nan = [i for i,e in enumerate(mean) if e is not np.nan]
