@@ -217,7 +217,7 @@ def get_stoich(s):
 
 def load_yaml_model(path):
     with open(path,'r') as fid:
-        the_dict = yaml.load(fid)
+        the_dict = yaml.full_load(fid)
 
     new = KineticModel(name = the_dict['name'])
 
