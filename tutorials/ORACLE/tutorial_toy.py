@@ -112,7 +112,7 @@ Get a Kinetic Model
 small_molecules = ['h_c','h_e']
 
 model_gen = FromPyTFA(small_molecules=small_molecules)
-this_skimpy_model = model_gen.import_model(this_pytfa_model,solution)
+this_skimpy_model = model_gen.import_model(this_pytfa_model,solution.raw)
 
 """
 Sanitize the solution to match with the skimpy model
@@ -145,6 +145,7 @@ this_skimpy_model.compile_mca(sim_type=QSSA)
 sampling_parameters = SimpleParameterSampler.Parameters(n_samples=5)
 sampler = SimpleParameterSampler(sampling_parameters)
 
+# Sample the model
 parameter_population = sampler.sample(this_skimpy_model, flux_dict, concentration_dict)
 
 """

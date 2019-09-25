@@ -142,7 +142,7 @@ small_molecules = ['h_c','h_e','h_m',
                    'na1_c','na1_e']
 
 model_gen = FromPyTFA(water='h2o')
-kmodel = model_gen.import_model(tmodel, solution)
+kmodel = model_gen.import_model(tmodel, solution.raw)
 
 kmodel.update()
 
