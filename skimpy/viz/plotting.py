@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 
 
-def timetrace_plot(time,data,filename='out.html', legend = None):
+def timetrace_plot(time, data, filename='out.html', legend=None):
     """
     Classic time vs. Y-value plot.
 
@@ -43,7 +43,7 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
     :param legend:
     :return:
     """
-    # Make cool plot functions maype there is also a cooler way?
+    # Make cool plot functions maybe there is also a cooler way?
     if filename == '':
         # show the plot
         pass
@@ -74,6 +74,8 @@ def timetrace_plot(time,data,filename='out.html', legend = None):
 
 
 def boxplot(df, filename):
+        # TODO document, short explanation of usage
+        # Adapted from: https://bokeh.pydata.org/en/latest/docs/gallery/boxplot.html
 
         mean = df.mean()
         not_nan = [i for i,e in enumerate(mean) if e is not np.nan]
@@ -101,8 +103,6 @@ def boxplot(df, filename):
                    x_range=cats,
                    toolbar_location=None)
 
-
-
         # stems
         p.segment(cats, upper, cats, q3, line_color="black")
         p.segment(cats, lower, cats, q1, line_color="black")
@@ -121,7 +121,6 @@ def boxplot(df, filename):
         show(p)
 
 
-
 def plot_population_per_variable(data, filename, stride = 1):
     """
 
@@ -138,16 +137,16 @@ def plot_population_per_variable(data, filename, stride = 1):
     # colors = viridis(len(grouped))
 
     for var in data.columns:
-        if var in ['solution_id','time']:
+        if var in ['solution_id', 'time']:
             continue
 
-        p = figure(x_axis_type = 'datetime')
+        p = figure(x_axis_type='datetime')
 
-        for group,this_data in grouped:
+        for group, this_data in grouped:
             this_data = this_data.iloc[::stride]
             p.line(this_data['time'], this_data[var],
                    # line_color = colors[group],
-                   line_alpha = 0.2)
+                   line_alpha=0.2)
 
         p.title.text = var
 

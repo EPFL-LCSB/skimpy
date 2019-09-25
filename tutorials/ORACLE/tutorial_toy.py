@@ -69,7 +69,7 @@ this_pytfa_model.convert(add_displacement=True)
 # We choose a flux directionality profile (FDP)
 # with minium fluxes of 1e-3
 
-this_bounds = {'DM_13dpg': (-10.0, -2.0),
+this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'DM_2h3oppan': (1e-3, 100.0),
                'DM_adp':      (-100.0, -1e-3),
                'DM_atp':      (1e-3, 100.0),
@@ -95,7 +95,7 @@ solution = this_pytfa_model.optimize()
 
 # Force a minimal thermodynamic displacement
 min_log_displacement = 1e-1
-add_min_log_displacement(this_pytfa_model,min_log_displacement)
+add_min_log_displacement(this_pytfa_model, min_log_displacement)
 
 # Find a solution for the model
 solution = this_pytfa_model.optimize()
@@ -109,10 +109,11 @@ Get a Kinetic Model
 # Define the molecules that should be considered small-molecules
 # These molecules will not be accounted explicitly in the kinetic mechanism as
 # substrates and products
-small_molecules = ['h_c','h_e']
+small_molecules = ['h_c', 'h_e']
 
 model_gen = FromPyTFA(small_molecules=small_molecules)
 this_skimpy_model = model_gen.import_model(this_pytfa_model,solution.raw)
+
 
 """
 Sanitize the solution to match with the skimpy model
@@ -130,8 +131,8 @@ metabolite_ids = this_pytfa_model.log_concentration.list_attr('id')
 temp_concentration_dict = np.exp(solution.raw[variable_names]).to_dict()
 
 # Map concentration names
-mapping_dict = {k:sanitize_cobra_vars(v) for k,v in zip(variable_names,metabolite_ids)}
-concentration_dict = {mapping_dict[k]:v for k,v in temp_concentration_dict.items()}
+mapping_dict = {k: sanitize_cobra_vars(v) for k, v in zip(variable_names, metabolite_ids)}
+concentration_dict = {mapping_dict[k]: v for k, v in temp_concentration_dict.items()}
 
 
 """
