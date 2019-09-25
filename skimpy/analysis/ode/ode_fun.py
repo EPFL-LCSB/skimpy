@@ -25,13 +25,12 @@ limitations under the License.
 
 """
 
-from sympy import symbols
+from numpy import array, double
+from sympy import symbols, Symbol
 
 from skimpy.utils.compile_sympy import make_cython_function
-from skimpy.utils.general import robust_index
 from ...utils.tabdict import TabDict
 from warnings import warn
-
 
 def robust_index(in_var):
     """
@@ -50,7 +49,6 @@ def robust_index(in_var):
         return in_var.name
     else:
         raise TypeError('Value should be of type str or sympy.Symbol')
-
 
 class ODEFunction:
     def __init__(self, model, variables, expressions, parameters, pool=None):

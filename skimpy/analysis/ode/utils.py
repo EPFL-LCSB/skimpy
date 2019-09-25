@@ -160,37 +160,43 @@ def make_expresson_single_var(input):
 
 
 
-def make_flux_fun(kinetic_model):
+def make_flux_fun(kinetic_model, sim_type):
     """
 
     :param kinetic_model:
     :type kinetic_model: skimpy.core.KineticModel
     :return:
     """
-
+    sim_type = sim_type.lower()
     # Get all variables and expressions (Better solution with types?)
-    all_rate_expr = [this_reaction.mechanism.reaction_rates \
-                    for this_reaction in kinetic_model.reactions.values()]
+    # TODO This should be a method in KineticModel that stores the expressions
+    if sim_type == QSSA:
+        # Get all variables and expressions (Better solution with types?)
+        all_rate_expr = [(this_reaction.name,
+                          this_reaction.mechanism.reaction_rates['v_net']) \
+                          for this_reaction in kinetic_model.reactions.values()]
+    elif sim_type == ELEMENTARY:
+        # Get all variables and expressions (Better solution with types?)
+        all_rate_expr = [(this_reaction.name+'_'+name, this_rate )
+                         for this_reaction in kinetic_model.reactions.values()
+                         for name,this_rate in this_reaction.mechanism.reaction_rates.items()]
+
+    else:
+        raise (ValueError('Simulation type not recognized: {}'.format(sim_type)))
+
+    expr = TabDict(all_rate_expr)
 
     all_param = kinetic_model.ode_fun.parameters
-
 
     # Flatten all the lists
     flatten_list = lambda this_list: [item for sublist in this_list \
                                       for item in sublist]
 
     variables = kinetic_model.ode_fun.variables
-    expr = {}
-
-    # Mass balance
-    # Sum up all rate expressions
-    for this_reaction in all_rate_expr:
-        for this_rate_key in this_reaction:
-            expr[this_rate_key] = this_reaction[this_rate_key]
 
     # Make vector function from expressions in this case all_expressions
     # are all the expressions indexed by the
     flux_fun = FluxFunction(variables, expr, all_param)
-    flux_fun._parameter_values = kinetic_model.ode_fun.parameter_values
+    flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
 
     return flux_fun

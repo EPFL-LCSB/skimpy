@@ -43,7 +43,6 @@ class FluxFunction:
         """
         self.variables = variables
         self.expr = expr
-        self.flux_names = list(expr.keys())
         self.parameters = parameters
 
         # Unpacking is needed as ufuncify only take ArrayTypes
@@ -53,37 +52,19 @@ class FluxFunction:
 
         self.function = make_cython_function(sym_vars, expr.values(), simplify=False, pool=pool)
 
-    @property
-    def parameter_values(self):
-        if not self._parameter_values:
-            raise ArgumentError('No parameters have been set')
-        else:
-            return self._parameter_values
-
-    @parameter_values.setter
-    def parameter_values(self,value):
-        """
-        Would-be optimization hack to avoid looking up thr whole dict at each
-        iteration step in __call__
-
-        :param value:
-        :return:
-        """
-        #self._parameters = value
-        self._parameter_values = [value[x] for x in self.parameters.values()]
 
     def __call__(self,concentrations,  parameters=None):
         # Todo handle different input types
         variables = [concentrations[str(x)] for x in self.variables]
 
         if parameters is None:
-            input_vars = list(variables)+list(self.parameter_values.values())
+            input_vars = list(variables)+list(self.parameters.values())
         else:
             input_vars = list(variables) \
-                         + [parameters[x] for x in self.parameters.values()]
+                         + [parameters[x] for x in self.parameters]
 
         fluxes = np.zeros(len(self.expr))
 
         self.function(input_vars, fluxes)
 
-        return {k: v for k, v in zip(self.flux_names, fluxes)}
+        return {k:v for k,v in zip(list(self.expr.keys()) , fluxes)}

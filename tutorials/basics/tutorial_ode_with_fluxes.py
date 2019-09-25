@@ -64,7 +64,7 @@ this_model.initial_conditions['pfk'] = 1.0
 
 this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-calc_fluxes = make_flux_fun(this_model)
+calc_fluxes = make_flux_fun(this_model, ELEMENTARY)
 
 steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
 

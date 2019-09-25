@@ -51,7 +51,20 @@ def test_fluxes():
 
     this_sol_full = dummy_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-    calc_fluxes = make_flux_fun(dummy_model)
+    calc_fluxes = make_flux_fun(dummy_model, ELEMENTARY)
+
+    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
+
+
+    dummy_model.compile_ode(sim_type=QSSA)
+
+    dummy_model.initial_conditions['A'] = 10.0
+    dummy_model.initial_conditions['B'] = 1.0
+    dummy_model.initial_conditions['pfk'] = 1.0
+
+    this_sol_full = dummy_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
+
+    calc_fluxes = make_flux_fun(dummy_model, QSSA)
 
     steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
 
