@@ -48,9 +48,17 @@ class SimpleParameterSampler(ParameterSampler):
     # if parameters are not defined put default values
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
-    def sample(self, compiled_model, flux_dict, concentration_dict, seed=123):
+    def sample(self,
+               compiled_model,
+               flux_dict,
+               concentration_dict,
+               only_stable=True,
+               min_max_eigenvalues=False,
+               seed=123):
 
         parameter_population = []
+        smallest_eigenvalues = []
+        largest_eigenvalues = []
 
         self.seed = seed
         np.random.seed(self.seed)
@@ -76,16 +84,11 @@ class SimpleParameterSampler(ParameterSampler):
 
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
-            try:
 
-                parameter_sample = self._sample_saturation_step_compiled(
-                    compiled_model,
-                    symbolic_concentrations_dict,
-                    flux_dict)
-
-            except ValueError:
-                continue
-
+            parameter_sample = self._sample_saturation_step_compiled(
+                compiled_model,
+                symbolic_concentrations_dict,
+                flux_dict)
 
             # Check stability: real part of all eigenvalues of the jacobian is <= 0
             this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
@@ -94,8 +97,11 @@ class SimpleParameterSampler(ParameterSampler):
             #largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
             #                                 return_eigenvectors=False)
             # Test suggests that this is apparently much faster ....
-            largest_eigenvalue = np.real(sorted(
-                eigenvalues(this_jacobian.todense()))[-1])
+            this_real_eigenvalues = np.real(sorted(
+                eigenvalues(this_jacobian.todense())))
+
+            largest_eigenvalue = this_real_eigenvalues[-1]
+            smallest_eigenvalue = this_real_eigenvalues[0]
 
             is_stable = largest_eigenvalue <= 0
 
@@ -103,14 +109,18 @@ class SimpleParameterSampler(ParameterSampler):
                                        '(max real part eigv: {}'.
                                        format(is_stable,largest_eigenvalue))
 
-            if is_stable:
+            if is_stable or not only_stable:
                 parameter_population.append(parameter_sample)
+                largest_eigenvalues.append(largest_eigenvalue)
+                smallest_eigenvalues.append(smallest_eigenvalue)
 
             # Count the trials
             trials += 1
-
-        return parameter_population
-
+            
+        if min_max_eigenvalues:
+            return parameter_population, largest_eigenvalues, smallest_eigenvalues
+        else:
+            return parameter_population
 
     # Under construction new sampling with compiled function
     def _compile_sampling_functions(self,model,
