@@ -32,6 +32,7 @@ from sympy import symbols,Symbol
 
 from skimpy.utils.tabdict import TabDict
 from skimpy.utils.compile_sympy import make_cython_function
+from skimpy.utils.general import robust_index
 
 class ElasticityFunction:
     def __init__(self, expressions, respective_variables, variables,  parameters, shape, pool=None):
@@ -78,7 +79,8 @@ class ElasticityFunction:
         """
         Return a sparse matrix type with elasticity values
         """
-        parameter_values = array([parameters[x] for x in self.parameters.values()], dtype=double)
+        parameter_values = array([parameters[x] for x in
+                                  self.parameters.values()], dtype=double)
 
         input_vars = append_array(variables , parameter_values)
 

@@ -29,26 +29,10 @@ from numpy import array, double
 from sympy import symbols, Symbol
 
 from skimpy.utils.compile_sympy import make_cython_function
+from skimpy.utils.general import robust_index
 from ...utils.tabdict import TabDict
 from warnings import warn
 
-def robust_index(in_var):
-    """
-    Indexing can be done with symbols or strings representing the symbol,
-    so we harmonize it by returning the name of the symbol if the input is of
-    type symbol
-
-    :param in_var:
-    :type in_var: str or sympy.Symbol
-    :return:
-    """
-
-    if isinstance(in_var, str):
-        return in_var
-    elif isinstance(in_var, Symbol):
-        return in_var.name
-    else:
-        raise TypeError('Value should be of type str or sympy.Symbol')
 
 class ODEFunction:
     def __init__(self, model, variables, expressions, parameters, pool=None):
@@ -82,8 +66,8 @@ class ODEFunction:
 
     @property
     def parameters(self):
-        return TabDict((k,self.model.parameters[robust_index(k)].value)
-                                   for k in self._parameters)
+        return TabDict((k, self.model.parameters[robust_index(k)].value)
+                       for k in self._parameters)
 
     @parameters.setter
     def parameters(self, value):
