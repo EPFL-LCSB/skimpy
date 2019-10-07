@@ -5,7 +5,7 @@ from skimpy.mechanisms import *
 import numpy as np
 
 
-def build_linear_pathway_model():
+def build_linear_GEEK_pathway_model():
 
     metabolites = ['A', 'B', 'C', 'D' ]
     # Build linear Pathway model
@@ -114,7 +114,7 @@ def build_linear_pathway_model():
 
 
 def test_geek_kinetics():
-    this_model = build_linear_pathway_model()
+    this_model = build_linear_GEEK_pathway_model()
 
     concentration_dict = {'A': 3.0, 'B': 2.0, 'C': 1.0, 'D': 0.5}
 
