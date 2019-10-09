@@ -1,12 +1,21 @@
-bokeh>=0.12.1
 cobra>0.8
 ipdb
 lxml
 openpyxl
-pytest
-scipy
-numpy
 tabulate
 sphinx>=1.4
 sphinx-rtd-theme
+matplotlib
+# from setup.py
+sympy
+pytest
+scipy
+numpy
+pandas
+bokeh>=0.12.1
 Cython
+# scikits.odes # installation/compilation done with sundials in Dockerfile
+deap
+dill
+# extras ORACLE:
+pytfa

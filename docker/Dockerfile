@@ -49,7 +49,7 @@ RUN chmod +x /utils/*.sh
 # Install sundials
 RUN /utils/install_sundials.sh
 
-# Export environment vairables from installation
+# Export environment variables from installation
 ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-3.1.1/include"
 ENV SUNDIALS_LIBDIR ="${HOME}/sundials-3.1.1/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-2.7.0"
@@ -85,5 +85,5 @@ WORKDIR ./work
 
 
 # Load your package in development mode on startup
-ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy/docker/pytfa && pip install --user -e /skimpy[ORACLE] && $0 $*"]
+ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && $0 $*"]
 CMD /bin/bash
