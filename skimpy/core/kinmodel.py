@@ -182,6 +182,21 @@ class KineticModel(object):
         raise NotImplemented('We have to do some thinking OK')
         pass
 
+    def repair(self):
+
+        """
+        Link inhibitors to reactants
+        FIXME: Any idea to avoid this is dearly welcome
+        :return:
+        """
+        for this_reaction in self.reactions.values():
+            this_mechanism = this_reaction.mechanism
+            if hasattr(this_mechanism, 'inhibitors'):
+                for this_keys, this_inhibitor in this_mechanism.inhibitors.items():
+                    if this_inhibitor.name in self.reactants:
+                        this_mechanism.inhibitors[this_keys] = self.reactants[this_inhibitor.name]
+
+
 
     @property
     def sim_type(self):

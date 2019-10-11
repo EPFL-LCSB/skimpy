@@ -37,6 +37,7 @@ CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
                      "nonecheck=True, initializecheck=False , optimize=False, language=c++\n"
 
 SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
+EXP_FUNCTION = "cdef extern from \"math.h\": \n double exp(double x) \n"
 
 def _set_cflags():
     """ Suppress cython warnings by setting -w flag """
@@ -61,7 +62,7 @@ def make_cython_function(symbols, expressions, quiet=True, simplify=True, pool=N
 
     def this_function(input_array,output_array):
 
-        code = CYTHON_DECLARATION+SQRT_FUNCTION+code_expressions
+        code = CYTHON_DECLARATION+SQRT_FUNCTION+EXP_FUNCTION+code_expressions
 
         Cython.inline(code,
                      language_level=3,

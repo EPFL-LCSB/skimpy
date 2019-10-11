@@ -70,7 +70,7 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
 
         """
 
-        suffix = "_{0}_{}".format(stringify_stoichiometry(stoichiometry), generalized_reactants)
+        suffix = "_{0}_{1}".format(stringify_stoichiometry(stoichiometry), generalized_reactants)
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
@@ -99,7 +99,7 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
 
         for gr in generalized_reactants:
 
-            alpha_f = 'alpha_forward_{}_{}'.format(gr)
+            alpha_f = 'alpha_forward_{}'.format(gr)
             parameter_list[alpha_f] =  [ODE, MCA, QSSA]
 
             alpha_r = 'alpha_reverse_{}'.format(gr)
@@ -115,14 +115,19 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
 
         Parameters = make_parameter_set(__name__ + suffix, parameter_list)
 
+        Inhibitors = make_reactant_set(__name__ + suffix, generalized_reactants)
+
         #ElementaryReactions = namedtuple('ElementaryReactions', [])
 
-        def __init__(self, name, reactants, parameters=None):
+        def __init__(self, name, reactants, parameters=None, inhibitors=None ):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
             KineticMechanism.__init__(self, name, reactants, parameters)
-            
-            self.generalized_reactants = generalized_reactants
+
+            if inhibitors is not None:
+                self.inhibitors = inhibitors
+            else:
+                self.inhibitors = self.Inhibitors(**dict(zip(generalized_reactants, generalized_reactants)))
 
         def get_qssa_rate_expression(self):
 
@@ -135,8 +140,8 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
             kf = self.parameters.vmax_forward.symbol
             Keq = self.parameters.k_equilibrium.symbol
 
-            beta_f = self.parameters.beta_f.symbol
-            beta_r = self.parameters.beta_r.symbol
+            beta_f = self.parameters.beta_forward.symbol
+            beta_r = self.parameters.beta_reverse.symbol
 
 
             forward_rate_expression = kf * exp(beta_f)
@@ -151,13 +156,13 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
                 p = this_product.symbol
                 backward_rate_expression *= p
 
-            for this_gr in self.generalized_reactants:
+            for this_gr in self.inhibitors.values():
 
                 alpha_f, alpha_r, gr_0 = [self.parameters[p].symbol for p in
-                                          self.reactant_parameter_links[this_gr]]
+                                          self.reactant_parameter_links[this_gr.name]]
 
                 # FIXME  get this from a proper defined set
-                gr = Symbol(this_gr)
+                gr = this_gr.symbol
                 forward_rate_expression *= (gr/gr_0)**alpha_f
                 backward_rate_expression *= (gr/gr_0)**alpha_r
 
