@@ -30,6 +30,7 @@ from .utils import create_reaction_from_stoich, check_boundary_reaction
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.namespace import WATER_FORMULA
 
+
 class FromCobra(ModelGenerator):
     """
     Class to generate Kinetic models from cobra
@@ -41,7 +42,7 @@ class FromCobra(ModelGenerator):
                                 **kwargs
                                 )
 
-    def import_model(self,cobra_model):
+    def import_model(self, cobra_model):
         """
         Function to create a kinetic model from a constraint based model
 
@@ -57,7 +58,7 @@ class FromCobra(ModelGenerator):
         # to be constant concentrations
         parameters = {}
         for this_reaction in cobra_model.reactions:
-           if not check_boundary_reaction(this_reaction):
+            if not check_boundary_reaction(this_reaction):
                 this_kinetic_reaction = self.import_reaction(cobra_model, this_reaction)
                 if this_kinetic_reaction is not None:
                     this_mechanism = this_kinetic_reaction.mechanism
@@ -72,8 +73,8 @@ class FromCobra(ModelGenerator):
                     # If the metabolite does not correspond to water as water is
                     # omitted from the reactions or if we force the reactant to
                     # be excluded
-                    if  not (this_met .formula == WATER_FORMULA) \
-                        and (this_met .id not in self.reactants_to_exclude):
+                    if not (this_met .formula == WATER_FORMULA) \
+                       and (this_met .id not in self.reactants_to_exclude):
                         met = sanitize_cobra_vars(this_met.id)
                         this_reactant = skimpy_model.reactants[met]
                         this_const_met = ConstantConcentration(this_reactant)
@@ -93,8 +94,7 @@ class FromCobra(ModelGenerator):
 
         # Ignore if only reactants participate that will be ignored
         is_ignored = all([met.id in self.reactants_to_exclude
-                        for met in cobra_reaction.metabolites])
-
+                          for met in cobra_reaction.metabolites])
 
         if is_ignored or is_water:
             return None
@@ -107,8 +107,8 @@ class FromCobra(ModelGenerator):
             met_stoich_dict = {}
             for this_met, this_stoich in cobra_reaction.metabolites.items():
                 this_met_id = sanitize_cobra_vars(this_met)
-                met_stoich_dict[this_met_id ] = MetWithStoich(metabolite=this_met,
-                                                              stoichiometry=this_stoich)
+                met_stoich_dict[this_met_id] = MetWithStoich(metabolite=this_met,
+                                                             stoichiometry=this_stoich)
             # Get inhibitors from reaction groups
             if self.reactions_to_reaction_groups is not None:
                 try:
@@ -136,16 +136,16 @@ class FromCobra(ModelGenerator):
                 reaction_group = None
 
             if irrev_direction > 0:
-                #Irreversible in forward direction
+                # Irreversible in forward direction
                 irrev = True
             elif irrev_direction < 0:
-                #Irreversible in backward direction
+                # Irreversible in backward direction
                 # invert the assumed forward stoichiometry
-                irrev  = True
+                irrev = True
                 for this_met_id, metstoich in met_stoich_dict.items():
 
                     raise NotImplementedError('FIX ME SEE COMMENT')
-                    # The attribute of the namedtuple cant be changed
+                    # FIXME: The attribute of the namedtuple cant be changed
                     # find solution for this!!!
 
                     metstoich.stoichiometry *= -1
@@ -162,10 +162,4 @@ class FromCobra(ModelGenerator):
                                                           reaction_group=reaction_group,
                                                           irrev=irrev)
 
-
-
         return skimpy_reaction
-
-
-
-
