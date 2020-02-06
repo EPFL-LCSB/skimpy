@@ -1,6 +1,4 @@
 # Skimpy
-# Ignore file in the work folder
-./docker/work/*
 
 # Ignore generated c files
 skimpy/cython/nullspace.c
