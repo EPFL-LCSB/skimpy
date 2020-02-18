@@ -86,7 +86,10 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
 
     if left_basis.any():
 
-        L0 = Matrix([x for x in left_basis])
+        if left_basis.shape[0] == 1:
+            L0 = Matrix(left_basis)
+        else:
+            L0 = Matrix([x for x in left_basis])
 
         ## We need to separate N and N0 beforehand
 
