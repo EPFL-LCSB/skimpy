@@ -27,17 +27,27 @@ limitations under the License.
 """
 
 
-def add_min_log_displacement(tmodel,min_log_displacement, inplace=True):
+def add_min_log_displacement(tmodel, min_log_displacement, tva_fluxes=None, inplace=True):
+    EPSILON = tmodel.solver.configuration.tolerances.feasibility
+
     if inplace:
         temp_model = tmodel
     else:
         temp_model = tmodel.copy()
 
-    for ln_gamma in temp_model.thermo_displacement:
-        if tmodel.solution.raw[ln_gamma.variable.name] >= 0:
-            ln_gamma.variable.lb = min_log_displacement
-        elif tmodel.solution.raw[ln_gamma.variable.name] < 0:
-            ln_gamma.variable.ub = -min_log_displacement
+    if tva_fluxes is not None:
+        for ln_gamma in temp_model.thermo_displacement:
+            if tva_fluxes["minimum"][ln_gamma.id] >= -EPSILON and \
+                    tva_fluxes["maximum"][ln_gamma.id] > -EPSILON :
+                ln_gamma.variable.ub = -min_log_displacement
+
+            elif tva_fluxes["minimum"][ln_gamma.id] < EPSILON and \
+                    tva_fluxes["maximum"][ln_gamma.id] <= EPSILON :
+                ln_gamma.variable.lb = min_log_displacement
+            else:
+                raise ValueError("Not a model with fixed directionality!")
+    else:
+        raise NotImplementedError()
 
     temp_model.repair()
     return temp_model
