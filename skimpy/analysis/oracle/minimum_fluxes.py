@@ -47,14 +47,29 @@ def add_min_flux_requirements(tmodel,flux, inplace=True, safe=True):
         temp_model.remove_reactions([temp_model.reactions.get_by_id(rxn)
                                  for rxn in blocked_rxns])
 
-    for rxn in temp_model.reactions:
-        rev_var = rxn.reverse_variable
-        fwd_var = rxn.forward_variable
+        for rxn in temp_model.reactions:
+            rev_var = rxn.reverse_variable
+            fwd_var = rxn.forward_variable
 
-        if flux <= rev_var.ub and rev_var.lb < flux:
-            rev_var.lb = flux
-        if flux <= fwd_var.ub and fwd_var.lb < flux:
-            fwd_var.lb = flux
+            if flux <= rev_var.ub \
+                and rev_var.lb < flux \
+                and tva_fluxes['minimum'][rxn.id] < -flux:
+                rev_var.lb = flux
+            if flux <= fwd_var.ub \
+                and fwd_var.lb < flux \
+                and tva_fluxes['maximum'][rxn.id] > flux:
+                fwd_var.lb = flux
+
+
+    else:
+        for rxn in temp_model.reactions:
+            rev_var = rxn.reverse_variable
+            fwd_var = rxn.forward_variable
+
+            if flux <= rev_var.ub and rev_var.lb < flux:
+                rev_var.lb = flux
+            if flux <= fwd_var.ub and fwd_var.lb < flux:
+                fwd_var.lb = flux
 
     temp_model.repair()
 
