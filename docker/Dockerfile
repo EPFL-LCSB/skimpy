@@ -54,7 +54,8 @@ ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-3.1.1/include"
 ENV SUNDIALS_LIBDIR ="${HOME}/sundials-3.1.1/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-2.7.0"
 # Install python interface to sundials
-RUN pip install scikits.odes
+#modify this
+RUN pip install 'scikits.odes== 2.4.1'
 ENV LD_LIBRARY_PATH="${HOME}/sundials-3.1.1/lib"
 
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"

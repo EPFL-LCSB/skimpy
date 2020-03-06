@@ -91,7 +91,7 @@ tmodel = fix_directionality(tmodel, solution, inplace=True)
 solution = tmodel.optimize()
 
 # Add dummy free energy constrains for reaction of unknown free energy
-tmodel = add_undefined_delta_g(tmodel, solution, delta_g_std=-5.0, delta_g_std_err=2.0, inplace=True)
+tmodel = add_undefined_delta_g(tmodel, solution, delta_g_std=0.0, delta_g_std_err=100000.0, inplace=True)
 solution = tmodel.optimize()
 
 # Force a minimal thermodynamic displacement
@@ -111,7 +111,7 @@ Convert fluxes to importable format
 """
 
 # Map fluxes back to reaction variables
-this_flux_solution = get_reaction_data(tmodel, solution)
+this_flux_solution = get_reaction_data(tmodel, solution.raw)
 # Create the flux dict
 # Convert fluxes from mmol/gDW/hr to mol/L/s
 # eColi 0.39 gDW/L
@@ -121,7 +121,7 @@ flux_dict = (0.39*1e-3*this_flux_solution[[i.id for i in tmodel.reactions]]).to_
 variable_names = tmodel.log_concentration.list_attr('name')
 metabolite_ids = tmodel.log_concentration.list_attr('id')
 #Get conentrations in mol
-temp_concentration_dict = np.exp(solution[variable_names]).to_dict()
+temp_concentration_dict = np.exp(solution.raw[variable_names]).to_dict()
 
 # Map concentration names
 mapping_dict = {k:sanitize_cobra_vars(v) for k,v in zip(variable_names,metabolite_ids)}
@@ -141,15 +141,14 @@ small_molecules = ['h_c','h_e','h_m',
                    'hco3_c','hco3_e','hco3_m',
                    'na1_c','na1_e']
 
-model_gen = FromPyTFA(water='h2o')
+model_gen = FromPyTFA(reactants_to_exclude = ['h2o_e','h2o_c'])
 kmodel = model_gen.import_model(tmodel, solution.raw)
 
-kmodel.update()
 
 """
 Compile the model
 """
-this_model.prepare(mca=True)
+kmodel.prepare(mca=True)
 # Compile MCA functions
 kmodel.compile_mca(sim_type=QSSA)
 
