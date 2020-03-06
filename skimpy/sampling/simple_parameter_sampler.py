@@ -28,9 +28,9 @@ limitations under the License.
 from collections import namedtuple
 import numpy as np
 from numpy.random import sample
-#from scipy.sparse.linalg import eigs as eigenvalues
+# from scipy.sparse.linalg import eigs as eigenvalues
 from scipy.linalg import eigvals as eigenvalues
-from sympy import sympify, Symbol
+from sympy import Symbol
 
 from skimpy.utils.namespace import *
 
@@ -69,14 +69,15 @@ class SimpleParameterSampler(ParameterSampler):
         fluxes = [flux_dict[this_reaction.name] for this_reaction in
                   compiled_model.reactions.values()]
         concentrations = np.array([concentration_dict[this_variable] for
-                  this_variable in compiled_model.variables.keys()])
+                                   this_variable in
+                                   compiled_model.variables.keys()])
 
-        symbolic_concentrations_dict = {Symbol(k):v
-                                        for k,v in concentration_dict.items()}
+        symbolic_concentrations_dict = {Symbol(k): v
+                                        for k, v in concentration_dict.items()}
 
         trials = 0
 
-        #Compile functions
+        # Compile functions
         self._compile_sampling_functions(
             compiled_model,
             symbolic_concentrations_dict,
@@ -90,12 +91,13 @@ class SimpleParameterSampler(ParameterSampler):
                 symbolic_concentrations_dict,
                 flux_dict)
 
-            # Check stability: real part of all eigenvalues of the jacobian is <= 0
+            # Check stability: real part of all eigenvalues of the jacobian is
+            # <= 0
             this_jacobian = compiled_model.jacobian_fun(fluxes, concentrations,
                                                         parameter_sample)
 
-            #largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
-            #                                 return_eigenvectors=False)
+            # largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
+            #                                  return_eigenvectors=False)
             # Test suggests that this is apparently much faster ....
             this_real_eigenvalues = np.real(sorted(
                 eigenvalues(this_jacobian.todense())))
@@ -107,7 +109,7 @@ class SimpleParameterSampler(ParameterSampler):
 
             compiled_model.logger.info('Model is stable? {} '
                                        '(max real part eigv: {}'.
-                                       format(is_stable,largest_eigenvalue))
+                                       format(is_stable, largest_eigenvalue))
 
             if is_stable or not only_stable:
                 parameter_population.append(parameter_sample)
@@ -116,14 +118,14 @@ class SimpleParameterSampler(ParameterSampler):
 
             # Count the trials
             trials += 1
-            
+
         if min_max_eigenvalues:
             return parameter_population, largest_eigenvalues, smallest_eigenvalues
         else:
             return parameter_population
 
     # Under construction new sampling with compiled function
-    def _compile_sampling_functions(self,model,
+    def _compile_sampling_functions(self, model,
                                     concentrations,
                                     fluxes):
         """
@@ -132,13 +134,11 @@ class SimpleParameterSampler(ParameterSampler):
         """
         model.saturation_parameter_function = SaturationParameterFunction(model,
                                                                           model.parameters,
-                                                                         concentrations)
+                                                                          concentrations)
 
         model.flux_parameter_function = FluxParameterFunction(model,
                                                               model.parameters,
                                                               concentrations,)
-
-
 
     def _sample_saturation_step_compiled(self,
                                          compiled_model,
@@ -153,23 +153,22 @@ class SimpleParameterSampler(ParameterSampler):
         :return:
         """
 
-        parameter_sample = {v.symbol: v.value for k,v in compiled_model.parameters.items()}
+        parameter_sample = {v.symbol: v.value for k, v in compiled_model.parameters.items()}
 
         model_parameters = compiled_model.parameters
         # Update the concentrations which are parameters (Boundaries)
-        for k,v in concentration_dict.items():
+        for k, v in concentration_dict.items():
             if str(k) in model_parameters:
                 parameter_sample[k] = v
 
-
-        #Set all vmax/flux parameters to 1.
+        # Set all vmax/flux parameters to 1.
         # TODO Generalize into Flux and Saturation parameters
         for this_reaction in compiled_model.reactions.values():
             vmax_param = this_reaction.parameters.vmax_forward
             parameter_sample[vmax_param.symbol] = 1
 
-        if not hasattr(compiled_model,'saturation_parameter_function')\
-           or not hasattr(compiled_model,'flux_parameter_function'):
+        if not hasattr(compiled_model, 'saturation_parameter_function')\
+           or not hasattr(compiled_model, 'flux_parameter_function'):
             raise RuntimeError("Function for sampling not complied")
 
         if not compiled_model.saturation_parameter_function.sym_saturations:
