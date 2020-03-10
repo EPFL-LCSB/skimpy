@@ -108,7 +108,7 @@ class SimpleParameterSampler(ParameterSampler):
             is_stable = largest_eigenvalue <= 0
 
             compiled_model.logger.info('Model is stable? {} '
-                                       '(max real part eigv: {}'.
+                                       '(max real part eigv: {})'.
                                        format(is_stable, largest_eigenvalue))
 
             if is_stable or not only_stable:
@@ -129,7 +129,7 @@ class SimpleParameterSampler(ParameterSampler):
                                     concentrations,
                                     fluxes):
         """
-        Compliles the function for sampling using theano
+        Compiles the function for sampling using theano
         :param model:
         """
         model.saturation_parameter_function = SaturationParameterFunction(model,
@@ -146,7 +146,7 @@ class SimpleParameterSampler(ParameterSampler):
                                          flux_dict):
 
         """
-        Sample one set of staturations using theano complied functions
+        Sample one set of saturations using theano complied functions
         :param compiled_model:
         :param concentration_dict:
         :param flux_dict:
