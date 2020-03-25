@@ -84,6 +84,8 @@ class SimpleParameterSampler(ParameterSampler):
                 symbolic_concentrations_dict,
                 flux_dict)
 
+        # Sample as long as max trials aren't exceeded and we haven't reached
+        # target population size
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
 
@@ -129,7 +131,7 @@ class SimpleParameterSampler(ParameterSampler):
                                     concentrations,
                                     fluxes):
         """
-        Compiles the function for sampling using theano
+        Compiles the function for sampling using cython
         :param model:
         """
         model.saturation_parameter_function = SaturationParameterFunction(model,
@@ -146,7 +148,7 @@ class SimpleParameterSampler(ParameterSampler):
                                          flux_dict):
 
         """
-        Sample one set of saturations using theano complied functions
+        Sample one set of saturations using cython complied functions
         :param compiled_model:
         :param concentration_dict:
         :param flux_dict:
@@ -171,6 +173,7 @@ class SimpleParameterSampler(ParameterSampler):
            or not hasattr(compiled_model, 'flux_parameter_function'):
             raise RuntimeError("Function for sampling not complied")
 
+        # Sample appropriate # of saturations
         if not compiled_model.saturation_parameter_function.sym_saturations:
             n_stats = 0
             saturations = []
@@ -178,7 +181,7 @@ class SimpleParameterSampler(ParameterSampler):
             n_sats = len(compiled_model.saturation_parameter_function.sym_saturations)
             saturations = sample(n_sats)
 
-        # Calcualte the Km's
+        # Calculate the Km's
         compiled_model.saturation_parameter_function(
             saturations,
             parameter_sample,
