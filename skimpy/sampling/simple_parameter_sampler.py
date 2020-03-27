@@ -75,10 +75,9 @@ class SimpleParameterSampler(ParameterSampler):
         symbolic_concentrations_dict = {Symbol(k): v
                                         for k, v in concentration_dict.items()}
 
-        trials = 0
-
-        #Compile functions
-        if not hasattr(compiled_model, 'saturation_parameter_function'):
+        # Compile functions for calculating Km's and Vmax's
+        if not hasattr(compiled_model, 'saturation_parameter_function')\
+           or not hasattr(compiled_model, 'flux_parameter_function'):
             self._compile_sampling_functions(
                 compiled_model,
                 symbolic_concentrations_dict,
@@ -86,6 +85,7 @@ class SimpleParameterSampler(ParameterSampler):
 
         # Sample as long as max trials aren't exceeded and we haven't reached
         # target population size
+        trials = 0
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
 
@@ -145,7 +145,9 @@ class SimpleParameterSampler(ParameterSampler):
     def _sample_saturation_step_compiled(self,
                                          compiled_model,
                                          concentration_dict,
-                                         flux_dict):
+                                         flux_dict,
+                                         only_sample=None,
+                                         fixed_parameters=None):
 
         """
         Sample one set of saturations using cython complied functions
@@ -185,7 +187,9 @@ class SimpleParameterSampler(ParameterSampler):
         compiled_model.saturation_parameter_function(
             saturations,
             parameter_sample,
-            concentration_dict
+            concentration_dict,
+            only_sample,
+            fixed_parameters
         )
 
         # Calculate the Vmax's

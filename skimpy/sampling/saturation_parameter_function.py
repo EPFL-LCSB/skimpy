@@ -45,13 +45,12 @@ class SaturationParameterFunction():
     def __init__(self,model,parameters,concentrations):
 
 
-        sym_concentrations = [c for c in concentrations]
-
-        self.sym_concentrations = sym_concentrations
-
+        # Gather concentrations and saturation_parameters from the inputs.
+        # saturation_parameters are those that will be sampled
+        self.sym_concentrations = [c for c in concentrations]
         self.saturation_parameters = [v for k,v in parameters.items()
                                       if (v.hook is not None)
-                                      and (v.value is None) ]
+                                      and (v.value is None) ] # should this be removed?
 
         if not self.saturation_parameters:
             # If there are no saturation parameters in the model dont compile
@@ -72,8 +71,8 @@ class SaturationParameterFunction():
             self.expressions = expressions
             self.sym_saturations = sym_saturations
 
-            sym_vars = sym_saturations + sym_concentrations
-
+            # Create the cython function
+            sym_vars = sym_saturations + self.sym_concentrations
             self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
 
 
