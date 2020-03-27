@@ -176,8 +176,8 @@ def test_compile_mca():
     kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
 
-@pytest.mark.dependency(name=['test_sampling_linear_pathway','test_compile_mca'])
-def test_oracle_sampling():
+@pytest.mark.dependency(name=['test_parameter_sampling_linear_pathway','test_compile_mca'])
+def test_oracle_parameter_sampling():
 
     # Initialize parameter sampler
     sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
@@ -188,7 +188,14 @@ def test_oracle_sampling():
 
 
 
-@pytest.mark.dependency(name=['test_oracle_sampling','test_compile_mca'])
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
+def test_oracle_flux_concentration_sampling():
+
+    pass
+
+
+
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
 def test_oracle_ode():
 
     # Initialize parameter sampler
@@ -214,7 +221,7 @@ def test_oracle_ode():
     solpop = ODESolutionPopulation(solutions)
 
 
-@pytest.mark.dependency(name=['test_oracle_sampling','test_compile_mca'])
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
 def test_oracle_mca():
 
 
@@ -236,3 +243,5 @@ def test_oracle_mca():
     concentration_control_coeff = kmodel.concentration_control_fun(flux_dict,
                                                                    concentration_dict,
                                                                    parameter_population)
+
+

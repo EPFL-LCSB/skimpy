@@ -6,7 +6,7 @@ from tests.utils import build_linear_pathway_model
 
 
 @pytest.mark.dependency(name='build_linear_pathway_model')
-def test_sampling_linear_pathway():
+def test_parameter_sampling_linear_pathway():
     this_model = build_linear_pathway_model()
 
     this_model.prepare(mca=True)
