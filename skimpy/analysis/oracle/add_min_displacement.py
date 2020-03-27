@@ -25,7 +25,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
+from pytfa.analysis import variability_analysis
 
 def add_min_log_displacement(tmodel, min_log_displacement, tva_fluxes=None, inplace=True):
     EPSILON = tmodel.solver.configuration.tolerances.feasibility
@@ -35,19 +35,19 @@ def add_min_log_displacement(tmodel, min_log_displacement, tva_fluxes=None, inpl
     else:
         temp_model = tmodel.copy()
 
-    if tva_fluxes is not None:
-        for ln_gamma in temp_model.thermo_displacement:
-            if tva_fluxes["minimum"][ln_gamma.id] >= -EPSILON and \
-                    tva_fluxes["maximum"][ln_gamma.id] > -EPSILON :
-                ln_gamma.variable.ub = -min_log_displacement
+    if tva_fluxes is None:
+        tva_fluxes = variability_analysis(temp_model, kind='reactions')
 
-            elif tva_fluxes["minimum"][ln_gamma.id] < EPSILON and \
-                    tva_fluxes["maximum"][ln_gamma.id] <= EPSILON :
-                ln_gamma.variable.lb = min_log_displacement
-            else:
-                raise ValueError("Not a model with fixed directionality!")
-    else:
-        raise NotImplementedError()
+    for ln_gamma in temp_model.thermo_displacement:
+        if tva_fluxes["minimum"][ln_gamma.id] >= -EPSILON and \
+                tva_fluxes["maximum"][ln_gamma.id] > -EPSILON :
+            ln_gamma.variable.ub = -min_log_displacement
+
+        elif tva_fluxes["minimum"][ln_gamma.id] < EPSILON and \
+                tva_fluxes["maximum"][ln_gamma.id] <= EPSILON :
+            ln_gamma.variable.lb = min_log_displacement
+        else:
+            raise ValueError("Not a model with fixed directionality!")
 
     temp_model.repair()
     return temp_model
