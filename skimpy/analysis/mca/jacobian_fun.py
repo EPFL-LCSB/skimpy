@@ -49,6 +49,11 @@ class JacobianFunction:
         self.conservation_relation = conservation_relation
 
     def __call__(self, fluxes, concentrations, parameters):
+        """
+        :param fluxes: `Dict` or `pd.Series` of reference flux vector
+        :param concentrations: `Dict` or `pd.Series` of reference concentration vector
+        :param parameters: `Dict` or `pd.Series` of reference parameters vector
+        """
 
         #Calculate the Jacobian
         flux_matrix = diags(array(fluxes), 0).tocsc()
