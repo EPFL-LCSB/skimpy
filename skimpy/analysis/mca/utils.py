@@ -163,7 +163,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
     return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 
 
-def get_dep_indep_vars_from_basis(L0, all_dependent_ix=None):
+def get_dep_indep_vars_from_basis(L0, all_dependent_ix=None, concentrations=None):
     nonzero_rows, nonzero_cols = L0.nonzero()
     row_dict = defaultdict(list)
     # Put the ixs in a dict indexed by row number (moiety index)
@@ -186,9 +186,14 @@ def get_dep_indep_vars_from_basis(L0, all_dependent_ix=None):
             unassigned_vars = [x for x in set(mojetie_vars)
                 .difference(all_independent_ix + all_dependent_ix)]
             # Get the metabolite that participates in least mojeties:
-            unassigned_vars_sorted = sorted(unassigned_vars,
-                                            key=lambda k: L0[:, row].count_nonzero())
-
+            if concentrations is None:
+                unassigned_vars_sorted = sorted(unassigned_vars,
+                                                key=lambda k: L0[:, k].count_nonzero())
+            else:
+                # The largest concentrations to be dependent
+                unassigned_vars_sorted = sorted(unassigned_vars,
+                                                key=lambda k: concentrations[k],
+                                                reverse=True)
             # Choose a representative dependent metabolite:
             if unassigned_vars_sorted:
                 all_dependent_ix.append(unassigned_vars_sorted[0])
