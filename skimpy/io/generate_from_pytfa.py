@@ -123,9 +123,13 @@ class FromPyTFA(FromCobra):
         # We here calculate the delta G from
         try:
             scaling_order = sum(this_reaction.metabolites.values() )
-
             var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
             deltag0 = pytfa_solution_data[var_delta_g]
+            is_in_model = True
+        except KeyError:
+            is_in_model = False
+
+        if is_in_model:
             # Calculate the deltaG0 based on the reactants that will
             # be part in the model
             for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
@@ -135,7 +139,7 @@ class FromPyTFA(FromCobra):
                     met_lc = pytfa_solution_data[var_met_lc]
                     deltag0 -= s * RT * (met_lc + log(scaling_factor))
 
-        except KeyError:
+        else:
             deltag0 = self.dummy_dgo
 
         k_eq = deltag0_to_keq(deltag0,
