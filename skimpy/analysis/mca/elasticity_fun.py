@@ -27,6 +27,7 @@ limitations under the License.
 from numpy import array, double, reciprocal,zeros
 from numpy import append as append_array
 from scipy.sparse import coo_matrix
+from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import symbols,Symbol
 
@@ -120,9 +121,10 @@ class ElasticityFunction:
         # Qd the scaling matrix
         dxd_dxi = sparse_inv(Fd).dot(-1*Fi)
 
-        Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
-
-        #reciprocal(Xd).dot(dxd_dxi).dot(Xi)
+        #Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
+        XD = diags(reciprocal(Xd), 0).tocsc()
+        XI = diags(Xi, 0).tocsc()
+        Qd = XD.dot(dxd_dxi).dot(XI)
 
         return Qd
 
