@@ -34,7 +34,7 @@ import multiprocessing
 from sympy.printing import ccode
 
 CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
-                     "nonecheck=True, initializecheck=False , optimize=False, language=c++\n"
+                     "nonecheck=True, initializecheck=False , optimize=False, language=c\n"
 
 SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
 EXP_FUNCTION = "cdef extern from \"math.h\": \n double exp(double x) \n"
@@ -100,9 +100,31 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
     return cython_code
 
 
+from sympy import cse
+
 def generate_a_code_line_simplfied(input):
     i, e, input_subs = input
-    cython_code = "output_array[{}] = {} ".format(i,ccode(e.simplify()))
+
+    # Use common sub expressions instead of simpilfy
+    common_sub_expressions, main_expression = cse(e)
+    #print(main_expression)
+    cython_code = ''
+    for this_cse in common_sub_expressions:
+        cython_code=cython_code+'{} = {} \n'.format(str(this_cse[0]),
+                                                    ccode(this_cse[1],standard='C99'))
+
+
+    cython_code = cython_code+"output_array[{}] = {} ".format(i,ccode(main_expression[0]
+                                                                      ,standard='C99')
+                                                              )
+
+    # Subtitute generated common subexpression with unique common_sub_expresion names
+    for this_cse in common_sub_expressions:
+        gen_sym = str(this_cse[0])
+        unique_sym = "cse_{}_{}".format(i,gen_sym)
+        cython_code = re.sub(r"{}".format(gen_sym), r"{}".format(unique_sym),
+                             cython_code)
+
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
@@ -118,7 +140,7 @@ def generate_a_code_line_simplfied(input):
 
 def generate_a_code_line(input):
     i, e, input_subs = input
-    cython_code = "output_array[{}] = {} ".format(i,ccode(e))
+    cython_code = "output_array[{}] = {} ".format(i,ccode(e, standard='C99'))
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
