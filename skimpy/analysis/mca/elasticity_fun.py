@@ -24,10 +24,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+import numpy as np
 from numpy import array, double, reciprocal,zeros
 from numpy import append as append_array
+
+# Test wise
+from scipy.sparse import SparseEfficiencyWarning
+import warnings
+warnings.simplefilter('ignore',SparseEfficiencyWarning)
+
 from scipy.sparse import coo_matrix
-from scipy.sparse import diags
+from scipy.sparse import diags, find
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import symbols,Symbol
 
@@ -97,6 +104,9 @@ class ElasticityFunction:
 
     def get_dependent_weights(self, concentration_vector, L0, all_independent_ix, all_dependent_ix):
 
+        # TODO This derivation does not allow cross dependencies of dependent metabolites!
+        # Usually you can find basis that omit this
+
         # The dependent weights have dimensions of moieties x independent metabolites
         # The current L0 gives the relation L0*[xi|xd] = C
 
@@ -116,12 +126,13 @@ class ElasticityFunction:
 
         # Fi Factors for in dependent concentrations
         Fi = L0[:, all_independent_ix]
+
         # Fd Factors for dependent concentrations
         Fd = L0[:, all_dependent_ix]
-        # Qd the scaling matrix
-        dxd_dxi = sparse_inv(Fd).dot(-1*Fi)
 
-        #Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
+        dxd_dxi = sparse_inv(Fd).dot(-Fi)
+
+        # Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
         XD = diags(reciprocal(Xd), 0).tocsc()
         XI = diags(Xi, 0).tocsc()
         Qd = XD.dot(dxd_dxi).dot(XI)
