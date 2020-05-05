@@ -97,8 +97,7 @@ class SimpleParameterSampler(ParameterSampler):
             #largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
             #                                 return_eigenvectors=False)
             # Test suggests that this is apparently much faster ....
-            this_real_eigenvalues = np.real(sorted(
-                eigenvalues(this_jacobian.todense())))
+            this_real_eigenvalues = sorted(np.real(eigenvalues(this_jacobian.todense())))
 
             largest_eigenvalue = this_real_eigenvalues[-1]
             smallest_eigenvalue = this_real_eigenvalues[0]

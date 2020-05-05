@@ -102,7 +102,7 @@ class ParameterValuePopulation(object):
 
         for i,this_data in enumerate(self._data):
             this_data = np.array([this_data._parameter_values[p]
-                                 for p in param_names], dtype=np.float)
+                                 for p in param_names], dtype=np.float64)
             f.create_dataset('parameter_set_{}'.format(i), data=this_data)
 
         f.close()

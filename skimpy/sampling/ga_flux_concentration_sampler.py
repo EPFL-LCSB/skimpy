@@ -232,7 +232,10 @@ def sample_parameters(kmodel, tmodel, individual, n_samples=1000, conc_scaling=1
     # Especially this .... This is tested currently with the varma model this
     # the integer model with i.e. Nij_Biomass * 1000 is not feasible in the FBA .....
     # This this has been a crude fix so far ....
-    flux_dict['LMPD_biomass_c_17_462'] = flux_dict['LMPD_biomass_c_17_462'] / 1000.0
+    try:
+        flux_dict['LMPD_biomass_c_17_462'] = flux_dict['LMPD_biomass_c_17_462'] / 1000.0
+    except:
+        pass
 
     # M to muM
     concentration_dict = {sanitize_cobra_vars(LC.id): np.exp(solution_raw[LC.variable.name]) * conc_scaling
