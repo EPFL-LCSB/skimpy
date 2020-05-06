@@ -67,9 +67,14 @@ class Reaction(object):
 
     @property
     def reactant_stoichiometry(self):
-        reactant_stoichiometry = TabDict( (self.mechanism.reactants[k],v)
-                                 for k,v in self.mechanism.reactant_stoichiometry.items()
-                                 if self.mechanism.reactants[k].type == VARIABLE )
+        reactant_stoichiometry = TabDict([])
+        for k,v in self.mechanism.reactant_stoichiometry.items():
+            if self.mechanism.reactants[k].type == VARIABLE:
+                this_reactant = self.mechanism.reactants[k]
+                if this_reactant in reactant_stoichiometry.keys():
+                    reactant_stoichiometry[this_reactant] += v
+                else:
+                    reactant_stoichiometry[this_reactant] = v
 
         for this_modifier in self.modifiers.values():
             this_mod_sm = this_modifier.reactants.small_molecule
