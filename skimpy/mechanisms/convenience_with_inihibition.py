@@ -194,15 +194,23 @@ def make_convenience_with_inhibition(stoichiometry, inihbitor_stoichiometry):
 
             expressions = {}
 
+            # TODO Find a better solution to handle duplicate substrates
+            # The dict currently does not allow for this
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 stoich = self.reactant_stoichiometry[type]
-                expressions[s] = stoich*rate_expression
+                if s in expressions.keys():
+                    expressions[s] += stoich * rate_expression
+                else:
+                    expressions[s] = stoich*rate_expression
 
             for type, this_product in products.items():
                 p = this_product.symbol
                 stoich = self.reactant_stoichiometry[type]
-                expressions[p] = stoich * rate_expression
+                if p in expressions.keys():
+                    expressions[p] += stoich * rate_expression
+                else:
+                    expressions[p] = stoich*rate_expression
 
             self.expressions = expressions
             self.expression_parameters = self.get_parameters_from_expression(rate_expression)
@@ -218,12 +226,18 @@ def make_convenience_with_inhibition(stoichiometry, inihbitor_stoichiometry):
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 stoich = self.reactant_stoichiometry[type]
-                self.expressions[s] = stoich*self.reaction_rates['v_net']
+                if s in expressions.keys():
+                    self.expressions[s] += stoich * self.reaction_rates['v_net']
+                else:
+                    self.expressions[s] = stoich*self.reaction_rates['v_net']
 
             for type, this_product in products.items():
                 p = this_product.symbol
                 stoich = self.reactant_stoichiometry[type]
-                self.expressions[p] = stoich*self.reaction_rates['v_net']
+                if p in expressions.keys():
+                    self.expressions[p] += stoich * self.reaction_rates['v_net']
+                else:
+                    self.expressions[p] = stoich*self.reaction_rates['v_net']
 
 
         """"
