@@ -62,7 +62,7 @@ class ODEFunction:
         expressions = [self.expressions[x] for x in self.variables.values()]
 
         # Awsome magic
-        self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=pool)
+        self.function = make_cython_function(sym_vars, expressions, simplify=True, pool=pool)
 
     @property
     def parameters(self):
