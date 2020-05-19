@@ -33,32 +33,32 @@ import multiprocessing
 
 from sympy.printing import ccode
 
-CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
-                     "nonecheck=True, initializecheck=False , optimize=False, language=c\n"
+CYTHON_DECLARATION = "# cython: boundscheck=False, wraparound=False,"+\
+                     "nonecheck=True, initializecheck=False, language=c\n"
 
 SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
 EXP_FUNCTION = "cdef extern from \"math.h\": \n double exp(double x) \n"
 
-def _set_cflags():
+def _set_cflags(optimize=False):
     """ Suppress cython warnings by setting -w flag """
+    if optimize:
+        flags = '-w -O3'
+    else:
+        flags = '-w -O0'
 
-    flags = '-w -O0'
-
-    if 'CFLAGS' not in os.environ:
-        os.environ['CFLAGS'] = flags
-    elif not flags in os.environ['CFLAGS']:
-        os.environ['CFLAGS'] = os.environ['CFLAGS'] + " " + flags
-
+    os.environ['CFLAGS'] = flags
 
 
-def make_cython_function(symbols, expressions, quiet=True, simplify=True, pool=None):
+
+
+def make_cython_function(symbols, expressions, quiet=True, simplify=True, optimize=False, pool=None):
 
     code_expressions = generate_vectorized_code(symbols,
                                                 expressions,
                                                 simplify=simplify,
                                                 pool=pool)
 
-    _set_cflags()
+    _set_cflags(optimize=optimize)
 
     def this_function(input_array,output_array):
 
@@ -71,7 +71,7 @@ def make_cython_function(symbols, expressions, quiet=True, simplify=True, pool=N
     return this_function
 
 
-def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
+def generate_vectorized_code(inputs, expressions, simplify=True, optimize=False, pool=None):
     # input substitution dict:
     input_subs = {str(e): "input_array[{}]".format(i)
                   for i, e in enumerate(inputs)}
@@ -102,11 +102,14 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
 
 from sympy import cse
 
-def generate_a_code_line_simplfied(input):
+def generate_a_code_line_simplfied(input , optimize=False):
     i, e, input_subs = input
 
     # Use common sub expressions instead of simpilfy
-    common_sub_expressions, main_expression = cse(e)
+    if optimize:
+        common_sub_expressions, main_expression = cse(e.simplify())
+    else:
+        common_sub_expressions, main_expression = cse(e)
     #print(main_expression)
     cython_code = ''
     for this_cse in common_sub_expressions:
@@ -138,9 +141,15 @@ def generate_a_code_line_simplfied(input):
     return cython_code
 
 
-def generate_a_code_line(input):
+def generate_a_code_line(input, optimize=False):
     i, e, input_subs = input
-    cython_code = "output_array[{}] = {} ".format(i,ccode(e, standard='C99'))
+
+    if optimize:
+        cython_code = "output_array[{}] = {} ".format(i, ccode(e.simplify()), standard='C99')
+    else:
+        cython_code = "output_array[{}] = {} ".format(i,ccode(e, standard='C99'))
+
+
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
