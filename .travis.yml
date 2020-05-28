@@ -16,6 +16,7 @@ before_install:
  - pip install scikits.odes==2.4.1
  - pip install pytest-cov
 install:
+ - cd $TRAVIS_BUILD_DIR
  - pip install -e .
 
 script:
