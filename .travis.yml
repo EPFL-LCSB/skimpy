@@ -10,6 +10,7 @@ branches:
  - dev
 
 before_install:
+ - apt-get update && apt-get install -y --no-install-recommends fort77 gfortran
  - pip install -r docker/requirements.txt
  - source docker/utils/install_sundials.sh
  - pip install scikits.odes==2.4.1
@@ -22,5 +23,3 @@ script:
 
 after_success:
  - pip install codecov; codecov;
-
-
