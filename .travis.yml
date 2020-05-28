@@ -10,7 +10,7 @@ branches:
  - dev
 
 before_install:
- - apt-get install -y --no-install-recommends fort77 gfortran
+ - sudo apt-get install -y --no-install-recommends fort77 gfortran
  - pip install -r docker/requirements.txt
  - source docker/utils/install_sundials.sh
  - pip install scikits.odes==2.4.1
