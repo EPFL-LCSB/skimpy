@@ -10,6 +10,9 @@ branches:
  - dev
 
 before_install:
+ - pip install -r docker/requirements.txt
+ - source docker/utils/install_sundials.sh
+ - pip install scikits.odes== 2.4.1
  - pip install pytest-cov
 install:
  - pip install -e .
@@ -19,3 +22,5 @@ script:
 
 after_success:
  - pip install codecov; codecov;
+
+
