@@ -10,7 +10,7 @@ branches:
  - dev
 
 before_install:
- - sudo apt-get install -y --no-install-recommends fort77 gfortran libflint-2.5.2  libflint-dev
+ - sudo apt-get install -y --no-install-recommends fort77 gfortran libflint-2.5.2 libflint-dev libopenblas-dev liblapack-dev libgmp-dev yasm
  - pip install -r docker/requirements.txt
  - source docker/utils/install_sundials.sh
  - pip install scikits.odes==2.4.1
