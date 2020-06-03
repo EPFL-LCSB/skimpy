@@ -25,8 +25,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
+from cobra.util.solver import set_objective
 from pytfa.analysis import variability_analysis
+from pytfa.optim.constraints import ReactionConstraint
+from pytfa.utils import numerics
+
+class MinFLux(ReactionConstraint):
+    """
+    Class to represent thermodynamics constraints.
+    G: Flux_FW + Fluw_BW > min_flux
+    """
+    prefix = 'MF_'
+
+
+BIGM = numerics.BIGM
+BIGM_THERMO = numerics.BIGM_THERMO
+BIGM_DG = numerics.BIGM_DG
+BIGM_P = numerics.BIGM_P
+EPSILON = numerics.EPSILON
 
 
 def add_min_flux_requirements(tmodel,flux, inplace=True, safe=True, exclude=[]):
@@ -52,15 +68,12 @@ def add_min_flux_requirements(tmodel,flux, inplace=True, safe=True, exclude=[]):
             if rxn.id not in exclude:
                 rev_var = rxn.reverse_variable
                 fwd_var = rxn.forward_variable
-
-                if flux <= rev_var.ub \
-                    and rev_var.lb < flux \
-                    and tva_fluxes['minimum'][rxn.id] < -flux:
-                    rev_var.lb = flux
-                if flux <= fwd_var.ub \
-                    and fwd_var.lb < flux \
-                    and tva_fluxes['maximum'][rxn.id] > flux:
-                    fwd_var.lb = flux
+                # TODO if
+                expression = fwd_var + rev_var
+                temp_model.add_constraints(MinFLux,
+                                           rxn,
+                                           expression,
+                                           lb=flux)
     
     else:
         for rxn in temp_model.reactions:
@@ -68,35 +81,15 @@ def add_min_flux_requirements(tmodel,flux, inplace=True, safe=True, exclude=[]):
                 rev_var = rxn.reverse_variable
                 fwd_var = rxn.forward_variable
 
-                if flux <= rev_var.ub and rev_var.lb < flux:
-                    rev_var.lb = flux
-                if flux <= fwd_var.ub and fwd_var.lb < flux:
-                    fwd_var.lb = flux
+                expression = fwd_var + rev_var
+
+                temp_model.add_constraints(MinFLux,
+                                           rxn,
+                                           expression,
+                                           lb=flux)
 
     temp_model.repair()
 
     return temp_model
 
-def relax_min_flux_gurobi(model, relax_obj_type = 0, exclude_variables=None):
-    N = len(model.reactions)
-    # Can we exclude the biomass reaction?
-    if exclude_variables is None:
-        the_vars = [x._internal_variable for x in model.variables[:2*N]]
-    else:
-        the_vars = [x._internal_variable for x in model.variables[:2 * N]
-                    if x not in exclude_variables ]
-
-    vars_penalities = [1]*len(the_vars)
-
-    grm = model.solver.problem.feasRelax(relaxobjtype=relax_obj_type,
-                                         minrelax=True,
-                                         constrs=None,
-                                         vars=the_vars,
-                                         lbpen=vars_penalities,
-                                         ubpen=None,
-                                         rhspen=None)
-
-    return grm
-
-# TODO Flux relaxation function for any solver see pytfa optim relax_LC!
 
