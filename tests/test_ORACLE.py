@@ -108,7 +108,7 @@ def prepare_tfa_model_for_kinetic_import(tmodel):
     # Add minimum flux requirements basal fluxes 1e-6
     # safe: ensure that fluxes that cant obey the minimum requirement are removed
 
-    tmodel = add_min_flux_requirements(tmodel, BASL_FLUX, inplace=True, safe=True)
+    tmodel = add_min_flux_requirements(tmodel, BASL_FLUX, inplace=True )
     solution = tmodel.optimize()
 
     # Fix the flux directionality profile (FDP)
