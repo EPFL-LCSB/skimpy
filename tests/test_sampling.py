@@ -17,7 +17,6 @@ def test_parameter_sampling_linear_pathway():
     flux_dict = {'E1': 1.0, 'E2': 1.0, 'E3': 1.0}
     concentration_dict = {'A': 10.0, 'B': 5.0, 'C': 1.0, 'D': 0.05}
 
-
     parameters = SimpleParameterSampler.Parameters(n_samples=10)
     sampler = SimpleParameterSampler(parameters)
 

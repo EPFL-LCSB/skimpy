@@ -81,9 +81,9 @@ def make_cython_function(symbols, expressions, quiet=True, simplify=True, optimi
         # Input pointers
         fun.function.argtypes = [ctypes.POINTER(ctypes.c_double),
                                  ctypes.POINTER(ctypes.c_double),]
-        #Cast
+        #Cast to numpy float
         if not type(input_array) ==  np.ndarray.dtype:
-            input_array = np.array(input_array)
+            input_array = np.array(input_array, dtype=np.float)
 
         #x.ctypes.data_as(ctypes.POINTER(ctypes.c_long))
         fun.function(input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_double)) ,
