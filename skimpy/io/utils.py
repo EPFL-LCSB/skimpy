@@ -132,22 +132,29 @@ def guess_mechanism(reactants,inhibitors,irrev=None):
     stoich = [i for i in reactants.values()]
     stoich.sort(reverse=True)
 
-    if irrev:
+    is_integer = all([i.is_integer() for i in stoich] )
+
+    if irrev or not is_integer:
         return make_irrev_m_n_michaelis_menten(stoich)
 
     if inhibitors is not None:
         stoich_inhibitors = [1 for i in inhibitors]
         return make_convenience_with_inhibition(stoich,stoich_inhibitors)
-    # 2) Reversible Michaelis Menten kinetics
-    mechanism = check_rev_michaelis_menten(reactants)
-    if mechanism is not None:
-        return mechanism
+
+    # Note this kinetic leads to a model with more parameters we will create the draft based
+    # On rev hill for bibi reactions.
+    # # 2) Reversible Michaelis Menten kinetics
+    # mechanism = check_rev_michaelis_menten(reactants)
+    # if mechanism is not None:
+    #     return mechanism
+
     # 3) Test for Generalized Reversible hill
     # Stoichiometry needs to be equal to 1/-1 and same number of products
     # and substrates
     abs_eqal = lambda x: abs(x) == 1
     if all(map(abs_eqal,stoich)) and sum(stoich) == 0:
-        return make_generalized_reversible_hill_n_n(stoich)
+        # We use the generlized hill mechanism with h = 1 
+        return make_generalized_reversible_hill_n_n_h1(stoich)
     # Else Conv-kinetics
     else:
         return make_convenience(stoich)
