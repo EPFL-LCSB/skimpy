@@ -132,7 +132,7 @@ def guess_mechanism(reactants,inhibitors,irrev=None):
     stoich = [i for i in reactants.values()]
     stoich.sort(reverse=True)
 
-    is_integer = all([i.is_integer() for i in stoich] )
+    is_integer = all([float(i).is_integer() for i in stoich] )
 
     if irrev or not is_integer:
         return make_irrev_m_n_michaelis_menten(stoich)
