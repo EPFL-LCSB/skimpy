@@ -146,7 +146,7 @@ class SimpleParameterSampler(ParameterSampler):
                                          compiled_model,
                                          concentration_dict,
                                          flux_dict,
-                                         only_sample=None,
+                                         parameters_to_resample=None,
                                          fixed_parameters=None):
 
         """
@@ -188,7 +188,7 @@ class SimpleParameterSampler(ParameterSampler):
             saturations,
             parameter_sample,
             concentration_dict,
-            only_sample,
+            parameters_to_resample,
             fixed_parameters
         )
 

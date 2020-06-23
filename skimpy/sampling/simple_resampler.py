@@ -54,7 +54,7 @@ class SimpleResampler(SimpleParameterSampler):
                compiled_model,
                flux_dict,
                concentration_dict,
-               only_sample,
+               parameters_to_resample,
                fixed_parameter_population,
                min_max_eigenvalues=False,
                seed=321):  # TODO: this seed needs to be different from the
@@ -97,7 +97,7 @@ class SimpleResampler(SimpleParameterSampler):
                     compiled_model,
                     symbolic_concentrations_dict,
                     flux_dict,
-                    only_sample=only_sample,
+                    parameters_to_resample=parameters_to_resample,
                     fixed_parameters=these_parameters)
 
                 # Check stability: real part of all eigenvalues of the jacobian

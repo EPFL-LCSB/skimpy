@@ -76,7 +76,7 @@ class SaturationParameterFunction():
             self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=model.pool)
 
 
-    def __call__(self, saturations, parameters, concentrations, only_sample,
+    def __call__(self, saturations, parameters, concentrations, parameters_to_resample,
                  fixed_parameters):
 
         # Transform the sample to bounds accroding to the bounds of the
@@ -116,14 +116,14 @@ class SaturationParameterFunction():
             self.function(input,saturation_parameter_values)
 
             # Assigning saturation parameters
-            if not only_sample:
+            if not parameters_to_resample:
                 for p,v in zip(self.saturation_parameters, saturation_parameter_values):
                     parameters[p.symbol] = v
             else:
-                # Only assign sampled parameters that are in `only_sample`. Use
+                # Only assign sampled parameters that are in `parameters_to_resample`. Use
                 # the value of `fixed_parameters` for other parameters
                 for c, p in enumerate(self.saturation_parameters):
-                    if p in only_sample:
+                    if p in parameters_to_resample:
                         parameters[p.symbol] = saturation_parameter_values[c]
                     else:
                         parameters[p.symbol] = fixed_parameters[p.symbol]

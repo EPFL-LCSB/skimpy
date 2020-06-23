@@ -158,9 +158,9 @@ parameter_population = sampler.sample(this_skimpy_model, flux_dict,
 
 # Perform resampling
 resampler = SimpleResampler(sampling_parameters)
-only_sample = [this_skimpy_model.parameters['km_substrate_Trp_nadh']]
+parameters_to_resample = [this_skimpy_model.parameters['km_substrate_Trp_nadh']]
 resampled_population = resampler.sample(this_skimpy_model, flux_dict,
-                                        concentration_dict, only_sample,
+                                        concentration_dict, parameters_to_resample,
                                         parameter_population)
 
 # Print parameters that are different in the first sample
