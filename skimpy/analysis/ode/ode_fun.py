@@ -66,14 +66,15 @@ class ODEFunction:
 
     @property
     def parameters(self):
-        return TabDict((k, self.model.parameters[robust_index(k)].value)
+        model_params = self.model.parameters
+        return TabDict((k, model_params[robust_index(k)].value)
                        for k in self._parameters)
 
     @parameters.setter
     def parameters(self, value):
         self._parameters = value
 
-    def get_parames(self):
+    def get_params(self):
         self._parameters_values = self.parameters.values()
 
     # @property
