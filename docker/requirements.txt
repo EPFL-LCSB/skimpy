@@ -17,5 +17,6 @@ Cython
 # scikits.odes # installation/compilation done with sundials in Dockerfile
 deap
 dill
+h5py
 # extras ORACLE:
 pytfa
