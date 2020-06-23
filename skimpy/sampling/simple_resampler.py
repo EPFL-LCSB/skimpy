@@ -57,7 +57,8 @@ class SimpleResampler(SimpleParameterSampler):
                only_sample,
                fixed_parameter_population,
                min_max_eigenvalues=False,
-               seed=123):
+               seed=321):  # TODO: this seed needs to be different from the
+                           # `SimpleParameterSampler` seed. should it be removed? 
 
         parameter_population = []
         smallest_eigenvalues = []
