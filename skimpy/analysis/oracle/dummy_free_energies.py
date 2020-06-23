@@ -50,7 +50,8 @@ def add_undefined_delta_g(_tmodel,
                           delta_g_std=-10,
                           delta_g_std_err=2,
                           add_displacement=True,
-                          inplace=True):
+                          inplace=True,
+                          exclude_reactions=[]):
     if inplace:
         tmodel = _tmodel
     else:
@@ -59,6 +60,9 @@ def add_undefined_delta_g(_tmodel,
     sol = solution
 
     for this_rxn in tmodel.reactions:
+        # Pass over the exclude reactions
+        if this_rxn.id in exclude_reactions:
+            continue
 
         this_rxn_rev_flux = sol[this_rxn.id]
         try:
