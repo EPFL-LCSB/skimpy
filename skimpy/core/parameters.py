@@ -81,7 +81,7 @@ class ParameterValuePopulation(object):
             # Todo check for indexable
             self._data = [ ParameterValues(d,kmodel=kmodel) for d in data]
             if index is None:
-                self._index = index
+                self._index = [str(i) for i,_ in enumerate(data) ]
             else:
                 self._index = TabDict((k,i) for i,k in enumerate(index))
 
