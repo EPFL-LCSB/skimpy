@@ -38,6 +38,7 @@ from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.sampling.flux_concentration_sampler import FluxConcentrationSampler
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 from skimpy.io.generate_from_pytfa import FromPyTFA
+from skimpy.analysis.oracle.load_pytfa_solution import *
 
 from pytfa.analysis import  GeneralizedACHRSampler
 
@@ -73,14 +74,16 @@ class GaFluxConcentrationSampler(FluxConcentrationSampler):
                                            'crossover_scaling',
                                            'max_eigenvalue',
                                            'min_eigenvalue',
-                                           'concentration_scaling',
+                                           'scaling_parameters',
                                            ])
+
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
-    def sample(
-               self,
+    def sample(self,
                tmodel,
-               kmodel,):
+               kmodel,
+               simple_parameter_sampler,
+               only_stable=True):
 
         """
 
@@ -98,10 +101,12 @@ class GaFluxConcentrationSampler(FluxConcentrationSampler):
         from deap import creator
         from deap import tools
 
+        self.only_stable = only_stable
 
         self.tmodel = tmodel
         self.kmodel = kmodel
 
+        self.parameter_sampler = simple_parameter_sampler
         self.sampler = GeneralizedACHRSampler(tmodel, thinning=100, seed=self.parameters.seed)
 
         #Create the initial population from TFA Sampling
@@ -147,8 +152,9 @@ class GaFluxConcentrationSampler(FluxConcentrationSampler):
         _, lamda_max, lamda_min = sample_parameters(self.kmodel,
                                                     self.tmodel,
                                                     flux_concentration,
-                                                    n_samples=self.parameters.n_parameter_samples,
-                                                    conc_scaling=self.parameters.concentration_scaling)
+                                                    self.parameter_sampler,
+                                                    self.parameters.scaling_parameters,
+                                                    only_stable=self.only_stable)
 
         P_lambda_max = sum([1 for i in lamda_max if i < self.parameters.max_eigenvalue ])\
                        / self.parameters.n_parameter_samples
@@ -197,55 +203,40 @@ def convex_mating(ind1,ind2, eta=0.5):
     return ind1,ind2
 
 
-def sample_parameters(kmodel, tmodel, individual, n_samples=1000, conc_scaling=1e6):
+def sample_parameters(kmodel,
+                      tmodel,
+                      individual,
+                      param_sampler,
+                      scaling_parameters,
+                      only_stable=True,
+                      ):
 
     """
     Run sampling on first order model
     """
     solution_raw = individual.data.data
 
-    for name,rxn in kmodel.reactions.items():
-        pytfa_reaction = tmodel.reactions.get_by_id(name)
-        try:
-            rxn.parameters['k_equilibrium'].value = model_gen.get_equlibrium_constant( tmodel,
-                                                                              solution_raw,
-                                                                              pytfa_reaction,
-                                                                              scaling_factor=conc_scaling)[0]
-        except KeyError:
-            pass
+    # Load fluxes and concentrations
+    fluxes = load_fluxes(solution_raw, tmodel, kmodel,
+                         density=scaling_parameters.DENSITY,
+                         ratio_gdw_gww=scaling_parameters.GDW_GWW_RATIO,
+                         concentration_scaling=scaling_parameters.CONCENTRATION_SCALING,
+                         time_scaling=scaling_parameters.TIME_SCALING)
 
-    # Initialize parameter sampler
-    sampling_parameters = SimpleParameterSampler.Parameters(n_samples=n_samples)
-    sampler = SimpleParameterSampler(sampling_parameters)
+    concentrations = load_concentrations(solution_raw, tmodel, kmodel,
+                                         concentration_scaling=scaling_parameters.CONCENTRATION_SCALING)
 
-
-    #TODO BIIIIG SHIT HERE HOW CAN WE MAKE THIS PROPERLY OR EVERY MODEL !!!!!!!!!!!!!!!!
-
-    # Unit conversion from FBA model (Mass flux) mmol/gDW/hr to density flux mol/L/hr
-    # Conversion needs gWW/gDW = 3.0 g/g and density of 1gDW 1L = 1200 gWW
-    # TODO Generalize in a Unit System
-
-    flux_dict = {reaction.id: 1e-3/(3./1200.) * conc_scaling *
-                                (solution_raw[reaction.forward_variable.name] - solution_raw[reaction.reverse_variable.name])
-                 for reaction in tmodel.reactions}
-
-    # Especially this .... This is tested currently with the varma model this
-    # the integer model with i.e. Nij_Biomass * 1000 is not feasible in the FBA .....
-    # This this has been a crude fix so far ....
-    try:
-        flux_dict['LMPD_biomass_c_17_462'] = flux_dict['LMPD_biomass_c_17_462'] / 1000.0
-    except:
-        pass
-
-    # M to muM
-    concentration_dict = {sanitize_cobra_vars(LC.id): np.exp(solution_raw[LC.variable.name]) * conc_scaling
-                          for LC in tmodel.log_concentration}
+    # Fetch equilibrium constants
+    load_equilibrium_constants(solution_raw, tmodel, kmodel,
+                               concentration_scaling=scaling_parameters.CONCENTRATION_SCALING,
+                               in_place=True)
 
     parameter_population_lam_mu,\
-        lamda_max, lamda_min = sampler.sample(kmodel,
-                                             flux_dict,
-                                             concentration_dict,
-                                             min_max_eigenvalues=True)
+        lamda_max, lamda_min = param_sampler.sample(kmodel,
+                                                    fluxes,
+                                                    concentrations,
+                                                    only_stable = only_stable,
+                                                    min_max_eigenvalues=True)
 
     return parameter_population_lam_mu, lamda_max, lamda_min
 

@@ -77,10 +77,11 @@ class SimpleParameterSampler(ParameterSampler):
         trials = 0
 
         #Compile functions
-        self._compile_sampling_functions(
-            compiled_model,
-            symbolic_concentrations_dict,
-            flux_dict)
+        if not hasattr(compiled_model, 'saturation_parameter_function'):
+            self._compile_sampling_functions(
+                compiled_model,
+                symbolic_concentrations_dict,
+                flux_dict)
 
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
