@@ -30,6 +30,10 @@ import numpy as np
 
 import multiprocessing
 
+import math
+from fractions import Fraction
+import functools
+
 from scipy.sparse import csr_matrix, csc_matrix
 from scipy.sparse.linalg import inv as sparse_inv
 from sympy import diff, simplify, Matrix, eye, zeros
@@ -45,6 +49,7 @@ from skimpy.nullspace import left_integer_nullspace
 from ...utils.namespace import *
 
 sparse_matrix = csc_matrix
+
 
 
 def get_dlogx_dlogy(sympy_expression, variable):
@@ -64,9 +69,10 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
     full_stoichiometry = get_stoichiometry(kinetic_model, all_variables)
 
     S = full_stoichiometry.todense()
+
     # Left basis dimensions: rows are metabolites, columns are moieties
     # L0*S = 0 -> L0 is the left null space matrix
-    S_non_integer = None
+
     try:
         left_basis = left_integer_nullspace(S)
     except TypeError:
@@ -74,19 +80,31 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         non_integer_rxn_idx = set([j for i in range(S.shape[0])
                                    for j in range(S.shape[1])
                                    if not float(S[i, j]).is_integer()])
-        integer_rxn_idx = set(range(S.shape[1])).difference(non_integer_rxn_idx)
-        S_non_integer = S[:,list(non_integer_rxn_idx)]
+
+        # integer_rxn_idx = set(range(S.shape[1])).difference(non_integer_rxn_idx)
+        # S_non_integer = S[:,list(non_integer_rxn_idx)]
 
         non_integer_rxns = [kinetic_model.reactions.iloc(i)[0] for i in non_integer_rxn_idx]
         kinetic_model.logger.warning('Non integer stoichiometries found {} '
-                                      'do not consider for linear dependencies'.format(non_integer_rxns))
+                                      'change to integer for linear dependencies'.format(non_integer_rxns))
 
-        S = S[:,list(integer_rxn_idx)].astype(int)
-        left_basis = left_integer_nullspace(S)
+        # Transform the original stoichiometry to integer to calculate the left integer nullspace
+        S_integer = S.copy()
+        # Find the common denominator
+        for non_int_ix in list(non_integer_rxn_idx):
+            rxn_array = S_integer[:,non_int_ix]
+            nonzero = np.where(rxn_array)[0]
+            denoms = [Fraction(x[0,0]).limit_denominator().denominator for x in rxn_array[nonzero]]
+            gcd = functools.reduce(lambda a, b: a * b // math.gcd(a, b), denoms)
+
+            S_integer[:,non_int_ix] = np.array(S_integer[:,non_int_ix]*gcd, dtype=np.int )
+
+        S_integer = S_integer.astype(int)
+        left_basis = left_integer_nullspace(S_integer)
 
     if left_basis.any():
 
-        L0 = Matrix(left_basis)
+        L0, pivot = Matrix(left_basis).rref()
 
         ## We need to separate N and N0 beforehand
 
@@ -145,22 +163,11 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         all_dependent_ix = []
         conservation_relation = sparse_matrix(np.array([]),dtype=np.float)
 
-    # Reconstruct with non integer reactions
-    if S_non_integer is not None:
-        reduced_stoichiometry_int = reduced_stoichiometry.todense()
-        reduced_stoichiometry = np.zeros((reduced_stoichiometry.shape[0],
-                                          S.shape[1]+S_non_integer.shape[1]))
-        for i,ix in enumerate(integer_rxn_idx):
-            reduced_stoichiometry[:,ix] = reduced_stoichiometry_int[:,i].T
-        for i,ix in enumerate(non_integer_rxn_idx):
-            reduced_stoichiometry[:,ix] = S_non_integer[all_independent_ix,i].T
-        # Reconvert to sparse
-        reduced_stoichiometry = sparse_matrix(np.array(reduced_stoichiometry), dtype=np.float)
-
     return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 
 
 def get_dep_indep_vars_from_basis(L0, all_dependent_ix=None, concentrations=None):
+
     nonzero_rows, nonzero_cols = L0.nonzero()
     row_dict = defaultdict(list)
     # Put the ixs in a dict indexed by row number (moiety index)
