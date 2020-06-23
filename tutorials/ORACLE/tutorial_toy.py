@@ -35,6 +35,7 @@ from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.utils.namespace import *
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
+from skimpy.sampling.simple_resampler import SimpleResampler
 from skimpy.core.solution import ODESolutionPopulation
 from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars
@@ -154,6 +155,16 @@ sampler = SimpleParameterSampler(sampling_parameters)
 # Sample the model
 parameter_population = sampler.sample(this_skimpy_model, flux_dict,
                                       concentration_dict)
+
+# Perform resampling
+resampler = SimpleResampler(sampling_parameters)
+only_sample = [this_skimpy_model.parameters['km_substrate_Trp_nadh']]
+resampled_population = resampler.sample(this_skimpy_model, flux_dict,
+                                        concentration_dict, only_sample,
+                                        parameter_population)
+
+# Print parameters that are different in the first sample
+print([k for k in parameter_population[0].keys() if parameter_population[0][k] != resampled_population[0][k]])
 
 """
 Calculate control coefficients

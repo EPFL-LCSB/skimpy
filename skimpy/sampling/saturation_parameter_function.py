@@ -50,7 +50,7 @@ class SaturationParameterFunction():
         self.sym_concentrations = [c for c in concentrations]
         self.saturation_parameters = [v for k,v in parameters.items()
                                       if (v.hook is not None)
-                                      and (v.value is None) ] # should this be removed?
+                                      and (v.value is None) ] # TODO: should this be removed?
 
         if not self.saturation_parameters:
             # If there are no saturation parameters in the model dont compile
