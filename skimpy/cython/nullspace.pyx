@@ -28,7 +28,7 @@ limitations under the License.
 import numpy as np
 
 cdef extern from "nullspace.pyh":
-    ctypedef int slong
+    ctypedef long slong
     ctypedef slong fmpz
     ctypedef fmpz fmpz_t[1]
 

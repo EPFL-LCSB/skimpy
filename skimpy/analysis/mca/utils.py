@@ -94,6 +94,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         for non_int_ix in list(non_integer_rxn_idx):
             rxn_array = S_integer[:,non_int_ix]
             nonzero = np.where(rxn_array)[0]
+            # TODO Pass a parameter option to limit denom
             denoms = [Fraction(x[0,0]).limit_denominator().denominator for x in rxn_array[nonzero]]
             gcd = functools.reduce(lambda a, b: a * b // math.gcd(a, b), denoms)
 
