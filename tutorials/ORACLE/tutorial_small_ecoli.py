@@ -83,7 +83,9 @@ Prepare the model to sample parameters
 # Add minimum flux requirements basal fluxes 1e-6
 # safe: ensure that fluxes that cant obey the minimum requirement are removed
 basal_flux = 1e-6 # mmol/gDW/hr
+
 tmodel = add_min_flux_requirements(tmodel, basal_flux, inplace=True,)
+
 solution = tmodel.optimize()
 
 # Fix the flux directionality profile (FDP)
