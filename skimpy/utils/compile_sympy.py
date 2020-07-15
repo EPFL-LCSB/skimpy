@@ -35,6 +35,7 @@ import tempfile
 
 import multiprocessing
 from sympy.printing import ccode
+from sympy import Symbol
 
 
 """
@@ -135,27 +136,37 @@ def generate_a_code_line_simplfied(input , optimize=False):
     i, e, input_subs = input
 
     # Use common sub expressions instead of simpilfy
+    # Generate directly unique CSE Symbols and tranlate them to ccode
     if optimize:
         common_sub_expressions, main_expression = cse(e.simplify())
     else:
         common_sub_expressions, main_expression = cse(e)
-    #print(main_expression)
-    cython_code = ''
+
+    # Generate unique symbols for the common subexpressions
+    cse_subs = {}
+    common_sub_expressions_unique = []
     for this_cse in common_sub_expressions:
+        gen_sym = str(this_cse[0])
+        unique_sym = Symbol("cse_{}_{}".format(i,gen_sym))
+        cse_subs[ this_cse[0]] = unique_sym
+        common_sub_expressions_unique.append(
+            [unique_sym,this_cse[1]] )
+
+    # Substitute the cse symbols in mainexpression and other cse
+    for this_cse in common_sub_expressions_unique:
+        this_cse[1] = this_cse[1].subs(cse_subs)
+
+    main_expression = main_expression[0].subs(cse_subs)
+
+    cython_code = ''
+    for this_cse in common_sub_expressions_unique:
         cython_code=cython_code+'double {} = {} ;\n'.format(str(this_cse[0]),
                                                     ccode(this_cse[1],standard='C99'))
 
 
-    cython_code = cython_code+"output_array[{}] = {} ;".format(i,ccode(main_expression[0]
+    cython_code = cython_code+"output_array[{}] = {} ;".format(i,ccode(main_expression
                                                                       ,standard='C99')
                                                               )
-
-    # Subtitute generated common subexpression with unique common_sub_expresion names
-    for this_cse in common_sub_expressions:
-        gen_sym = str(this_cse[0])
-        unique_sym = "cse_{}_{}".format(i,gen_sym)
-        cython_code = re.sub(r"{}".format(gen_sym), r"{}".format(unique_sym),
-                             cython_code)
 
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
