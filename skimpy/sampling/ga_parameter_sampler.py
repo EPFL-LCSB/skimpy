@@ -52,6 +52,7 @@ class GaParameterSampler(ParameterSampler):
     # if parameters are not defined put default values
     Parameters.__new__.__defaults__ = (None,) * len(Parameters._fields)
 
+
     def sample(self,
                compiled_model,
                flux_dict,
@@ -60,7 +61,9 @@ class GaParameterSampler(ParameterSampler):
                max_generation=10,
                mutation_probability = 0.2,
                eta = 20,
-               max_eigenvalue = 0,
+               fitness_fun = default_fitness,
+               fitness_weights = (-1,),
+               **kwargs,
                ):
 
         """
@@ -104,7 +107,7 @@ class GaParameterSampler(ParameterSampler):
         Define the DA optimzation problem with DEAP NSGA-2
         """
 
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+        creator.create("FitnessMin", base.Fitness, weights=fitness_weights)
         creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
         n_dim = len(compiled_model.saturation_parameter_function.sym_saturations)
@@ -119,13 +122,18 @@ class GaParameterSampler(ParameterSampler):
         #if hasattr(compiled_model,'pool'):
         #    toolbox.register("map", compiled_model.pool.map)
 
-
-        toolbox.register("evaluate", self.fitness)
+        toolbox.register("evaluate", fitness_fun,
+                         compiled_model=compiled_model,
+                         concentration_dict=concentration_dict,
+                         flux_dict=flux_dict,
+                         **kwargs)
 
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=list(bound_low), up=list(bound_up), eta=eta)
         toolbox.register("mutate", tools.mutPolynomialBounded, low=list(bound_low), up=list(bound_up), eta=eta, indpb=1.0/n_dim)
-        toolbox.register("select", tools.selBest)
-
+        if len(fitness_weights) > 1:
+            toolbox.register("select", tools.selNSGA2)
+        else:
+            toolbox.register("select", tools.selBest)
         """
         """
         toolbox.pop_size = self.parameters.n_samples
@@ -150,7 +158,7 @@ class GaParameterSampler(ParameterSampler):
                                         )
         # Plot pareto fronts
 
-        return parameter_population
+        return parameter_population, log
 
     # Under construction new sampling with compiled function
     def _compile_sampling_functions(self,model,
@@ -169,27 +177,36 @@ class GaParameterSampler(ParameterSampler):
                                                               model.parameters,
                                                               concentrations,)
 
-    def fitness(self,saturations):
-        parameter_sample = calc_parameters(saturations,
-                                           self.compiled_model,
-                                           self.concentration_dict,
-                                           self.flux_dict)
 
-        lambda_max = calc_max_eigenvalue(parameter_sample,
-                                         self.compiled_model,
-                                         self.concentration_dict,
-                                         self.flux_dict)
-        if lambda_max < self.max_eigenvalue :
 
-            return (self.max_eigenvalue,)
-        else :
-            return (lambda_max,)
 
+"""
+Default fitness function can 
+"""
+def default_fitness(saturations,
+                    compiled_model=None,
+                    concentration_dict=dict(),
+                    flux_dict=dict(),
+                    max_eigenvalue=0
+                    ):
+    parameter_sample = calc_parameters(saturations,
+                                       compiled_model,
+                                       concentration_dict,
+                                       flux_dict)
+
+    lambda_max = calc_max_eigenvalue(parameter_sample,
+                                     compiled_model,
+                                     concentration_dict,
+                                     flux_dict)
+
+    if lambda_max < max_eigenvalue:
+        return (max_eigenvalue,)
+    else :
+        return (lambda_max,)
 
 """
 Utils
 """
-
 
 def run_ea(toolbox, stats=None, verbose=False):
     pop = toolbox.population(n=toolbox.pop_size)
