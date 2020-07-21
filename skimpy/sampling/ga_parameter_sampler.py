@@ -41,6 +41,33 @@ from deap import algorithms
 from skimpy.sampling import ParameterSampler, SaturationParameterFunction, FluxParameterFunction
 
 
+"""
+Default fitness function can 
+"""
+def default_fitness(saturations,
+                    compiled_model=None,
+                    concentration_dict=dict(),
+                    flux_dict=dict(),
+                    max_eigenvalue=0
+                    ):
+    parameter_sample = calc_parameters(saturations,
+                                       compiled_model,
+                                       concentration_dict,
+                                       flux_dict)
+
+    lambda_max = calc_max_eigenvalue(parameter_sample,
+                                     compiled_model,
+                                     concentration_dict,
+                                     flux_dict)
+
+    if lambda_max < max_eigenvalue:
+        return (max_eigenvalue,)
+    else :
+        return (lambda_max,)
+
+"""
+Parameter sampling class 
+"""
 class GaParameterSampler(ParameterSampler):
     """
     A simple parameter sampler that samples stable model parameters
@@ -63,7 +90,7 @@ class GaParameterSampler(ParameterSampler):
                eta = 20,
                fitness_fun = default_fitness,
                fitness_weights = (-1,),
-               **kwargs,
+               **kwargs
                ):
 
         """
@@ -100,8 +127,6 @@ class GaParameterSampler(ParameterSampler):
         self.compiled_model = compiled_model
         self.concentration_dict = concentration_dict
         self.flux_dict= flux_dict
-
-        self.max_eigenvalue = max_eigenvalue
 
         """
         Define the DA optimzation problem with DEAP NSGA-2
@@ -179,30 +204,6 @@ class GaParameterSampler(ParameterSampler):
 
 
 
-
-"""
-Default fitness function can 
-"""
-def default_fitness(saturations,
-                    compiled_model=None,
-                    concentration_dict=dict(),
-                    flux_dict=dict(),
-                    max_eigenvalue=0
-                    ):
-    parameter_sample = calc_parameters(saturations,
-                                       compiled_model,
-                                       concentration_dict,
-                                       flux_dict)
-
-    lambda_max = calc_max_eigenvalue(parameter_sample,
-                                     compiled_model,
-                                     concentration_dict,
-                                     flux_dict)
-
-    if lambda_max < max_eigenvalue:
-        return (max_eigenvalue,)
-    else :
-        return (lambda_max,)
 
 """
 Utils
