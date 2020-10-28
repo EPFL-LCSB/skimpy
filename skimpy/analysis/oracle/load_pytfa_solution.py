@@ -92,8 +92,15 @@ def load_equilibrium_constants(solution_raw, tmodel, kmodel,
     # Calculate the fitting equilibrium constants for the kinetic models (absorb concentrations that do
     # not appear explicitly in the mass balance of the model in the deltag )
     RT = tmodel.RT
+
+    rnxs_ids_with = [dg.id for dg in tmodel.delta_g]
+
     for pytfa_rxn in tmodel.reactions:
+
         if not pytfa_rxn.id in kmodel.reactions:
+            continue
+
+        if not pytfa_rxn.id in rnxs_ids_with:
             continue
 
         deltag0 = solution_raw[tmodel.delta_g.get_by_id(pytfa_rxn.id).name]
