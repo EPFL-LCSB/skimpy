@@ -79,6 +79,8 @@ def add_undefined_delta_g(_tmodel,
                                   delta_g_std=this_dgo,
                                   delta_g_std_err=delta_g_std_err,
                                   add_displacement=add_displacement)
+                #Adding dgo
+                print(this_rxn.id)
 
     tmodel.repair()
 
@@ -172,7 +174,7 @@ def add_dummy_delta_g(tmodel,
     tmodel.add_constraint(ForwardDeltaGCoupling,
                         rxn,
                         CLHS,
-                        ub=BIGM_THERMO - epsilon)
+                        ub=BIGM_THERMO - epsilon*1e3)
 
     # BU_rxn: 1000 BU_rxn - DGR_rxn < 1000 - epsilon
     BU_rxn = tmodel.add_variable(BackwardUseVariable, rxn)
@@ -181,7 +183,7 @@ def add_dummy_delta_g(tmodel,
     tmodel.add_constraint(BackwardDeltaGCoupling,
                         rxn,
                         CLHS,
-                        ub=BIGM_THERMO - epsilon)
+                        ub=BIGM_THERMO - epsilon*1e3)
 
     # create the prevent simultaneous use constraints
     # SU_rxn: FU_rxn + BU_rxn <= 1
