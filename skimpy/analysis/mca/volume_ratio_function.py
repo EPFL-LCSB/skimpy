@@ -25,99 +25,65 @@ limitations under the License.
 
 """
 
-import pandas as pd
-from numpy import array, zeros
+from numpy import array, double, zeros
+from numpy import append as append_array
 
-from scipy.sparse import diags
-from scipy.sparse.linalg import inv as sparse_inv
+from sympy import symbols
 
-from skimpy.utils.tensor import Tensor
+from skimpy.utils.tabdict import TabDict
+from skimpy.utils.compile_sympy import make_cython_function
 
-class ConcentrationControlFunction:
-    def __init__(self,
-                 model,
-                 reduced_stoichometry,
-                 independent_elasticity_function,
-                 dependent_elasticity_function,
-                 parameter_elasticity_function,
-                 conservation_relation,
-                 independent_variable_ix,
-                 dependent_variable_ix,
-                 volume_ratios,
-                 ):
+class VolumeRatioFunction:
+    def __init__(self, model, variables,  parameters, pool=None):
+        """
+        Constructor for a precompiled function to compute elasticities
+        numerically
+        :param variables: a list of strings denoting
+                                      the independent variables names
+        :param expressions: dict of  non-zero sympy expressions for the rate of
+                            change of a variable indexed by a tuple of the matrix position
+                            e.g: (1,1)
+        :param parameters:  list of parameter names
+        :param shape: Tuple defining the over all matrix size e.g (10,30)
 
-        self.model = model
-        self.reduced_stoichometry = reduced_stoichometry
-        self.dependent_elasticity_function = dependent_elasticity_function
-        self.independent_elasticity_function = independent_elasticity_function
-        self.parameter_elasticity_function = parameter_elasticity_function
-        self.independent_variable_ix = independent_variable_ix
-        self.dependent_variable_ix = dependent_variable_ix
-        self.conservation_relation = conservation_relation
-        self.volume_ratios = volume_ratios
+        """
+        self.variables = variables
+        self.parameters = parameters
 
-    def __call__(self,  flux_dict, concentration_dict, parameter_population):
+        # Unpacking is needed as ufuncify only take ArrayTypes
+        parameters = [x for x in self.parameters]
+        variables = [x for x in variables]
 
-        # Calculate the Concentration Control coefficients
-        # Log response of the concentration with respect to the log change in a Parameter
-        #
-        # C_Xi_P = -(N_r*V*E_i + N_r*V*E_d*Q_i)(N_r*V*Pi)
-        #
+        sym_vars = list(symbols(variables+parameters))
 
-        fluxes = [flux_dict[r] for r in self.model.reactions]
+        # Derive expression
+        expr_dict = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
+                            v.compartment.parameters.cell_volume.symbol )
+                           for k,v in model.reactants.items()])
 
-        # Only consider independent concentrations
-        concentrations = [concentration_dict[r] for r in self.model.reactants]
+        expressions= [expr_dict[v] for v in variables]
 
-        num_parameters = len(self.parameter_elasticity_function.expressions)
-        num_concentration = len(self.independent_variable_ix)
-        population_size = len(parameter_population)
+        self.expressions = expressions
 
-        concentration_control_coefficients = zeros((num_concentration,num_parameters,population_size))
+        # Awsome sympy magic
+        # TODO problem with typs if any parameter ot variables is interpreted as interger
+        # Make a function to compute every non zero entry in the matrix
 
-        for i,parameters in enumerate(parameter_population):
+        self.function = make_cython_function(sym_vars, expressions, pool=pool, simplify=True)
 
-            flux_matrix = diags(array(fluxes), 0).tocsc()
+    def __call__(self, variables, parameters):
+        """
+        Return a sparse matrix type with elasticity values
+        """
+        parameter_values = array([parameters[x.symbol] for x in
+                                  self.parameters.values()], dtype=double)
 
-            # Elasticity matrix
+        input_vars = append_array(variables , parameter_values)
 
-            if self.conservation_relation.nnz == 0:
-                # If there are no moieties
-                elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
+        values = array(zeros(len(self.expressions)),dtype=double)
 
-            else:
-                # If there are omieties
-                ix = self.independent_variable_ix
+        self.function(input_vars, values)
 
-                elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
 
-                dependent_weights = self.dependent_elasticity_function.\
-                    get_dependent_weights(
-                                    concentration_vector=concentrations,
-                                    L0=self.conservation_relation,
-                                    all_dependent_ix=self.dependent_variable_ix,
-                                    all_independent_ix=self.independent_variable_ix,
-                                )
+        return values
 
-                # Calculate the effective elasticises
-                elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
-                                     .dot(dependent_weights)
-
-            N_E_V = self.reduced_stoichometry.dot(flux_matrix).dot(elasticity_matrix)
-            N_E_V_inv = sparse_inv(N_E_V)
-
-            parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
-
-            N_E_P = self.reduced_stoichometry.dot(flux_matrix).dot(parameter_elasticity_matrix)
-
-            this_cc = - N_E_V_inv.dot(N_E_P)
-            concentration_control_coefficients[:,:,i] = this_cc.todense()
-
-        concentration_index = pd.Index([self.model.reactants.iloc(i)[0] for i in self.independent_variable_ix],
-                                       name="concentration")
-        parameter_index = pd.Index(self.parameter_elasticity_function.respective_variables, name="parameter")
-        sample_index = pd.Index(range(population_size), name="sample")
-
-        tensor_ccc = Tensor(concentration_control_coefficients, [concentration_index,parameter_index,sample_index])
-
-        return tensor_ccc

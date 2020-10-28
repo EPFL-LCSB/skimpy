@@ -31,6 +31,7 @@ from skimpy.analysis.ode.symbolic_jacobian_fun import SymbolicJacobianFunction
 from skimpy.analysis.mca.make import make_mca_functions
 from skimpy.analysis.mca.prepare import prepare_mca
 from skimpy.analysis.mca import *
+from skimpy.analysis.mca.volume_ratio_function import VolumeRatioFunction
 from ..utils.logger import get_bistream_logger
 from .solution import ODESolution
 
@@ -62,6 +63,8 @@ class KineticModel(object):
         self._simtype = None
         self._modified = True
         self._recompiled = False
+        # Add using add compartments!
+        self.compartments = iterable_to_tabdict([])
 
         #self.parameters = TabDict()
 
@@ -79,6 +82,12 @@ class KineticModel(object):
         for this_reaction in self.reactions.values():
             reaction_params = TabDict({str(p.symbol): p for p in this_reaction.parameters.values()})
             parameters.update(reaction_params)
+
+        # Compartment parameters
+        for this_comp in self.compartments.values():
+            comp_params = TabDict({str(p.symbol): p for p in this_comp.parameters.values()})
+            parameters.update(comp_params)
+
         return parameters
 
     @parameters.setter
@@ -92,6 +101,11 @@ class KineticModel(object):
         for this_reaction in self.reactions.values():
             reaction_params = TabDict({str(p.symbol): p for p in this_reaction.parameters.values()})
             parameters.update(reaction_params)
+
+        # Compartment parameters
+        for this_comp in self.compartments.values():
+            comp_params = TabDict({str(p.symbol): p for p in this_comp.parameters.values()})
+            parameters.update(comp_params)
 
         for key,value in value_dict.items():
             parameters[str(key)].value = value
@@ -133,6 +147,15 @@ class KineticModel(object):
 
 
         self.add_to_tabdict(reaction, 'reactions')
+
+    def add_compartment(self, compartment):
+        """
+
+        :param compartment:
+        :return:
+        """
+        self.add_to_tabdict(compartment, 'compartments')
+
 
     def add_constraint(self, constraint):
         constraint.link(self)
@@ -342,12 +365,19 @@ class KineticModel(object):
                 self.dependent_elasticity_fun = dependent_elasticity_fun
                 self.parameter_elasticities_fun = parameter_elasticities_fun
 
+                if self.compartments:
+                    self.volume_ratio_func = VolumeRatioFunction(self,
+                                                                 self.variables,
+                                                                 self.parameters,)
+                else:
+                    self.volume_ratio_func = None
 
                 # Build functions for stability and control coefficient's
                 self.jacobian_fun = JacobianFunction(
                     self.reduced_stoichiometry,
                     self.independent_elasticity_fun,
                     self.dependent_elasticity_fun,
+                    self.volume_ratio_func,
                     self.conservation_relation,
                     self.independent_variables_ix,
                     self.dependent_variables_ix)
@@ -357,6 +387,7 @@ class KineticModel(object):
                     self.reduced_stoichiometry,
                     self.independent_elasticity_fun,
                     self.dependent_elasticity_fun,
+                    self.volume_ratio_func,
                     self.parameter_elasticities_fun,
                     self.conservation_relation,
                     self.independent_variables_ix,

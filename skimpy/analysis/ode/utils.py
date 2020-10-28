@@ -104,7 +104,19 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     # Better since this is implemented now
     variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
 
-    expr = make_expressions(variables,all_expr, pool=pool)
+    #Compartments # CHECK IF THIS ONLY IS TRUE IF ITS EMPTY
+    if not kinetic_model.compartments:
+        #TODO Throw error if no cell reference compartment is given
+
+        volume_ratios = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
+                            v.compartment.parameters.cell_volume.symbol )
+                           for k,v in kinetic_model.reactants.items()])
+
+        all_parameters.update()
+    else:
+        volume_ratios = None
+
+    expr = make_expressions(variables,all_expr, volume_ratios=volume_ratios ,pool=pool)
 
     # Apply constraints. Constraints are modifiers that act on
     # expressions
@@ -123,7 +135,7 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     return ode_fun, variables
 
 
-def make_expressions(variables, all_flux_expr, pool=None):
+def make_expressions(variables, all_flux_expr, volume_ratios=None,pool=None):
 
     if pool is None:
         expr = dict.fromkeys(variables.values(), 0.0)
@@ -142,6 +154,14 @@ def make_expressions(variables, all_flux_expr, pool=None):
         list_expressions = pool.map(make_expresson_single_var, inputs)
 
         expr = join_dicts(list_expressions)
+
+    #Add compartment volumes
+    if not volume_ratios is None:
+        for k,v in variables.items():
+            volume_ratio = volume_ratios[k]
+            # Mutiply massbalance for each metabolite by volume ratio
+            expr[v] = volume_ratio*expr[v]
+
 
     return expr
 

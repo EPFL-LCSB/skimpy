@@ -19,26 +19,17 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+WITHOUT WARRANTIE CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-from skimpy.core.itemsets import Parameter
-from skimpy.utils import TabDict, iterable_to_tabdict
 
-class Compartment(object):
-    """
-    Global Compartment class
-    """
-    def __init__(self, name, model=None ):
+from collections import namedtuple
 
-        #TODO Do we need additional info for the future?
-        self.name = name
+ScalingParameters = namedtuple('ScalingParameters', ["CONCENTRATION_SCALING",
+                                                     "TIME_SCALING",
+                                                     "DENSITY",
+                                                     "GDW_GWW_RATIO",])
 
-        #Parameters so far only volume but maybe others soon
-        volume = Parameter(name='volume', model=model, value=None, suffix=name  )
-        cell_volume = Parameter(name='cell_volume', model=model, value=None, suffix=name )
-
-        self.parameters = iterable_to_tabdict([volume, cell_volume])
-
+# ToDo: Unit system

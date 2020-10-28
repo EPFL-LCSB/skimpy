@@ -36,6 +36,7 @@ from scipy.sparse import csr_matrix, csc_matrix
 from skimpy.utils import TabDict, iterable_to_tabdict
 from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
     ConstantConcentration, KineticModel, ExpressionModifier
+from skimpy.core.compartments import Compartment
 from skimpy.mechanisms import *
 from skimpy.utils.general import make_subclasses_dict, get_stoichiometry
 from skimpy.utils.namespace import PARAMETER, VARIABLE
@@ -75,6 +76,8 @@ FIELDS_TO_SERIALIZE = [
                        'name',
                        'initial_conditions',
                        'dependent_reactants',
+                       'compartments',
+                       'reactants',
                         ]
 
 #----------------------------------------------------------------
@@ -93,7 +96,11 @@ def reactant_representer(dumper, data):
         # Store it as a parameter
         return parameter_representer(dumper,data)
     elif data.type == VARIABLE:
-        return dumper.represent_str(data.name)
+        dict = {'name':data.name, 'compartment':data.compartment.name}
+        return dumper.represent_dict(dict)
+
+def compartment_representer(dumper, data):
+    return dumper.represent_str(data.name)
 
 def mechanism_representer(dumper, data):
     the_dict = {k:v.name for k,v in data.reactants.items()}
@@ -137,6 +144,7 @@ def refresh_representers():
     yaml.add_representer(Reactant, reactant_representer)
     yaml.add_representer(Parameter, parameter_representer)
     yaml.add_representer(Reaction, reaction_representer)
+    yaml.add_representer(Compartment, compartment_representer)
 
     for the_class in get_mechanism_subclasses().values():
         yaml.add_representer(the_class, mechanism_representer)
@@ -152,6 +160,7 @@ def export_to_yaml(model, path=None, **kwargs):
     dict_model = vars(model)
     # Add parameters that are properties
     dict_model['parameters'] = model.parameters
+    dict_model['reactants'] = model.reactants
     fields_not_to_serialize = [x for x in dict_model if not x in FIELDS_TO_SERIALIZE]
     [dict_model.pop(k) for k in fields_not_to_serialize]
 
@@ -237,6 +246,17 @@ def load_yaml_model(path):
             new_reaction.modifiers[new_modifier.name] = new_modifier
 
         new.add_reaction(new_reaction)
+
+    #Resbuild compartments
+    for the_comp in the_dict['compartments'].values():
+        new_comp = Compartment(the_comp)
+        new.add_compartment(new_comp)
+
+    # Assing compartments
+    for the_met in the_dict['reactants'].values():
+        met = new.reactants[the_met['name']]
+        comp = new.compartments[the_met['compartment']]
+        met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
