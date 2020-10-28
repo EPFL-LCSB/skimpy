@@ -277,15 +277,21 @@ def load_yaml_model(path):
 
 
     # Parameter assignment based on what parameters have been stored
-    for rxn_obj in new.reactions.values():
-        # Look into parameters for assignment
-        for p in rxn_obj.parameters.values():
-            # Try to find the parameter in our YAML
-            try:
-                p.value = the_dict['parameters'][str(p.symbol)]
-            except KeyError:
-                #No value found
-                pass
+    # for rxn_obj in new.reactions.values():
+    #     # Look into parameters for assignment
+    #     for p in rxn_obj.parameters.values():
+    #         # Try to find the parameter in our YAML
+    #         try:
+    #             p.value = the_dict['parameters'][str(p.symbol)]
+    #         except KeyError:
+    #             #No value found
+    #             pass
+    this_params = new.parameters
+    for parameter, value in the_dict['parameters'].items():
+        try:
+            this_params[parameter].value = value
+        except KeyError:
+            pass
 
     # Initial conditions
     for the_ic, value in the_dict['initial_conditions'].items():
