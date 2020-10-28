@@ -69,11 +69,11 @@ class ConcentrationControlFunction:
         # Only consider independent concentrations
         concentrations = [concentration_dict[r] for r in self.model.reactants]
 
-        num_parameters = len(self.parameter_elasticity_function.expressions)
+        num_parameters = len(self.parameter_elasticity_function.respective_variables)
         num_concentration = len(self.independent_variable_ix)
         population_size = len(parameter_population)
 
-        concentration_control_coefficients = zeros((num_concentration,num_parameters,population_size))
+        concentration_control_coefficients = zeros((num_concentration, num_parameters, population_size))
 
         for i,parameters in enumerate(parameter_population):
 
