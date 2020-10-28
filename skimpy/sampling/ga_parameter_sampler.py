@@ -41,13 +41,9 @@ from deap import algorithms
 from skimpy.sampling import ParameterSampler, SaturationParameterFunction, FluxParameterFunction
 
 
-<<<<<<< HEAD
-
 """
 TODO Move to Utils or sth. 
 =======
-"""
->>>>>>> f36ecb6a19c5ef3db3973e7122a5e0c2357b8b76
 Default fitness function can 
 """
 def default_fitness(saturations,
@@ -71,13 +67,10 @@ def default_fitness(saturations,
     else :
         return (lambda_max,)
 
-<<<<<<< HEAD
 
-=======
 """
 Parameter sampling class 
 """
->>>>>>> f36ecb6a19c5ef3db3973e7122a5e0c2357b8b76
 class GaParameterSampler(ParameterSampler):
     """
     A simple parameter sampler that samples stable model parameters
@@ -100,12 +93,8 @@ class GaParameterSampler(ParameterSampler):
                eta = 20,
                fitness_fun = default_fitness,
                fitness_weights = (-1,),
-<<<<<<< HEAD
-               **kwargs ):
-=======
                **kwargs
                ):
->>>>>>> f36ecb6a19c5ef3db3973e7122a5e0c2357b8b76
 
         """
 
@@ -218,10 +207,7 @@ class GaParameterSampler(ParameterSampler):
 
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> f36ecb6a19c5ef3db3973e7122a5e0c2357b8b76
 """
 Utils
 """
