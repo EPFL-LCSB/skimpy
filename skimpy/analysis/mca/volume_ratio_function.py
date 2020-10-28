@@ -58,7 +58,7 @@ class VolumeRatioFunction:
 
         # Derive expression
         expr_dict = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
-                            v.compartment.parameters.cell_volume.symbol )
+                            v.compartment.parameters.volume.symbol )
                            for k,v in model.reactants.items()])
 
         expressions= [expr_dict[v] for v in variables]
