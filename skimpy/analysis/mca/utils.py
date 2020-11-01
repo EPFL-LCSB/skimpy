@@ -103,7 +103,13 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         S_integer = S_integer.astype(int)
         left_basis = left_integer_nullspace(S_integer)
 
+
     if left_basis.any():
+        # Check if the conservation relations are constent with the rank deficency!
+        rank_deficency = S.shape[0] - np.linalg.matrix_rank(S)
+        if left_basis.shape[0] != rank_deficency:
+            raise RuntimeError("There are not as many conservation realations as the rank deficieny of the matrix!"
+                               "Check stoichiometry!")
 
         L0, pivot = Matrix(left_basis).rref()
 
