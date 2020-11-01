@@ -196,14 +196,14 @@ class GaParameterSampler(ParameterSampler):
         Compliles the function for sampling using theano
         :param model:
         """
-
-        model.saturation_parameter_function = SaturationParameterFunction(model,
-                                                                          model.parameters,
-                                                                         concentrations)
-
-        model.flux_parameter_function = FluxParameterFunction(model,
-                                                              model.parameters,
-                                                              concentrations,)
+        if not hasattr(model,'saturation_parameter_function'):
+            model.saturation_parameter_function = SaturationParameterFunction(model,
+                                                                              model.parameters,
+                                                                             concentrations)
+        if not hasattr(model, 'flux_parameter_function'):
+            model.flux_parameter_function = FluxParameterFunction(model,
+                                                                  model.parameters,
+                                                                  concentrations,)
 
 
 
