@@ -169,7 +169,7 @@ def generate_a_code_line_simplfied(input , optimize=False):
                                                               )
 
     # Substitute integers in the cython code
-    cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
+    cython_code = re.sub(r"(\ |\+|[^e]\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
                          cython_code)
 
@@ -191,7 +191,7 @@ def generate_a_code_line(input, optimize=False):
 
 
     # Substitute integers in the cython code
-    cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
+    cython_code = re.sub(r"(\ |\+|[^e]\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
                          cython_code)
 
@@ -199,5 +199,4 @@ def generate_a_code_line(input, optimize=False):
         cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)({})(\ |\+|\-|\*|\(|\)|\/|\,)".format(str_sym),
                              r"\1 {} \3 ".format(array_sym),
                              cython_code)
-
     return cython_code
