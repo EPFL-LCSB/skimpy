@@ -241,6 +241,13 @@ class KineticModel(object):
         """
         self.variables = TabDict([(k, v.symbol) for k, v in self.reactants.items()])
 
+        if self.compartments:
+            self.volume_ratio_func = VolumeRatioFunction(self,
+                                                         self.variables,
+                                                         self.parameters, )
+        else:
+            self.volume_ratio_func = None
+
         if mca:
             reduced_stoichometriy,\
             conservation_relation, \
@@ -365,12 +372,6 @@ class KineticModel(object):
                 self.dependent_elasticity_fun = dependent_elasticity_fun
                 self.parameter_elasticities_fun = parameter_elasticities_fun
 
-                if self.compartments:
-                    self.volume_ratio_func = VolumeRatioFunction(self,
-                                                                 self.variables,
-                                                                 self.parameters,)
-                else:
-                    self.volume_ratio_func = None
 
                 # Build functions for stability and control coefficient's
                 self.jacobian_fun = JacobianFunction(
