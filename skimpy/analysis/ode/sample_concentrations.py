@@ -2,6 +2,8 @@ import numpy as np
 from cobra import Model, Reaction, Metabolite
 #from optlang import Variable, Constraint, Objective, Model
 from cobra.sampling import sample
+from scipy.sparse import diags
+
 EPSILON = 1e-7
 
 def sample_initial_concentrations(kmodel,
@@ -25,9 +27,20 @@ def sample_initial_concentrations(kmodel,
         lower_bound = {k: v * lower_bound for k,v in  reference_concentrations.items()}
         upper_bound = {k: v * upper_bound for k, v in reference_concentrations.items()}
 
+
+        # Account for volume differences in compartments
+        if kmodel.volume_ratio_func is None:
+            effective_conservation_relations = kmodel.conservation_relation.todense()
+        else:
+            param_values = {p.symbol: p.value for p in kmodel.parameters.values()}
+            volume_ratios = kmodel.volume_ratio_func(concentrations, param_values)
+            inv_volume_ratio_matrix =  diags(1./np.array(volume_ratios)).todense()
+            effective_conservation_relations = kmodel.conservation_relation.todense()\
+                                               .dot(inv_volume_ratio_matrix)
+
         # Create a linear problem and sample it
-        rhs = kmodel.conservation_relation.todense().dot(concentrations)
-        linmodel = create_linear_model(kmodel.conservation_relation.todense(),
+        rhs = effective_conservation_relations.dot(concentrations)
+        linmodel = create_linear_model(effective_conservation_relations,
                                        rhs,
                                        kmodel.reactants,
                                        lower_bound=lower_bound,
