@@ -106,6 +106,7 @@ class ConcentrationControlFunction:
                                     L0=self.conservation_relation,
                                     all_dependent_ix=self.dependent_variable_ix,
                                     all_independent_ix=self.independent_variable_ix,
+                                    volume_ratios=volume_ratios
                                 )
 
                 # Calculate the effective elasticises

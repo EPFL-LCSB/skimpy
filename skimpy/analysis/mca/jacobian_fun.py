@@ -70,7 +70,7 @@ class JacobianFunction:
         # Elasticity matrix
         if self.conservation_relation.nnz == 0:
 
-            volume_ratio_matrix =  diags(array(volume_ratios)).tocsc()
+            volume_ratio_matrix_indep =  diags(array(volume_ratios)).tocsc()
 
             concentration_matrix = diags(array(concentrations)).tocsc()
             inv_concentration_matrix = sparse_inv(concentration_matrix)
@@ -78,8 +78,10 @@ class JacobianFunction:
         else:
             # We need to get only the concentrations of the independent metabolites
             ix = self.independent_variable_ix
-
-            volume_ratio_matrix = diags(array(volume_ratios)[ix]).tocsc()
+            volume_ratio_matrix_indep = diags(array(volume_ratios)[ix]).tocsc()
+            inv_volume_ratio_matrix_indep = sparse_inv(volume_ratio_matrix_indep)
+            ix_dep = self.dependent_variable_ix
+            volume_ratio_matrix_dep = diags(array(volume_ratios)[ix_dep]).tocsc()
 
             concentration_matrix = diags(array(concentrations)[ix]).tocsc()
             inv_concentration_matrix = sparse_inv(concentration_matrix)
@@ -92,6 +94,7 @@ class JacobianFunction:
                                 L0=self.conservation_relation,
                                 all_dependent_ix=self.dependent_variable_ix,
                                 all_independent_ix=self.independent_variable_ix,
+                                volume_ratios=volume_ratios
                             )
 
             elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
@@ -103,7 +106,7 @@ class JacobianFunction:
                 .dot(self.reduced_stoichometry)
             
         else:
-            jacobian = volume_ratio_matrix.dot(self.reduced_stoichometry)\
+            jacobian = volume_ratio_matrix_indep.dot(self.reduced_stoichometry)\
                         .dot(flux_matrix)\
                         .dot(elasticity_matrix)\
                         .dot(inv_concentration_matrix)
