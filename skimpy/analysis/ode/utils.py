@@ -109,7 +109,7 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
         #TODO Throw error if no cell reference compartment is given
 
         volume_ratios = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
-                            v.compartment.parameters.cell_volume.symbol )
+                            v.compartment.parameters.volume.symbol )
                            for k,v in kinetic_model.reactants.items()])
 
         all_parameters.update()
