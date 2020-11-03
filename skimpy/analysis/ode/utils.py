@@ -113,7 +113,7 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
                            for k,v in kinetic_model.reactants.items()])
         for comp in kinetic_model.compartments.values():
             this_comp_parameters = {str(v.symbol):v.symbol for v in comp.parameters.values() }
-            all_parameters.update( cthis_comp_parameters )
+            all_parameters.update( this_comp_parameters )
     else:
         volume_ratios = None
 
