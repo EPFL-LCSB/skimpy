@@ -111,9 +111,9 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
         volume_ratios = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
                             v.compartment.parameters.volume.symbol )
                            for k,v in kinetic_model.reactants.items()])
-        for v in kinetic_model.reactants.values():
-            all_parameters.update( [v.compartment.parameters.cell_volume.symbol,
-                                    v.compartment.parameters.volume.symbol ])
+        for comp in kinetic_model.compartments.values():
+            this_comp_parameters = {str(v.symbol):v.symbol for v in comp.parameters.values() }
+            all_parameters.update( cthis_comp_parameters )
     else:
         volume_ratios = None
 
