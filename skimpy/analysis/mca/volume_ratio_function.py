@@ -47,43 +47,15 @@ class VolumeRatioFunction:
         :param shape: Tuple defining the over all matrix size e.g (10,30)
 
         """
-        self.variables = variables
-        self.parameters = parameters
+        self.reactants = model.reactants
 
-        # Unpacking is needed as ufuncify only take ArrayTypes
-        parameters = [x for x in self.parameters]
-        variables = [x for x in variables]
-
-        sym_vars = list(symbols(variables+parameters))
-
-        # Derive expression
-        expr_dict = TabDict([(k,v.compartment.parameters.cell_volume.symbol/
-                            v.compartment.parameters.volume.symbol )
-                           for k,v in model.reactants.items()])
-
-        expressions= [expr_dict[v] for v in variables]
-
-        self.expressions = expressions
-
-        # Awsome sympy magic
-        # TODO problem with typs if any parameter ot variables is interpreted as interger
-        # Make a function to compute every non zero entry in the matrix
-
-        self.function = make_cython_function(sym_vars, expressions, pool=pool, simplify=True)
-
-    def __call__(self, variables, parameters):
+    def __call__(self,parameters):
         """
-        Return a sparse matrix type with elasticity values
+        Return a list of volume ratios
         """
-        parameter_values = array([parameters[x.symbol] for x in
-                                  self.parameters.values()], dtype=double)
+        values = [parameters[v.compartment.parameters.cell_volume.symbol] /
+                  parameters[v.compartment.parameters.volume.symbol]
+                  for k, v in self.reactants.items()]
 
-        input_vars = append_array(variables , parameter_values)
-
-        values = array(zeros(len(self.expressions)),dtype=double)
-
-        self.function(input_vars, values)
-
-
-        return values
+        return array(values)
 

@@ -62,7 +62,7 @@ class JacobianFunction:
         if self.volume_ratio_function is None:
             volume_ratios = [1,] * len(concentrations)
         else:
-            volume_ratios = self.volume_ratio_function(concentrations, parameters)
+            volume_ratios = self.volume_ratio_function(parameters)
 
         #Calculate the Jacobian
         flux_matrix = diags(array(fluxes), 0).tocsc()
@@ -103,6 +103,7 @@ class JacobianFunction:
         if flux_jacobian:
             jacobian = flux_matrix.dot(elasticity_matrix)\
                 .dot(inv_concentration_matrix)\
+                .dot(volume_ratio_matrix_indep)\
                 .dot(self.reduced_stoichometry)
             
         else:

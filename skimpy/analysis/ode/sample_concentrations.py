@@ -33,7 +33,7 @@ def sample_initial_concentrations(kmodel,
             effective_conservation_relations = kmodel.conservation_relation.todense()
         else:
             param_values = {p.symbol: p.value for p in kmodel.parameters.values()}
-            volume_ratios = kmodel.volume_ratio_func(concentrations, param_values)
+            volume_ratios = kmodel.volume_ratio_func(param_values)
             inv_volume_ratio_matrix =  diags(1./np.array(volume_ratios)).todense()
             effective_conservation_relations = kmodel.conservation_relation.todense()\
                                                .dot(inv_volume_ratio_matrix)
