@@ -388,8 +388,8 @@ class KineticModel(object):
                     self.reduced_stoichiometry,
                     self.independent_elasticity_fun,
                     self.dependent_elasticity_fun,
-                    self.volume_ratio_func,
                     self.parameter_elasticities_fun,
+                    self.volume_ratio_func,
                     self.conservation_relation,
                     self.independent_variables_ix,
                     self.dependent_variables_ix)
