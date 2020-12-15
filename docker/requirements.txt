@@ -1,4 +1,4 @@
-cobra>0.8
+cobra==0.17.1
 ipdb
 lxml
 openpyxl
