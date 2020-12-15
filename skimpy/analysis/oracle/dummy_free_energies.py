@@ -81,6 +81,7 @@ def add_undefined_delta_g(_tmodel,
                                   add_displacement=add_displacement)
                 #Adding dgo
                 print(this_rxn.id)
+                tmodel.optimize()
 
     tmodel.repair()
 

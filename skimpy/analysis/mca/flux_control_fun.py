@@ -77,7 +77,7 @@ class FluxControlFunction:
         for i, parameters in enumerate(parameter_population):
 
             if self.concentration_control_fun.volume_ratio_function is None:
-                volume_ratios = [1, ] * len(concentrations)
+                volume_ratios = array([1, ] * len(concentrations) )
             else:
                 volume_ratios = self.concentration_control_fun.volume_ratio_function(parameters)
 

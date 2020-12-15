@@ -76,7 +76,7 @@ RUN mkdir /skimpy
 
 COPY .bashrc $HOME
 RUN chown "$USER" "$HOME/.bashrc"
-RUN chown -R "$USER" "$HOME/.cache"
+#RUN chown -R "$USER" "$HOME/.cache"
 
 #Finalizing installation
 

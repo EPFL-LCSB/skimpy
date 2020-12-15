@@ -2,4 +2,5 @@
 docker run 	--rm -it 			\
 		-v $(pwd)/work:/home/skimpy/work \
 		-v $(pwd)/..:/skimpy	\
+		-v $(pwd)/../../smolfem:/smolfem	\
 		skimpy_docker

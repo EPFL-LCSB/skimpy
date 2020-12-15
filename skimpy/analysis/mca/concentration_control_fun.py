@@ -80,7 +80,7 @@ class ConcentrationControlFunction:
             flux_matrix = diags(array(fluxes), 0).tocsc()
 
             if self.volume_ratio_function is None:
-                volume_ratios = [1, ] * len(concentrations)
+                volume_ratios = array([1, ] * len(concentrations) )
             else:
                 volume_ratios = self.volume_ratio_function(parameters)
 

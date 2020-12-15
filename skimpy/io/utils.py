@@ -144,6 +144,8 @@ def guess_mechanism(reactants,inhibitors,irrev=None):
     # Note this kinetic leads to a model with more parameters we will create the draft based
     # On rev hill for bibi reactions.
     # # 2) Reversible Michaelis Menten kinetics
+    if stoich == [1, -1]:
+        return ReversibleMichaelisMenten
     # mechanism = check_rev_michaelis_menten(reactants)
     # if mechanism is not None:
     #     return mechanism
@@ -155,6 +157,11 @@ def guess_mechanism(reactants,inhibitors,irrev=None):
     if all(map(abs_eqal,stoich)) and sum(stoich) == 0:
         # We use the generlized hill mechanism with h = 1 
         return make_generalized_reversible_hill_n_n_h1(stoich)
+    # 4) Check for uni-bi or bi-uni
+    elif stoich == [1, 1, -1]:
+        return UniBiReversibleHill
+    elif stoich == [1, -1, -1]:
+        return BiUniReversibleHill
     # Else Conv-kinetics
     else:
         return make_convenience(stoich)
