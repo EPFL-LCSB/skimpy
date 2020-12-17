@@ -96,7 +96,8 @@ def reactant_representer(dumper, data):
         # Store it as a parameter
         return parameter_representer(dumper,data)
     elif data.type == VARIABLE:
-        dict = {'name':data.name, 'compartment':data.compartment.name}
+        dict = {'name':data.name,
+                'compartment': None if data.compartment is None else data.compartment.name}
         return dumper.represent_dict(dict)
 
 def compartment_representer(dumper, data):
