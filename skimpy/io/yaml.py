@@ -256,8 +256,9 @@ def load_yaml_model(path):
     # Assing compartments
     for the_met in the_dict['reactants'].values():
         met = new.reactants[the_met['name']]
-        comp = new.compartments[the_met['compartment']]
-        met.compartment = comp
+        if not the_met['compartment'] is None:
+            comp = new.compartments[the_met['compartment']]
+            met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
