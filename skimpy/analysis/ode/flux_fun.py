@@ -31,7 +31,7 @@ from skimpy.utils.compile_sympy import make_cython_function
 
 
 class FluxFunction:
-    def __init__(self, variables, expr, parameters, pool=None, ):
+    def __init__(self, variables, expr, parameters, pool=None):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
