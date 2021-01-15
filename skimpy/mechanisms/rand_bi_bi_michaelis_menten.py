@@ -44,6 +44,7 @@ class RandBiBiReversibleMichaelisMenten(KineticMechanism):
 
     Parameters = make_parameter_set(__name__,
                                     {   'vmax_forward':[ODE,MCA,QSSA],
+                                        'kcat_forward':[ODE,MCA,QSSA],
                                         'k_equilibrium':[ODE,MCA,QSSA],
                                         'ki_substrate1':[ODE,MCA,QSSA],
                                         'ki_substrate2':[ODE,MCA,QSSA],
@@ -95,8 +96,13 @@ class RandBiBiReversibleMichaelisMenten(KineticMechanism):
         kip2 = self.parameters.ki_product2.symbol
 
         keq = self.parameters.k_equilibrium.symbol
-        vmaxf = self.parameters.vmax_forward.symbol
 
+        if self.enzyme is None:
+            vmaxf = self.parameters.vmax_forward.symbol
+        else:
+            vmaxf = self.parameters.kcat_forward.symbol * \
+                    self.reactants.enzyme.symbol
+            
         common_denominator = 1 + s1/kis1 + s2/kis2 + p1/kip1 + p2/kip2 + \
                             s1*s2/(kis1*kms2) + p1*p2/(kip2*kmp1)
 

@@ -82,7 +82,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
         kmp = self.parameters.km_product.symbol
 
         keq = self.parameters.k_equilibrium.symbol
-        if self.with_catalyst_concentration:
+        if self.enzyme is not None:
             enzyme = self.reactants.enzyme.symbol
             kcat = self.parameters.kcat_forward.symbol
             vmaxf = kcat*enzyme

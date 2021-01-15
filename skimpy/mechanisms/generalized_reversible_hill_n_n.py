@@ -71,6 +71,7 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'kcat_forward':[ODE,MCA,QSSA],
                           'k_equilibrium': [ODE, MCA, QSSA],
                           'hill_coefficient': [ODE, MCA, QSSA]}
 
@@ -127,7 +128,11 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
 
 
             keq = self.parameters.k_equilibrium.symbol
-            vmaxf = self.parameters.vmax_forward.symbol
+            if self.enzyme is None:
+                vmaxf = self.parameters.vmax_forward.symbol
+            else:
+                vmaxf = self.parameters.kcat_forward.symbol * \
+                        self.reactants.enzyme.symbol
 
             fwd_nominator = vmaxf
             bwd_nominator = vmaxf/keq

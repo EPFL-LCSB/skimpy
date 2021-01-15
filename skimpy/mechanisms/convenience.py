@@ -59,6 +59,7 @@ def make_convenience(stoichiometry):
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'kcat_forward': [ODE,MCA,QSSA],
                           'k_equilibrium': [ODE, MCA, QSSA], }
 
         parameter_reactant_links = {}
@@ -109,7 +110,12 @@ def make_convenience(stoichiometry):
 
 
             keq = self.parameters.k_equilibrium.symbol
-            vmaxf = self.parameters.vmax_forward.symbol
+            #TODO EXTEND TO ALL OTHER MECHANISMS
+            if self.enzyme is None:
+                vmaxf = self.parameters.vmax_forward.symbol
+            else:
+                vmaxf = self.parameters.kcat_forward.symbol * \
+                        self.reactants.enzyme.symbol
 
             common_denominator_substrates = 1
             fwd_nominator = vmaxf
