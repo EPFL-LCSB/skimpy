@@ -113,11 +113,10 @@ def make_convenience_with_inhibition(stoichiometry, inihbitor_stoichiometry):
 
         ElementaryReactions = namedtuple('ElementaryReactions',[])
 
-
-        def __init__(self, name, reactants, inhibitors, parameters=None):
+        def __init__(self, name, reactants, inhibitors, parameters=None, **kwargs):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
-            KineticMechanism.__init__(self, name, reactants, parameters, inhibitors=inhibitors)
+            KineticMechanism.__init__(self, name, reactants, parameters, inhibitors=inhibitors, **kwargs)
 
         def get_qssa_rate_expression(self):
             reactant_km_relation = { }

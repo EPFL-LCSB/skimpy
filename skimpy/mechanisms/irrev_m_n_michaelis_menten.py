@@ -60,7 +60,9 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
         suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
         reactant_list = []
-        parameter_list = {'vmax_forward': [ODE, MCA, QSSA],}
+
+        parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'kcat_forward': [ODE, MCA, QSSA]}
 
         parameter_reactant_links = {}
         reactant_stoichiometry = {}
@@ -93,10 +95,10 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
         ElementaryReactions = namedtuple('ElementaryReactions',[])
 
 
-        def __init__(self, name, reactants, parameters=None):
+        def __init__(self, name, reactants, parameters=None, **kwargs):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
-            KineticMechanism.__init__(self, name, reactants, parameters)
+            KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
         def get_qssa_rate_expression(self):
             reactant_km_relation = {self.reactants[v].symbol: k
@@ -108,7 +110,12 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
             products= {k:r for k,r in self.reactants.items()
                           if k.startswith('product')}
 
-            vmaxf = self.parameters.vmax_forward.symbol
+            #TODO EXTEND TO ALL OTHER MECHANISMS
+            if self.enzyme is None:
+                vmaxf = self.parameters.vmax_forward.symbol
+            else:
+                vmaxf = self.parameters.kcat_forward.symbol * \
+                        self.reactants.enzyme.symbol
 
             forward_rate_expression = vmaxf
             backward_rate_expression = 0

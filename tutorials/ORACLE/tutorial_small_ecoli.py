@@ -24,7 +24,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
-
 import numpy as np
 
 import pytfa
@@ -41,6 +40,10 @@ from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
 
 from skimpy.analysis.oracle import *
+
+"""
+Tutorial for the ORACLE Workflow using the Varama model
+"""
 
 CPLEX = 'optlang-cplex'
 GLPK = 'optlang-glpk'

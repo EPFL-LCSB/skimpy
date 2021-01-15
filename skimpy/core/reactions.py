@@ -36,15 +36,18 @@ class Reaction(object):
     def __init__(self, name, reactants, mechanism, parameters=None, inhibitors=None, enzyme=None):
         self.name = name
         self.enzyme = enzyme
+
         if inhibitors is not None:
             self.mechanism = mechanism(name=name,
                                        reactants=reactants,
                                        parameters=parameters,
-                                       inhibitors=inhibitors)
+                                       inhibitors=inhibitors,
+                                       enzyme=enzyme)
         else:
             self.mechanism = mechanism(name=name,
                                        reactants=reactants,
-                                       parameters=parameters)
+                                       parameters=parameters,
+                                       enzyme=enzyme)
         self.modifiers = TabDict([])
 
     # Hooks to the mechanism attributes for convenience

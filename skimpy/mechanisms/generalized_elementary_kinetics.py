@@ -119,10 +119,10 @@ def make_generalized_elementary_kinetics(stoichiometry, generalized_reactants):
 
         #ElementaryReactions = namedtuple('ElementaryReactions', [])
 
-        def __init__(self, name, reactants, parameters=None, inhibitors=None ):
+        def __init__(self, name, reactants, parameters=None, inhibitors=None, **kwargs):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
-            KineticMechanism.__init__(self, name, reactants, parameters)
+            KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
             if inhibitors is not None:
                 self.inhibitors = inhibitors

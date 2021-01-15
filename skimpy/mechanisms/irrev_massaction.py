@@ -86,10 +86,10 @@ def make_irrev_massaction(stoichiometry):
         ElementaryReactions = namedtuple('ElementaryReactions',[])
 
 
-        def __init__(self, name, reactants, parameters=None):
+        def __init__(self, name, reactants, parameters=None, **kwargs):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
-            KineticMechanism.__init__(self, name, reactants, parameters)
+            KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
         def get_qssa_rate_expression(self):
 
