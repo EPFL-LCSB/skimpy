@@ -86,7 +86,7 @@ def convert_cobra_to_tfa(cobra_model):
     tmodel.convert(add_displacement = True)
 
     # Set the solver
-    tmodel.solver = CPLEX
+    tmodel.solver = GLPK
     # Set solver options
     tmodel.solver.configuration.tolerances.optimality = 1e-9
     tmodel.solver.configuration.tolerances.feasibility = 1e-9
