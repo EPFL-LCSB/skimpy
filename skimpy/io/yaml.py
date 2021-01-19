@@ -236,9 +236,13 @@ def load_yaml_model(path):
     for the_reaction in the_dict['reactions'].values():
         TheMechanism = get_mechanism(the_reaction['mechanism'])
         the_reactants = TheMechanism.Reactants(**the_reaction['mechanism'])
+        the_enzyme = the_reaction['enzyme']
+
         new_reaction = Reaction(name=the_reaction['name'],
                                 mechanism=TheMechanism,
-                                reactants=the_reactants)
+                                reactants=the_reactants,
+                                enzyme = the_enzyme,
+                                )
         # Add kinetic modifiers
         modifiers = the_reaction['modifiers']
         for the_modifier in modifiers.values():
