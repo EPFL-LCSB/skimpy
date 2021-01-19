@@ -120,7 +120,7 @@ class ConstantConcentration(BoundaryCondition):
         expressions[self.reactant.symbol] = expressions[self.reactant.symbol] * 0.0
 
     def __del__(self):
-        reactant.type = VARIABLE
+        self.reactant.type = VARIABLE
 
 
 class AdditiveConcentrationRate(ExpressionModifier):
