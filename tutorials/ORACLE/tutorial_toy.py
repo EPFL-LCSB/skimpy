@@ -46,8 +46,7 @@ from skimpy.analysis.oracle import *
 Import and curate a model
 """
 
-#this_cobra_model = import_matlab_model('../../models/toy_model.mat', 'ToyModel_DP')
-this_cobra_model = import_matlab_model('../../models/toy_model_maria.mat', 'model')
+this_cobra_model = import_matlab_model('../../models/toy_model.mat', 'model')
 
 
 """ 
