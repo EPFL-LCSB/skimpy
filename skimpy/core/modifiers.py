@@ -190,8 +190,11 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         parameters = self.Parameters()
         KineticMechanism.__init__(self, name, reactants, parameters)
 
-        self.reactant_stoichiometry = {'small_molecule':
-                                           float(mechanism_stoichiometry)}
+        if type(mechanism_stoichiometry) is dict:
+            self.reactant_stoichiometry = mechanism_stoichiometry
+        else:
+            self.reactant_stoichiometry = {'small_molecule':
+                                               float(mechanism_stoichiometry)}
 
     def modifier(self, expressions):
         """
@@ -250,8 +253,12 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         parameters = self.Parameters()
         KineticMechanism.__init__(self, name, reactants, parameters)
 
-        self.reactant_stoichiometry = {'small_molecule':
-                                           float(mechanism_stoichiometry)}
+        # TODO Unify between skimpy versions
+        if type(mechanism_stoichiometry) is dict:
+            self.reactant_stoichiometry = mechanism_stoichiometry
+        else:
+            self.reactant_stoichiometry = {'small_molecule':
+                                               float(mechanism_stoichiometry)}
 
     def modifier(self, expressions):
         """
