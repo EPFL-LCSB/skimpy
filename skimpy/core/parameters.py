@@ -132,7 +132,7 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
     param_names = f.get('parameter_names')[:].astype(np.unicode_)
 
     try:
-        index = np.array(f.get('index'))
+        index = f.get('index')[:].astype(np.unicode_)
         if index[0] is None:
             index = None
     except: # Put an error here
