@@ -40,49 +40,7 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     :param sim_type:
     :return:
     """
-    sim_type = sim_type.lower()
-    # Get all variables and expressions (Better solution with types?)
-    # TODO This should be a method in KineticModel that stores the expressions
-    if sim_type == QSSA:
-        all_data = []
-        # TODO Modifiers should be applicable for all simulation types
-        for this_reaction in kinetic_model.reactions.values():
-            this_reaction.mechanism.get_qssa_rate_expression()
-            # Update rate expressions
-            for this_mod in this_reaction.modifiers.values():
-                this_mod(this_reaction.mechanism.reaction_rates)
-            this_reaction.mechanism.update_qssa_rate_expression()
-
-            # Add modifier expressions
-            for this_mod in this_reaction.modifiers.values():
-                small_mol = this_mod.reactants['small_molecule']
-                sm = small_mol.symbol
-                flux = this_reaction.mechanism.reaction_rates['v_net']
-                flux_expression_sm = flux * this_mod.reactant_stoichiometry
-                this_reaction.mechanism.expressions[sm] = flux_expression_sm
-                # Add small molecule parameters if they are
-                if small_mol.type == PARAMETER:
-                    this_reaction.mechanism.expression_parameters.update([small_mol.symbol])
-
-            all_data.append((this_reaction.mechanism.expressions,
-                             this_reaction.mechanism.expression_parameters))
-
-
-    elif sim_type == TQSSA:
-        raise(NotImplementedError)
-
-
-    elif sim_type == ELEMENTARY:
-        all_data = []
-        #TODO Modifiers sould be applicable for all simulation types
-        for this_reaction in kinetic_model.reactions.values():
-            this_reaction.mechanism.get_full_rate_expression()
-
-            all_data.append((this_reaction.mechanism.expressions,
-                             this_reaction.mechanism.expression_parameters)
-                            )
-    else:
-        raise(ValueError('Simulation type not recognized: {}'.format(sim_type)))
+    all_data = get_expressions_from_model(kinetic_model, sim_type)
 
     all_expr, all_parameters = list(zip(*all_data))
 
@@ -90,19 +48,14 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     flatten_list = lambda this_list: [item for sublist in this_list \
                                       for item in sublist]
 
-    all_rates = flatten_list([these_expressions.keys()
-                              for these_expressions in all_expr])
-
     all_parameters = flatten_list(all_parameters)
     all_parameters = list(set(all_parameters))
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 
-    # Get unique set of all the variables
-    # variables = [sympify(x) for x in set(all_rates)]
-    # variables = iterable_to_tabdict(variables, use_name=False)
 
     # Better since this is implemented now
-    variables = TabDict([(k,v.symbol) for k,v in kinetic_model.reactants.items()])
+    reactant_items = kinetic_model.reactants.items()
+    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
 
     #Compartments # CHECK IF THIS ONLY IS TRUE IF ITS NOT EMPTY
     if kinetic_model.compartments:
@@ -188,6 +141,26 @@ def make_flux_fun(kinetic_model, sim_type):
     :param sim_type:
     :return:
     """
+    all_data = get_expressions_from_model(kinetic_model, sim_type)
+
+    all_expr, all_parameters = list(zip(*all_data))
+
+    reactions = kinetic_model.reactions.keys()
+
+    expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
+
+    all_param = kinetic_model.ode_fun.parameters
+    variables = kinetic_model.ode_fun.variables
+
+    # Make vector function from expressions in this case all_expressions
+    # are all the expressions indexed by the
+    flux_fun = FluxFunction(variables, expr, all_param)
+    flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
+
+    return flux_fun
+
+
+def get_expressions_from_model(kinetic_model, sim_type):
     sim_type = sim_type.lower()
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
@@ -212,13 +185,11 @@ def make_flux_fun(kinetic_model, sim_type):
                 if small_mol.type == PARAMETER:
                     this_reaction.mechanism.expression_parameters.update([small_mol.symbol])
 
-            all_data.append((this_reaction.mechanism.reaction_rates['v_net'],
+            all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))
-
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)
-
 
     elif sim_type == ELEMENTARY:
         all_data = []
@@ -226,38 +197,10 @@ def make_flux_fun(kinetic_model, sim_type):
         for this_reaction in kinetic_model.reactions.values():
             this_reaction.mechanism.get_full_rate_expression()
 
-            all_data.append((this_reaction.mechanism.reaction_rates['v_net'],
+            all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters)
                             )
     else:
         raise(ValueError('Simulation type not recognized: {}'.format(sim_type)))
 
-    all_expr, all_parameters = list(zip(*all_data))
-
-    # Flatten all the lists
-    flatten_list = lambda this_list: [item for sublist in this_list \
-                                      for item in sublist]
-
-
-    all_parameters = flatten_list(all_parameters)
-    all_parameters = list(set(all_parameters))
-    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
-
-    reactions = kinetic_model.reactions.keys()
-
-    expr = TabDict([(r,e) for r,e in zip(reactions,all_expr)])
-
-    all_param = kinetic_model.ode_fun.parameters
-
-    # Flatten all the lists
-    flatten_list = lambda this_list: [item for sublist in this_list \
-                                      for item in sublist]
-
-    variables = kinetic_model.ode_fun.variables
-
-    # Make vector function from expressions in this case all_expressions
-    # are all the expressions indexed by the
-    flux_fun = FluxFunction(variables, expr, all_param)
-    flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
-
-    return flux_fun
+    return all_data
