@@ -87,23 +87,22 @@ class Reaction(object):
 
     @property
     def parameters(self):
-        parameters = TabDict( (k,r) for k,r in self.mechanism.parameters.items()
-                                    if r.type == PARAMETER)
+        parameters = TabDict( (k, r) for k, r in self.mechanism.parameters.items()
+                                     if r.type == PARAMETER)
         parameters.update(TabDict((k, r) for k, r in self.mechanism.reactants.items()
                              if r.type == PARAMETER))
 
         for this_modifier in self.modifiers.values():
-            this_params = TabDict( (k,r) for k,r in this_modifier.parameters.items()
-                                     if r.type == PARAMETER)
+            this_params = TabDict( (k, r) for k, r in this_modifier.parameters.items()
+                                          if r.type == PARAMETER)
             this_params.update(TabDict((k, r) for k, r in this_modifier.reactants.items()
-                                  if r.type == PARAMETER))
+                                              if r.type == PARAMETER))
             parameters.update(this_params)
-
         return parameters
 
     @parameters.setter
     def parameters(self, value):
-        for name,p in value.items():
+        for name, p in value.items():
             p.suffix = self.name
         self.mechanism.parameters = value
 
