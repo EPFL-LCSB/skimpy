@@ -139,7 +139,7 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
     for i in range(lower_index,upper_index):
         this_param_set = 'parameter_set_{}'.format(i)
         param_values = np.array(f.get(this_param_set))
-        # Ensure type conversion 
+        # Ensure type conversion
         this_data = { str(k):float(v) for k,v in zip(param_names,param_values)}
         data.append(this_data)
     if index is None:
