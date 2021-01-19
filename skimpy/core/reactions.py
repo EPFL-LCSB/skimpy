@@ -80,9 +80,9 @@ class Reaction(object):
                     reactant_stoichiometry[this_reactant] = v
 
         for this_modifier in self.modifiers.values():
-            this_mod_sm = this_modifier.reactants.small_molecule
-            if this_mod_sm.type == VARIABLE:
-                reactant_stoichiometry[this_mod_sm] = this_modifier.reactant_stoichiometry
+            for k,v in this_modifier.reactants.items():
+                if v.type == VARIABLE and this_modifier.reactant_stoichiometry[k] != 0:
+                    reactant_stoichiometry[v] = this_modifier.reactant_stoichiometry[k]
         return reactant_stoichiometry
 
     @property
