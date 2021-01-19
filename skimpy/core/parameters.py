@@ -102,6 +102,7 @@ class ParameterValuePopulation(object):
         # TODO more central way ?
         param_names = np.array([k for k,v  in self._data[0]._parameter_values.items() if not (v is None)],
                                dtype=object)
+
         string_dt = h5py.special_dtype(vlen=str)
 
         f.create_dataset('parameter_names', data=param_names, dtype=string_dt)
@@ -127,7 +128,8 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
     if upper_index is None:
         upper_index = int(np.array(f.get('num_parameters_sets')))
 
-    param_names = np.array(f.get('parameter_names'))
+    # deconde
+    param_names = f.get('parameter_names')[:].astype(np.unicode_)
 
     try:
         index = np.array(f.get('index'))
@@ -138,9 +140,8 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
 
     for i in range(lower_index,upper_index):
         this_param_set = 'parameter_set_{}'.format(i)
-        param_values = np.array(f.get(this_param_set))
-        # Ensure type conversion
-        this_data = { str(k):float(v) for k,v in zip(param_names,param_values)}
+        param_values = f.get(this_param_set)[:].astype(np.float)
+        this_data = {k:v for k,v in zip(param_names,param_values)}
         data.append(this_data)
     if index is None:
         param_population = ParameterValuePopulation(data)
