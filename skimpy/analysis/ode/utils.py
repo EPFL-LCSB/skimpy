@@ -160,7 +160,9 @@ def make_flux_fun(kinetic_model, sim_type):
     return flux_fun
 
 
-def get_expressions_from_model(kinetic_model, sim_type):
+def get_expressions_from_model(kinetic_model, sim_type,
+                               medium_symbols=None,
+                               biomass_symbol=None):
     sim_type = sim_type.lower()
     # Get all variables and expressions (Better solution with types?)
     # TODO This should be a method in KineticModel that stores the expressions
@@ -194,9 +196,16 @@ def get_expressions_from_model(kinetic_model, sim_type):
                     # Add small molecule parameters if they are
                     if reactant.type == PARAMETER:
                         this_reaction.mechanism.expression_parameters.update([mod_sym])
+            expressions = this_reaction.mechanism.expressions
+            parameters = this_reaction.mechanism.expression_parameters
 
-            all_data.append((this_reaction.mechanism.expressions,
-                             this_reaction.mechanism.expression_parameters))
+            # For reactor building
+            if not medium_symbols is None:
+                vars_in_medium = [v for v in expressions if v in medium_symbols]
+                for v in vars_in_medium:
+                    expressions[v] = expressions[v]*biomass_symbol
+
+            all_data.append((expressions,parameters))
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)

@@ -35,7 +35,7 @@ from warnings import warn
 
 
 class ODEFunction:
-    def __init__(self, model, variables, expressions, parameters, pool=None):
+    def __init__(self, model, variables, expressions, parameters, pool=None, with_time=False):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
@@ -48,13 +48,17 @@ class ODEFunction:
         self.variables = variables
         self.expressions = expressions
         self.model = model
-
+        self.with_time = with_time
         # Link to the model
         self._parameters = parameters
 
         # Unpacking is needed as ufuncify only take ArrayTypes
         the_param_keys = [x for x in self._parameters]
         the_variable_keys = [x for x in variables]
+
+        if with_time:
+            the_variable_keys = ['t',] + the_variable_keys
+
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
         # Sort the expressions
@@ -77,5 +81,8 @@ class ODEFunction:
         self._parameters_values = self.parameters.values()
 
     def __call__(self, t, y, ydot):
-        input_vars = list(y)+list(self._parameters_values)
+        if self.with_time:
+            input_vars = [t,]+list(y)+list(self._parameters_values)
+        else:
+            input_vars = list(y)+list(self._parameters_values)
         self.function(input_vars, ydot)
