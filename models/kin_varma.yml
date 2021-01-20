@@ -870,10 +870,10 @@ reactions:
       mechanism_stoichiometry: *id007
       product1: co2_c
       product2: succoa_c
-      product3: akg_c
-      substrate1: nad_c
+      product3: nadh_c
+      substrate1: akg_c
       substrate2: coa_c
-      substrate3: nadh_c
+      substrate3: nad_c
     modifiers: {}
     name: AKGDH
   AKGt2rpp:
