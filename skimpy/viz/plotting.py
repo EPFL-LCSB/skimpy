@@ -8,7 +8,7 @@
 
 [---------]
 
-Copyright 2017 Laboratory of Computational Systems Biotechnology (LCSB),
+Copyright 2020 Laboratory of Computational Systems Biotechnology (LCSB),
 Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,15 +25,21 @@ limitations under the License.
 
 """
 from collections import OrderedDict
-from bokeh.plotting import figure, output_file, show, curdoc
+from bokeh.plotting import figure, output_file, show, curdoc, ColumnDataSource
 from bokeh.layouts import column
 from bokeh.palettes import Spectral11, viridis
+from bokeh.io import export_svgs
 
 import numpy as np
 import pandas as pd
 
 
-def timetrace_plot(time, data, filename='out.html', legend=None):
+def timetrace_plot(time, data,
+                   filename='out.html',
+                   legend=None,
+                   x_label='',
+                   y_label='',
+                   legend_location=None):
     """
     Classic time vs. Y-value plot.
 
@@ -43,34 +49,51 @@ def timetrace_plot(time, data, filename='out.html', legend=None):
     :param legend:
     :return:
     """
-    # Make cool plot functions maybe there is also a cooler way?
-    if filename == '':
-        # show the plot
-        pass
+    # output to static HTML file
+    output_file(filename)
+
+    # MAKE COLORZ
+    num_species = data.shape[1]
+    if num_species > 11:
+        palette = viridis(num_species)
     else:
-        # print to file
-        # output to static HTML file
-        output_file(filename)
+        palette = Spectral11[:num_species]
 
-        # MAKE COLORZ
-        num_species = data.shape[1]
-        if num_species > 11:
-            palette = viridis(num_species)
+    TOOLTIPS = [
+        ("index", "$index"),
+        ("(t,c)", "($x, $y)"),
+        ("species", "$name"),
+    ]
+    # PLOTS
+    p = figure(tooltips=TOOLTIPS)
+
+    for e in range(num_species):
+        if legend is not None:
+            legend_str = legend[e]
         else:
-            palette = Spectral11[:num_species]
+            legend_str = 'Compound {}'.format(e)
 
-        # PLOTS
-        p = figure(x_axis_type="datetime")
-        
-        for e in range(num_species):
-            if legend is not None:
-                legend_str = legend[e]
-            else:
-                legend_str = 'Compound {}'.format(e)
-            p.line(time,data[:,e], line_color = palette[e], legend=legend_str)
+        # Generate Data source
+        this_src = ColumnDataSource(data=dict(
+            time=time,
+            data=data[:,e],
+        ))
 
-        # show the results
-        show(p)
+        p.line(x='time',y='data', line_color=palette[e], source=this_src,
+               name=legend_str, legend_label=legend_str)
+
+    if not legend_location is None:
+        p.legend.location = legend_location
+
+    p.legend.click_policy="hide"
+    # show the results
+
+    #Make the axsis pretty
+    # change just some things about the x-axis
+    p.xaxis.axis_label = x_label
+    # change just some things about the y-axis
+    p.yaxis.axis_label = y_label
+    show(p)
 
 
 def boxplot(df, filename):
@@ -119,6 +142,7 @@ def boxplot(df, filename):
 
         output_file(filename)
         show(p)
+
 
 
 def plot_population_per_variable(data, filename, stride = 1):
