@@ -148,13 +148,21 @@ def make_flux_fun(kinetic_model, sim_type):
     reactions = kinetic_model.reactions.keys()
 
     expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
+    # Flatten all the lists
+    flatten_list = lambda this_list: [item for sublist in this_list \
+                                      for item in sublist]
 
-    all_param = kinetic_model.ode_fun.parameters
-    variables = kinetic_model.ode_fun.variables
+    all_parameters = flatten_list(all_parameters)
+    all_parameters = list(set(all_parameters))
+    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
+
+    # Better since this is implemented now
+    reactant_items = kinetic_model.reactants.items()
+    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
 
     # Make vector function from expressions in this case all_expressions
     # are all the expressions indexed by the
-    flux_fun = FluxFunction(variables, expr, all_param)
+    flux_fun = FluxFunction(variables, expr, all_parameters)
     flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
 
     return flux_fun
