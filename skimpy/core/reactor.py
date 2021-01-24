@@ -211,8 +211,8 @@ def make_reactor_ode_fun(reactor, sim_type, pool=None, add_dilution=False ):
         all_data = get_expressions_from_model(model, sim_type,
                                               medium_symbols=medium_symbols,
                                               biomass_symbol=biomass_symbol)
-
-        all_expr_model, all_parameters_model = list(zip(*all_data))
+        # get the dxdt expressions 
+        all_expr_model, _, all_parameters_model = list(zip(*all_data))
         parameters_list.extend(all_parameters_model)
         expression_list.extend(all_expr_model)
 

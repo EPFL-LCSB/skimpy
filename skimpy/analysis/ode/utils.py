@@ -42,7 +42,8 @@ def make_ode_fun(kinetic_model, sim_type, pool=None):
     """
     all_data = get_expressions_from_model(kinetic_model, sim_type)
 
-    all_expr, all_parameters = list(zip(*all_data))
+    # get expressions for dxdt
+    all_expr, _, all_parameters = list(zip(*all_data))
 
     # Flatten all the lists
     flatten_list = lambda this_list: [item for sublist in this_list \
@@ -143,7 +144,8 @@ def make_flux_fun(kinetic_model, sim_type):
     """
     all_data = get_expressions_from_model(kinetic_model, sim_type)
 
-    all_expr, all_parameters = list(zip(*all_data))
+    # Get flux expressions
+    _ ,all_expr, all_parameters = list(zip(*all_data))
 
     reactions = kinetic_model.reactions.keys()
 
@@ -204,7 +206,9 @@ def get_expressions_from_model(kinetic_model, sim_type,
                     # Add small molecule parameters if they are
                     if reactant.type == PARAMETER:
                         this_reaction.mechanism.expression_parameters.update([mod_sym])
-            expressions = this_reaction.mechanism.expressions
+
+            flux = this_reaction.mechanism.reaction_rates['v_net']
+            dxdt = this_reaction.mechanism.expressions
             parameters = this_reaction.mechanism.expression_parameters
 
             # For reactor building
@@ -213,7 +217,7 @@ def get_expressions_from_model(kinetic_model, sim_type,
                 for v in vars_in_medium:
                     expressions[v] = expressions[v]*biomass_symbol
 
-            all_data.append((expressions,parameters))
+            all_data.append((dxdt,flux,parameters))
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)
