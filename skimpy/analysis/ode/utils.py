@@ -219,11 +219,11 @@ def get_expressions_from_model(kinetic_model, sim_type,
 
             # For reactor building
             if not medium_symbols is None:
-                vars_in_medium = [v for v in expressions if v in medium_symbols]
+                vars_in_medium = [v for v in dxdt if v in medium_symbols]
                 for v in vars_in_medium:
-                    expressions[v] = expressions[v]*biomass_symbol
+                    dxdt[v] = dxdt[v]*biomass_symbol
 
-            all_data.append((dxdt,flux,parameters))
+            all_data.append((dxdt, flux, parameters))
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)
