@@ -6,10 +6,7 @@ import numpy as np
 from scipy.sparse import random
 from scipy import stats
 
-
-class ThisCustomRandomState(object):
-    def __init__(self):
-        pass
+class ThisCustomRandomState(np.random.RandomState):
 
     def randint(self, k):
         i = np.random.randint(k)
