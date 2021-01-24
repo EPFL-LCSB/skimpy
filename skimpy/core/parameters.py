@@ -81,7 +81,7 @@ class ParameterValuePopulation(object):
             # Todo check for indexable
             self._data = [ ParameterValues(d,kmodel=kmodel) for d in data]
             if index is None:
-                self._index = [str(i) for i,_ in enumerate(data) ]
+                self._index = TabDict((str(i),i) for i,_ in enumerate(data))
             else:
                 self._index = TabDict((k,i) for i,k in enumerate(index))
 
@@ -91,7 +91,7 @@ class ParameterValuePopulation(object):
             raise TypeError("Type {} is not supported".format(type(data)))
 
     def __getitem__(self,  index):
-        if self._index  is None:
+        if self._index is None:
             return self._data[index]
         else:
             return self._data[self._index[index]]
