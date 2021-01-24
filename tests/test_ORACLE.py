@@ -61,7 +61,7 @@ SMALL_MOLECULES = ['h_c','h_e','h_m',
                    'na1_c','na1_e']
 
 def import_toy_model_from_cobra():
-    path_to_model = join(this_directory, '..', 'models/toy_model_maria.mat')
+    path_to_model = join(this_directory, '..', 'models/toy_model.mat')
 
     cobra_model = import_matlab_model(path_to_model)
     #Test the model
@@ -88,9 +88,11 @@ def convert_cobra_to_tfa(cobra_model):
     # Set the solver
     tmodel.solver = GLPK
     # Set solver options
-    tmodel.solver.configuration.tolerances.optimality = 1e-9
+    # GLPK option optimality and integrality deprecated
+    #tmodel.solver.configuration.tolerances.optimality = 1e-9
+    #tmodel.solver.configuration.tolerances.integrality = 1e-9
+
     tmodel.solver.configuration.tolerances.feasibility = 1e-9
-    tmodel.solver.configuration.tolerances.integrality = 1e-9
 
 
     # Find a solution
