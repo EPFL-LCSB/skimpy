@@ -145,14 +145,20 @@ def make_flux_fun(kinetic_model, sim_type):
     all_data = get_expressions_from_model(kinetic_model, sim_type)
 
     # Get flux expressions
-    _ ,all_expr, all_parameters = list(zip(*all_data))
+    _, all_expr, all_parameters = list(zip(*all_data))
 
     reactions = kinetic_model.reactions.keys()
 
-    expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
     # Flatten all the lists
     flatten_list = lambda this_list: [item for sublist in this_list \
                                       for item in sublist]
+
+    if sim_type == ELEMENTARY:
+        expr = [[(r+'_'+er, ex) for er, ex in e.items()] for r, e in zip(reactions, all_expr)]
+        expr = TabDict(flatten_list(expr))
+    else:
+        expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
+
 
     all_parameters = flatten_list(all_parameters)
     all_parameters = list(set(all_parameters))
@@ -229,6 +235,7 @@ def get_expressions_from_model(kinetic_model, sim_type,
             this_reaction.mechanism.get_full_rate_expression()
 
             all_data.append((this_reaction.mechanism.expressions,
+                             this_reaction.mechanism.reaction_rates,
                              this_reaction.mechanism.expression_parameters)
                             )
     else:
