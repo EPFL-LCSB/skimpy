@@ -21,4 +21,5 @@ deap
 dill
 h5py
 # extras ORACLE:
-#pytfa
+pytfa
+escher==1.7.0
