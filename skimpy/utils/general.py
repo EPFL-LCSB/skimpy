@@ -24,10 +24,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 """
+
+from skimpy.utils.tabdict import TabDict
+from skimpy.utils.namespace import *
+
 from scipy.sparse import coo_matrix
 from numpy import array
 from sympy import Symbol
 import re
+
+from copy import deepcopy
 
 def join_dicts(dicts):
     joined_dict = {}
@@ -119,3 +125,23 @@ def robust_index(in_var):
         return in_var.name
     else:
         raise TypeError('Value should be of type str or sympy.Symbol')
+
+
+def get_all_reactants(model):
+    reactants = TabDict([])
+    for this_reaction in model.reactions.values():
+        this_rectants = TabDict([(v.name,v) for v in this_reaction.mechanism.reactants.values()])
+
+        for this_modifier in this_reaction.modifiers.values():
+            this_reactants = TabDict( (r.name,r)
+                                      for k,r in this_modifier.reactants.items())
+            reactants.update(this_reactants)
+
+        reactants.update(this_rectants)
+
+    reactants = deepcopy(reactants)
+
+    for r in reactants.values():
+        r.type = VARIABLE
+
+    return reactants

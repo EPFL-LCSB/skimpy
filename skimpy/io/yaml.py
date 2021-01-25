@@ -38,8 +38,9 @@ from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, 
     ConstantConcentration, KineticModel, ExpressionModifier
 from skimpy.core.compartments import Compartment
 from skimpy.mechanisms import *
-from skimpy.utils.general import make_subclasses_dict, get_stoichiometry
+from skimpy.utils.general import make_subclasses_dict, get_stoichiometry, get_all_reactants
 from skimpy.utils.namespace import PARAMETER, VARIABLE
+
 
 from skimpy.analysis.mca.utils import get_reduced_stoichiometry
 
@@ -161,7 +162,7 @@ def export_to_yaml(model, path=None, **kwargs):
     dict_model = vars(model)
     # Add parameters that are properties
     dict_model['parameters'] = model.parameters
-    dict_model['reactants'] = model.reactants
+    dict_model['reactants'] = get_all_reactants(model)
     fields_not_to_serialize = [x for x in dict_model if not x in FIELDS_TO_SERIALIZE]
     [dict_model.pop(k) for k in fields_not_to_serialize]
 
