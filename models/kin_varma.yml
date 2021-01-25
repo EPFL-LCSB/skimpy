@@ -49,22 +49,22 @@ compartments:
   e: e
 constraints: {}
 dependent_reactants:
-  accoa_c: &id001
+  accoa_c:
     compartment: c
     name: accoa_c
-  amp_c: &id002
+  amp_c:
     compartment: c
     name: amp_c
-  nadh_c: &id003
+  nadh_c:
     compartment: c
     name: nadh_c
-  nadp_c: &id004
+  nadp_c:
     compartment: c
     name: nadp_c
-  ppi_c: &id005
+  ppi_c:
     compartment: c
     name: ppi_c
-  q8h2_c: &id006
+  q8h2_c:
     compartment: c
     name: q8h2_c
 initial_conditions: {}
@@ -81,7 +81,6 @@ parameters:
   for_e: null
   glc_D_e: null
   h_e: null
-  hill_coefficient_ATPM: 1.0
   hill_coefficient_ATPS4rpp: 1.0
   hill_coefficient_FBA: 1.0
   hill_coefficient_FBA3: 1.0
@@ -188,7 +187,6 @@ parameters:
   k_equilibrium_AKGDH: 5569493438.349834
   k_equilibrium_AKGt2rpp: 0.08500153995913493
   k_equilibrium_ALCD2x: 2.5815932889150025e-06
-  k_equilibrium_ATPM: 52501037167.823586
   k_equilibrium_ATPS4rpp: 3.0307552251908896
   k_equilibrium_CITt3pp: 137844788512.2716
   k_equilibrium_CO2tpp: 29.308231290230122
@@ -243,28 +241,70 @@ parameters:
   k_equilibrium_TKT1: 2.702713465769381
   k_equilibrium_TKT2: 5789.7959868799435
   k_equilibrium_TPI: 0.14114040576930303
+  kcat_forward_ACALD: null
   kcat_forward_ACALDtpp: null
   kcat_forward_ACONTa: null
   kcat_forward_ACONTb: null
+  kcat_forward_ACS: null
   kcat_forward_ACt2rpp: null
+  kcat_forward_AKGDH: null
   kcat_forward_AKGt2rpp: null
+  kcat_forward_ALCD2x: null
+  kcat_forward_ATPM: null
+  kcat_forward_ATPS4rpp: null
   kcat_forward_CITt3pp: null
   kcat_forward_CO2tpp: null
+  kcat_forward_CS: null
+  kcat_forward_CYTBDpp: null
+  kcat_forward_CYTBO3_4pp: null
   kcat_forward_D-LACt2pp: null
   kcat_forward_ENO: null
   kcat_forward_ETOHtrpp: null
+  kcat_forward_FBA: null
+  kcat_forward_FBA3: null
+  kcat_forward_FBP: null
   kcat_forward_FORtppi: null
   kcat_forward_FUM: null
+  kcat_forward_G6PDH2r: null
+  kcat_forward_GAPD: null
+  kcat_forward_GLCptspp: null
+  kcat_forward_GND: null
+  kcat_forward_ICDHyr: null
+  kcat_forward_ICL: null
+  kcat_forward_LDH_D: null
+  kcat_forward_LMPD_biomass_c_17_462: null
+  kcat_forward_MALS: null
   kcat_forward_MALt3pp: null
+  kcat_forward_MDH: null
+  kcat_forward_ME1: null
+  kcat_forward_ME2: null
+  kcat_forward_NADH16pp: null
+  kcat_forward_NADH5: null
+  kcat_forward_NADTRHD: null
   kcat_forward_O2tpp: null
+  kcat_forward_PDH: null
+  kcat_forward_PFK: null
+  kcat_forward_PFK_3: null
+  kcat_forward_PFL: null
   kcat_forward_PGI: null
+  kcat_forward_PGK: null
   kcat_forward_PGL: null
   kcat_forward_PGM: null
   kcat_forward_PIt2rpp: null
+  kcat_forward_PIuabcpp: null
+  kcat_forward_PPC: null
+  kcat_forward_PPCK: null
+  kcat_forward_PYK: null
   kcat_forward_PYRt2rpp: null
   kcat_forward_RPE: null
   kcat_forward_RPI: null
   kcat_forward_SUCCt3pp: null
+  kcat_forward_SUCDi: null
+  kcat_forward_SUCOAS: null
+  kcat_forward_TALA: null
+  kcat_forward_THD2pp: null
+  kcat_forward_TKT1: null
+  kcat_forward_TKT2: null
   kcat_forward_TPI: null
   km_product10_LMPD_biomass_c_17_462: null
   km_product11_LMPD_biomass_c_17_462: null
@@ -404,6 +444,7 @@ parameters:
   km_substrate1_ACS: null
   km_substrate1_AKGDH: null
   km_substrate1_ALCD2x: null
+  km_substrate1_ATPM: null
   km_substrate1_ATPS4rpp: null
   km_substrate1_CS: null
   km_substrate1_CYTBDpp: null
@@ -494,7 +535,6 @@ parameters:
   km_substrate_ACONTb: null
   km_substrate_ACt2rpp: null
   km_substrate_AKGt2rpp: null
-  km_substrate_ATPM: null
   km_substrate_CITt3pp: null
   km_substrate_CO2tpp: null
   km_substrate_D-LACt2pp: null
@@ -551,7 +591,6 @@ parameters:
   vmax_backward_ACONTb: null
   vmax_backward_ACt2rpp: null
   vmax_backward_AKGt2rpp: null
-  vmax_backward_ATPM: null
   vmax_backward_ATPS4rpp: null
   vmax_backward_CITt3pp: null
   vmax_backward_CO2tpp: null
@@ -661,10 +700,18 @@ reactants:
   ac_c:
     compartment: c
     name: ac_c
+  ac_e:
+    compartment: e
+    name: ac_e
   acald_c:
     compartment: c
     name: acald_c
-  accoa_c: *id001
+  acald_e:
+    compartment: e
+    name: acald_e
+  accoa_c:
+    compartment: c
+    name: accoa_c
   acon_C_c:
     compartment: c
     name: acon_C_c
@@ -674,16 +721,27 @@ reactants:
   akg_c:
     compartment: c
     name: akg_c
-  amp_c: *id002
+  akg_e:
+    compartment: e
+    name: akg_e
+  amp_c:
+    compartment: c
+    name: amp_c
   atp_c:
     compartment: c
     name: atp_c
   cit_c:
     compartment: c
     name: cit_c
+  cit_e:
+    compartment: e
+    name: cit_e
   co2_c:
     compartment: c
     name: co2_c
+  co2_e:
+    compartment: e
+    name: co2_e
   coa_c:
     compartment: c
     name: coa_c
@@ -696,6 +754,9 @@ reactants:
   etoh_c:
     compartment: c
     name: etoh_c
+  etoh_e:
+    compartment: e
+    name: etoh_e
   f6p_c:
     compartment: c
     name: f6p_c
@@ -705,6 +766,9 @@ reactants:
   for_c:
     compartment: c
     name: for_c
+  for_e:
+    compartment: e
+    name: for_e
   fum_c:
     compartment: c
     name: fum_c
@@ -714,32 +778,51 @@ reactants:
   g6p_c:
     compartment: c
     name: g6p_c
+  glc_D_e:
+    compartment: e
+    name: glc_D_e
   glx_c:
     compartment: c
     name: glx_c
   h_c:
     compartment: c
     name: h_c
+  h_e:
+    compartment: e
+    name: h_e
   icit_c:
     compartment: c
     name: icit_c
   lac_D_c:
     compartment: c
     name: lac_D_c
+  lac_D_e:
+    compartment: e
+    name: lac_D_e
   mal_L_c:
     compartment: c
     name: mal_L_c
+  mal_L_e:
+    compartment: e
+    name: mal_L_e
   nad_c:
     compartment: c
     name: nad_c
-  nadh_c: *id003
-  nadp_c: *id004
+  nadh_c:
+    compartment: c
+    name: nadh_c
+  nadp_c:
+    compartment: c
+    name: nadp_c
   nadph_c:
     compartment: c
     name: nadph_c
   o2_c:
     compartment: c
     name: o2_c
+  o2_e:
+    compartment: e
+    name: o2_e
   oaa_c:
     compartment: c
     name: oaa_c
@@ -749,14 +832,24 @@ reactants:
   pi_c:
     compartment: c
     name: pi_c
-  ppi_c: *id005
+  pi_e:
+    compartment: e
+    name: pi_e
+  ppi_c:
+    compartment: c
+    name: ppi_c
   pyr_c:
     compartment: c
     name: pyr_c
+  pyr_e:
+    compartment: e
+    name: pyr_e
   q8_c:
     compartment: c
     name: q8_c
-  q8h2_c: *id006
+  q8h2_c:
+    compartment: c
+    name: q8h2_c
   r5p_c:
     compartment: c
     name: r5p_c
@@ -772,6 +865,9 @@ reactants:
   succ_c:
     compartment: c
     name: succ_c
+  succ_e:
+    compartment: e
+    name: succ_e
   succoa_c:
     compartment: c
     name: succoa_c
@@ -783,7 +879,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: &id010
+      mechanism_stoichiometry: &id004
         product1: 1.0
         product2: 1.0
         substrate1: -1.0
@@ -797,7 +893,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ACALD
   ACALDtpp:
@@ -828,7 +925,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: &id007
+      mechanism_stoichiometry: &id001
         product1: 1.0
         product2: 1.0
         product3: 1.0
@@ -844,7 +941,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: ACS
   ACt2rpp:
@@ -856,18 +954,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: ACt2rpp
   AKGDH:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: co2_c
       product2: succoa_c
       product3: nadh_c
@@ -885,18 +985,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: AKGt2rpp
   ALCD2x:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: &id008
+      mechanism_stoichiometry: &id002
         product1: 1.0
         product2: 1.0
         substrate1: -1.0
@@ -908,20 +1010,26 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ALCD2x
   ATPM:
     enzyme: null
     mechanism:
-      class: UniBiReversibleHill
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry:
+        product1: 1.0
+        product2: 1.0
+        substrate1: -1.0
       product1: adp_c
       product2: pi_c
-      substrate: atp_c
+      substrate1: atp_c
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ATPM
   ATPS4rpp:
@@ -934,11 +1042,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 3.0
+        mechanism_stoichiometry:
+          small_molecule: 3.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_e
     name: ATPS4rpp
   CITt3pp:
@@ -950,11 +1060,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: CITt3pp
   CO2tpp:
@@ -969,7 +1081,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: cit_c
       product2: coa_c
       substrate1: oaa_c
@@ -977,14 +1089,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: CS
   CYTBDpp:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: &id009
+      mechanism_stoichiometry: &id003
         product1: 2.0
         substrate1: -1.0
         substrate2: -2.0
@@ -994,29 +1107,33 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 4.0
+        mechanism_stoichiometry:
+          small_molecule: 4.0
         small_molecule: h_e
     name: CYTBDpp
   CYTBO3_4pp:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id009
+      mechanism_stoichiometry: *id003
       product1: q8_c
       substrate1: o2_c
       substrate2: q8h2_c
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -8.0
+        mechanism_stoichiometry:
+          small_molecule: -8.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 8.0
+        mechanism_stoichiometry:
+          small_molecule: 8.0
         small_molecule: h_e
     name: CYTBO3_4pp
   D-LACt2pp:
@@ -1028,11 +1145,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: D-LACt2pp
   ENO:
@@ -1079,7 +1198,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: FBP
   FORtppi:
@@ -1102,7 +1222,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadph_c
       product2: _6pgl_c
       substrate1: nadp_c
@@ -1110,14 +1230,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: G6PDH2r
   GAPD:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id010
+      mechanism_stoichiometry: *id004
       product1: _13dpg_c
       product2: nadh_c
       substrate1: nad_c
@@ -1129,7 +1250,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: g6p_c
       substrate1: pep_c
@@ -1140,7 +1261,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: &id011
+      mechanism_stoichiometry: &id005
         product1: 1.0
         product2: 1.0
         product3: 1.0
@@ -1157,7 +1278,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: nadph_c
       product2: co2_c
       product3: akg_c
@@ -1178,7 +1299,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: nadh_c
       substrate1: lac_D_c
@@ -1186,7 +1307,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: LDH_D
   LMPD_biomass_c_17_462:
@@ -1265,18 +1387,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 54927.291
+        mechanism_stoichiometry:
+          small_molecule: 54927.291
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -468.428
+        mechanism_stoichiometry:
+          small_molecule: -468.428
         small_molecule: h_e
     name: LMPD_biomass_c_17_462
   MALS:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: mal_L_c
       product2: coa_c
       substrate1: glx_c
@@ -1284,7 +1408,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: MALS
   MALt3pp:
@@ -1296,18 +1421,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: MALt3pp
   MDH:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: oaa_c
       product2: nadh_c
       substrate1: mal_L_c
@@ -1315,14 +1442,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: MDH
   ME1:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: co2_c
       product2: pyr_c
       product3: nadh_c
@@ -1334,7 +1462,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: nadph_c
       product2: pyr_c
       product3: co2_c
@@ -1346,7 +1474,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: nad_c
       substrate1: q8_c
@@ -1354,18 +1482,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 3.0
+        mechanism_stoichiometry:
+          small_molecule: 3.0
         small_molecule: h_e
     name: NADH16pp
   NADH5:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: nad_c
       substrate1: q8_c
@@ -1373,14 +1503,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: NADH5
   NADTRHD:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadp_c
       product2: nadh_c
       substrate1: nadph_c
@@ -1399,7 +1530,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: co2_c
       product2: accoa_c
       product3: nadh_c
@@ -1412,7 +1543,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: fdp_c
       product2: adp_c
       substrate1: f6p_c
@@ -1423,7 +1554,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: adp_c
       product2: s17bp_c
       substrate1: atp_c
@@ -1434,7 +1565,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: for_c
       product2: accoa_c
       substrate1: pyr_c
@@ -1453,7 +1584,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: _13dpg_c
       product2: adp_c
       substrate1: _3pg_c
@@ -1461,7 +1592,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: PGK
   PGL:
@@ -1473,7 +1605,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: PGL
   PGM:
@@ -1493,11 +1626,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: PIt2rpp
   PIuabcpp:
@@ -1516,14 +1651,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: PIuabcpp
   PPC:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pi_c
       product2: oaa_c
       substrate1: co2_c
@@ -1531,14 +1667,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 2.0
+        mechanism_stoichiometry:
+          small_molecule: 2.0
         small_molecule: h_c
     name: PPC
   PPCK:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: co2_c
       product2: pep_c
       product3: adp_c
@@ -1547,14 +1684,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: PPCK
   PYK:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: atp_c
       substrate1: pep_c
@@ -1570,11 +1708,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: PYRt2rpp
   RPE:
@@ -1602,18 +1742,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: SUCCt3pp
   SUCDi:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: fum_c
       substrate1: q8_c
@@ -1624,7 +1766,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: succoa_c
       product2: pi_c
       product3: adp_c
@@ -1637,7 +1779,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: f6p_c
       product2: e4p_c
       substrate1: s7p_c
@@ -1648,7 +1790,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadph_c
       product2: nad_c
       substrate1: nadp_c
@@ -1656,18 +1798,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 2.0
+        mechanism_stoichiometry:
+          small_molecule: 2.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -2.0
+        mechanism_stoichiometry:
+          small_molecule: -2.0
         small_molecule: h_e
     name: THD2pp
   TKT1:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: g3p_c
       product2: s7p_c
       substrate1: xu5p_D_c
@@ -1678,7 +1822,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: g3p_c
       product2: f6p_c
       substrate1: xu5p_D_c
