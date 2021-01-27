@@ -208,11 +208,11 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
 
-        if self.reactant_stoichiometry < 0:
+        if self.reactant_stoichiometry['small_molecule'] < 0:
             expressions['v_fwd'] = expressions['v_fwd']\
                                    * self.get_qssa_rate_expression()**-self.reactant_stoichiometry['small_molecule']
 
-        if self.reactant_stoichiometry > 0:
+        if self.reactant_stoichiometry['small_molecule'] > 0:
             expressions['v_bwd'] = expressions['v_bwd'] \
                                    * self.get_qssa_rate_expression()**self.reactant_stoichiometry['small_molecule']
 
