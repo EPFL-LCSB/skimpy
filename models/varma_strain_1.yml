@@ -1,39 +1,86 @@
-boundary_conditions: {}
+boundary_conditions:
+  CC_ac_e:
+    class: ConstantConcentration
+    reactant: ac_e
+  CC_acald_e:
+    class: ConstantConcentration
+    reactant: acald_e
+  CC_akg_e:
+    class: ConstantConcentration
+    reactant: akg_e
+  CC_cit_e:
+    class: ConstantConcentration
+    reactant: cit_e
+  CC_co2_e:
+    class: ConstantConcentration
+    reactant: co2_e
+  CC_etoh_e:
+    class: ConstantConcentration
+    reactant: etoh_e
+  CC_for_e:
+    class: ConstantConcentration
+    reactant: for_e
+  CC_glc_D_e:
+    class: ConstantConcentration
+    reactant: glc_D_e
+  CC_h_e:
+    class: ConstantConcentration
+    reactant: h_e
+  CC_lac_D_e:
+    class: ConstantConcentration
+    reactant: lac_D_e
+  CC_mal_L_e:
+    class: ConstantConcentration
+    reactant: mal_L_e
+  CC_o2_e:
+    class: ConstantConcentration
+    reactant: o2_e
+  CC_pi_e:
+    class: ConstantConcentration
+    reactant: pi_e
+  CC_pyr_e:
+    class: ConstantConcentration
+    reactant: pyr_e
+  CC_succ_e:
+    class: ConstantConcentration
+    reactant: succ_e
 compartments:
   c: c
   e: e
 constraints: {}
 dependent_reactants:
-  accoa_c: &id001
+  accoa_c:
     compartment: c
     name: accoa_c
-  amp_c: &id002
+  amp_c:
     compartment: c
     name: amp_c
-  nadph_c: &id003
+  nadh_c:
+    compartment: c
+    name: nadh_c
+  nadph_c:
     compartment: c
     name: nadph_c
-  ppi_c: &id004
+  ppi_c:
     compartment: c
     name: ppi_c
-  q8_c: &id005
+  q8_c:
     compartment: c
     name: q8_c
 initial_conditions: {}
 name: strain_1
 parameters:
-  ac_e: 0.026060272425212704
-  acald_e: 0.01799480930818039
-  akg_e: 387.7509081771404
+  ac_e: 0.6742530029054864
+  acald_e: 0.017949215451412873
+  akg_e: 0.0019740317741344052
   cell_volume_c: 1.0
   cell_volume_e: 1.0
-  cit_e: 3480.000000000006
-  co2_e: 9.60287966487384
-  etoh_e: 0.1760588707644617
-  for_e: 655.7481520099649
-  glc_D_e: 55117.93914105245
-  h_e: 0.10000000000000064
-  hill_coefficient_ATPM: 1.0
+  cit_e: 10000.000000000004
+  co2_e: 0.09020280389839555
+  etoh_e: 0.005066034399352465
+  for_e: 956.8514875417061
+  glc_D_e: 67199.99999999988
+  h_e: 0.09999999999999994
   hill_coefficient_ATPS4rpp: 1.0
   hill_coefficient_FBA: 1.0
   hill_coefficient_FBA3: 1.0
@@ -131,70 +178,65 @@ parameters:
   k2_fwd_RPI: null
   k2_fwd_SUCCt3pp: null
   k2_fwd_TPI: null
-  k_equilibrium_ACALD: 0.0023343863375673525
-  k_equilibrium_ACALDtpp: 0.016575472743551267
-  k_equilibrium_ACONTa: 0.018061434396503862
-  k_equilibrium_ACONTb: 1.0639262258394335
-  k_equilibrium_ACS: 16939.359529065227
-  k_equilibrium_ACt2rpp: 0.04147996928738497
-  k_equilibrium_AKGDH: 25251807.34812475
-  k_equilibrium_AKGt2rpp: 0.00220819757707539
-  k_equilibrium_ALCD2x: 3.2136455107411807e-06
-  k_equilibrium_ATPM: 4650753884.952937
-  k_equilibrium_ATPS4rpp: 0.2685378278514776
-  k_equilibrium_CITt3pp: 160476384.4382374
-  k_equilibrium_CO2tpp: 0.054763592357197535
-  k_equilibrium_CS: 19952.014322729385
-  k_equilibrium_CYTBDpp: 1.2538492950168286e+34
-  k_equilibrium_CYTBO3_4pp: 9.166483135463686e+23
-  k_equilibrium_D-LACt2pp: 0.011459496441609098
-  k_equilibrium_ENO: 4.433301939182782
-  k_equilibrium_ETOHtrpp: 0.033409199676209714
-  k_equilibrium_FBA: 125.64146580639637
-  k_equilibrium_FBA3: 6095.187226914622
-  k_equilibrium_FBP: 10574.303464716682
-  k_equilibrium_FORtppi: 87.0659373741384
-  k_equilibrium_FUM: 3.0155799021940215
-  k_equilibrium_G6PDH2r: 2.2409859959964717
-  k_equilibrium_GAPD: 4.388415156854162e-05
-  k_equilibrium_GLCptspp: 0.052713605372302845
-  k_equilibrium_GND: 50814.480353018946
-  k_equilibrium_ICDHyr: 1815.446946292713
-  k_equilibrium_ICL: 56.446084080642
-  k_equilibrium_LDH_D: 2.2112046075123486e-06
-  k_equilibrium_MALS: 5774.541464128655
-  k_equilibrium_MALt3pp: 1418969.0264866622
-  k_equilibrium_MDH: 2.2515614078528974e-06
-  k_equilibrium_ME1: 13777.479445815907
-  k_equilibrium_ME2: 26443.53345809013
-  k_equilibrium_NADH16pp: 41.110034046580395
-  k_equilibrium_NADH5: 136230360604.30309
-  k_equilibrium_NADTRHD: 0.032853251073120406
-  k_equilibrium_O2tpp: 0.03770313487098165
-  k_equilibrium_PDH: 3603225.6955265068
-  k_equilibrium_PFK: 353775.09426187066
-  k_equilibrium_PFK_3: 140822.4168232527
-  k_equilibrium_PFL: 19439.436650246193
-  k_equilibrium_PGI: 5.980101432845616
-  k_equilibrium_PGK: 9.051267427156402
-  k_equilibrium_PGL: 564.4529854547216
-  k_equilibrium_PGM: 0.2638354784870852
-  k_equilibrium_PIt2rpp: 0.09372595806540855
-  k_equilibrium_PIuabcpp: 2.6195880624774253
-  k_equilibrium_PPC: 35.72624538342535
-  k_equilibrium_PPCK: 47177457.115991354
-  k_equilibrium_PYK: 255.30877193768106
-  k_equilibrium_PYRt2rpp: 0.04351622880065215
-  k_equilibrium_RPE: 0.5564803817561303
-  k_equilibrium_RPI: 0.12895866303118822
-  k_equilibrium_SUCCt3pp: 1451377.4324364404
-  k_equilibrium_SUCDi: 1.594778824694611
-  k_equilibrium_SUCOAS: 128.2681749572514
-  k_equilibrium_TALA: 0.6070540788502867
-  k_equilibrium_THD2pp: 7788.14286257578
-  k_equilibrium_TKT1: 0.2350266605125791
-  k_equilibrium_TKT2: 98.74985426584824
-  k_equilibrium_TPI: 0.07802105324580148
+  k_equilibrium_ACALD: 0.0023952161938739884
+  k_equilibrium_ACALDtpp: 0.02081088149801024
+  k_equilibrium_ACONTa: 0.018378845639182396
+  k_equilibrium_ACONTb: 2.2581745086966243
+  k_equilibrium_ACS: 2003.1740533765105
+  k_equilibrium_ACt2rpp: 0.02121222186049293
+  k_equilibrium_AKGDH: 25235347.18838302
+  k_equilibrium_AKGt2rpp: 0.00019372766663953249
+  k_equilibrium_ALCD2x: 5.85505934038064e-06
+  k_equilibrium_ATPS4rpp: 0.2684765368128175
+  k_equilibrium_CITt3pp: 160476384.4382368
+  k_equilibrium_CO2tpp: 0.0457275522583551
+  k_equilibrium_CS: 9567.38147966072
+  k_equilibrium_D-LACt2pp: 0.015903418123082616
+  k_equilibrium_ENO: 42.426499960398225
+  k_equilibrium_ETOHtrpp: 0.015954869280692514
+  k_equilibrium_FBA: 134.7653011084728
+  k_equilibrium_FBA3: 5625.800101234318
+  k_equilibrium_FBP: 10574.303464716926
+  k_equilibrium_FORtppi: 65.9691329966747
+  k_equilibrium_FUM: 0.6900468406211514
+  k_equilibrium_G6PDH2r: 2.0639319880408054
+  k_equilibrium_GAPD: 5.0326313531585676e-06
+  k_equilibrium_GLCptspp: 0.22680924590629226
+  k_equilibrium_GND: 50814.48035301957
+  k_equilibrium_ICDHyr: 39118.964187338475
+  k_equilibrium_ICL: 37.26503966187547
+  k_equilibrium_LDH_D: 1.2571967411844687e-05
+  k_equilibrium_MALS: 5975.950536558892
+  k_equilibrium_MALt3pp: 1418969.0264866673
+  k_equilibrium_MDH: 1.627627230451892e-06
+  k_equilibrium_ME1: 13754.12847664913
+  k_equilibrium_ME2: 27693.950516236077
+  k_equilibrium_NADTRHD: 0.017746960400599816
+  k_equilibrium_O2tpp: 0.041346803919815094
+  k_equilibrium_PDH: 3571814.8468072913
+  k_equilibrium_PFK: 286002.7718594355
+  k_equilibrium_PFK_3: 140822.41682324893
+  k_equilibrium_PFL: 19439.43665024581
+  k_equilibrium_PGI: 2.256308722891752
+  k_equilibrium_PGK: 5.831382159369222
+  k_equilibrium_PGL: 553.9970758415556
+  k_equilibrium_PGM: 0.05623227605572823
+  k_equilibrium_PIt2rpp: 0.004863253677471809
+  k_equilibrium_PIuabcpp: 1.1949043432239481
+  k_equilibrium_PPC: 35.66686633130584
+  k_equilibrium_PPCK: 18806564.181967843
+  k_equilibrium_PYK: 48.82758847672929
+  k_equilibrium_PYRt2rpp: 0.02768365667946292
+  k_equilibrium_RPE: 0.11615974282993159
+  k_equilibrium_RPI: 0.06885118080621437
+  k_equilibrium_SUCCt3pp: 1451377.432436448
+  k_equilibrium_SUCDi: 3.1012037876708747
+  k_equilibrium_SUCOAS: 137.06480550458517
+  k_equilibrium_TALA: 0.9877380043142906
+  k_equilibrium_THD2pp: 7930.528656251668
+  k_equilibrium_TKT1: 2.3437917750960144
+  k_equilibrium_TKT2: 75.66726067966577
+  k_equilibrium_TPI: 0.06116451887214746
   kcat_forward_ACALD: null
   kcat_forward_ACALDtpp: null
   kcat_forward_ACONTa: null
@@ -260,263 +302,263 @@ parameters:
   kcat_forward_TKT1: null
   kcat_forward_TKT2: null
   kcat_forward_TPI: null
-  km_product10_LMPD_biomass_c_17_462: 45.32956019845807
-  km_product11_LMPD_biomass_c_17_462: 0.03254149246828038
-  km_product12_LMPD_biomass_c_17_462: 66.45489433204497
-  km_product13_LMPD_biomass_c_17_462: 0.48298880293385343
-  km_product1_ACALD: 253.2792860322296
-  km_product1_ACS: 982.4485420861732
-  km_product1_AKGDH: 19.94719434509586
-  km_product1_ALCD2x: 8.61874695389466
-  km_product1_ATPM: 201.0569848324678
-  km_product1_CS: 223.74526622833298
-  km_product1_CYTBDpp: 1312.1455620136066
-  km_product1_CYTBO3_4pp: 432704.7265534227
-  km_product1_FBA: 10897.912812027538
-  km_product1_FBA3: 7464.296209476587
-  km_product1_FBP: 214.27575470417045
-  km_product1_G6PDH2r: 31.144204706615863
-  km_product1_GAPD: 8827.83422287014
-  km_product1_GLCptspp: 368.4170759929704
-  km_product1_GND: 740.8601107761652
-  km_product1_ICDHyr: 26.468048005854342
-  km_product1_ICL: 8.507809235105826
-  km_product1_LDH_D: 464.11884991114067
-  km_product1_LMPD_biomass_c_17_462: 4035.867253265705
-  km_product1_MALS: 1891.099088433278
-  km_product1_MDH: 0.12710142636068406
-  km_product1_ME1: 42.461109594659206
-  km_product1_ME2: 1024.8579034648194
-  km_product1_NADH16pp: 0.004087356083269861
-  km_product1_NADH5: 0.23269259929319594
-  km_product1_NADTRHD: 720.7999157753719
-  km_product1_PDH: 10.913288932351659
-  km_product1_PFK: 185.558647734571
-  km_product1_PFK_3: 2023.5174101330974
-  km_product1_PFL: 11.9056345786943
-  km_product1_PGK: 7129.977476389397
-  km_product1_PIuabcpp: 28656.21237275689
-  km_product1_PPC: 177.8397253779721
-  km_product1_PPCK: 4.642208247225782
-  km_product1_PYK: 571.3380596866878
-  km_product1_SUCDi: 0.23309311910597072
-  km_product1_SUCOAS: 979.940032340376
-  km_product1_TALA: 0.12986549406335882
-  km_product1_THD2pp: 2638.591247721851
-  km_product1_TKT1: 814.3381728338342
-  km_product1_TKT2: 20.369420509268583
-  km_product2_ACALD: 21.134071970806296
-  km_product2_ACS: 2340.5673572861456
-  km_product2_AKGDH: 507.91509729455714
-  km_product2_ALCD2x: 304.5805563820096
-  km_product2_ATPM: 61392.77402231786
-  km_product2_CS: 198.6132635447963
-  km_product2_FBA: 173.92434345602803
-  km_product2_FBA3: 21.96247621345467
-  km_product2_FBP: 0.038028196320830224
-  km_product2_G6PDH2r: 9.460872161981545
-  km_product2_GAPD: 182.5201756091349
-  km_product2_GLCptspp: 0.8357905004587955
-  km_product2_GND: 3.681166613759247
-  km_product2_ICDHyr: 21.155977637859486
-  km_product2_ICL: 928.48983558078
-  km_product2_LDH_D: 2.041839614438227
-  km_product2_LMPD_biomass_c_17_462: 5271.631017186172
-  km_product2_MALS: 1498.712638393561
-  km_product2_MDH: 13.479021331096616
-  km_product2_ME1: 12474.670037565102
-  km_product2_ME2: 7586.7430268077105
-  km_product2_NADH16pp: 3672.979171031731
-  km_product2_NADH5: 163.9101902460007
-  km_product2_NADTRHD: 19.217269749764895
-  km_product2_PDH: 33.36440712755484
-  km_product2_PFK: 367.8283621543902
-  km_product2_PFK_3: 12424.13430901354
-  km_product2_PFL: 30.85647993276085
-  km_product2_PGK: 106.34148814825525
-  km_product2_PIuabcpp: 1007.9378982145079
-  km_product2_PPC: 161.7868325767179
-  km_product2_PPCK: 181.2602677969426
-  km_product2_PYK: 26919.178329775863
-  km_product2_SUCDi: 16556.053580540633
-  km_product2_SUCOAS: 1601.0316570049383
-  km_product2_TALA: 39.26827929273268
-  km_product2_THD2pp: 35.01029523916192
-  km_product2_TKT1: 17.467649065206388
-  km_product2_TKT2: 0.018575520411541126
-  km_product3_ACS: 21.444404211121626
-  km_product3_AKGDH: 25.80868746037353
-  km_product3_GND: 7045.458486646184
-  km_product3_ICDHyr: 292.1852737311735
-  km_product3_LMPD_biomass_c_17_462: 2478.866843448765
-  km_product3_ME1: 0.9100440104354751
-  km_product3_ME2: 1.1246103746878673
-  km_product3_PDH: 10.459850444906893
-  km_product3_PPCK: 1168.1245171479634
-  km_product3_SUCOAS: 332.87346895419876
-  km_product4_LMPD_biomass_c_17_462: 2050.23914481584
-  km_product5_LMPD_biomass_c_17_462: 8.739568631960712
-  km_product6_LMPD_biomass_c_17_462: 0.11066713574995712
-  km_product7_LMPD_biomass_c_17_462: 7623.5434240253935
-  km_product8_LMPD_biomass_c_17_462: 524.2405321416683
-  km_product9_LMPD_biomass_c_17_462: 0.5448221077601524
-  km_product_ACALDtpp: 0.03604315823701081
-  km_product_ACONTa: 51.13014372065864
-  km_product_ACONTb: 273.5596820178155
-  km_product_ACt2rpp: 0.37297745832885265
-  km_product_AKGt2rpp: 1223.751794554411
-  km_product_ATPS4rpp: 1203.6476765671384
-  km_product_CITt3pp: 150.6360215279898
-  km_product_CO2tpp: 1.6502648241784565
-  km_product_D-LACt2pp: 98.09544521841909
-  km_product_ENO: 22.692157009624896
-  km_product_ETOHtrpp: 0.0859391036840548
-  km_product_FORtppi: 523.581283011167
-  km_product_FUM: 474409.7504094907
-  km_product_MALt3pp: 17749.077946701807
-  km_product_O2tpp: 0.27548137606225254
-  km_product_PGI: 0.032467080520025636
-  km_product_PGL: 181590.60448193338
-  km_product_PGM: 238.0776981872623
-  km_product_PIt2rpp: 2688.169568399556
-  km_product_PYRt2rpp: 22360.967772362023
-  km_product_RPE: 1449.7625811602218
-  km_product_RPI: 1728.0030993698085
-  km_product_SUCCt3pp: 2471.757168828297
-  km_product_TPI: 360.27698240232735
-  km_substrate10_LMPD_biomass_c_17_462: 134.16360119486524
-  km_substrate11_LMPD_biomass_c_17_462: 4.689848645766696
-  km_substrate12_LMPD_biomass_c_17_462: 53.946465480549364
-  km_substrate13_LMPD_biomass_c_17_462: 1521.4608149631522
-  km_substrate14_LMPD_biomass_c_17_462: 9.082633177413623
-  km_substrate15_LMPD_biomass_c_17_462: 143.3440099422588
-  km_substrate16_LMPD_biomass_c_17_462: 16.021974799706616
-  km_substrate17_LMPD_biomass_c_17_462: 6980.260747475197
-  km_substrate18_LMPD_biomass_c_17_462: 30.941450899483556
-  km_substrate19_LMPD_biomass_c_17_462: 1.1222864766557097
-  km_substrate1_ACALD: 0.2910865986466722
-  km_substrate1_ACS: 0.004541344615185986
-  km_substrate1_AKGDH: 1297.1170690775482
-  km_substrate1_ALCD2x: 0.05872096013607755
-  km_substrate1_ATPS4rpp: 1200.3828056263585
-  km_substrate1_CS: 3.903576873549682
-  km_substrate1_CYTBDpp: 0.03137569541310078
-  km_substrate1_CYTBO3_4pp: 0.10565576811021936
-  km_substrate1_G6PDH2r: 454.77185909133976
-  km_substrate1_GAPD: 4281.280766742652
-  km_substrate1_GLCptspp: 74.52568771973785
-  km_substrate1_GND: 7554.469496108051
-  km_substrate1_ICDHyr: 61.899350335403696
-  km_substrate1_LDH_D: 18.703527722649813
-  km_substrate1_LMPD_biomass_c_17_462: 0.00661870646622341
-  km_substrate1_MALS: 8.602804980166876
-  km_substrate1_MDH: 3167.4822203073336
-  km_substrate1_ME1: 5209.48162759569
-  km_substrate1_ME2: 2003.9981146670168
-  km_substrate1_NADH16pp: 158878.79004224626
-  km_substrate1_NADH5: 191319.83406652248
-  km_substrate1_NADTRHD: 246.46933802747097
-  km_substrate1_PDH: 550.528099819846
-  km_substrate1_PFK: 0.0015545324735366667
-  km_substrate1_PFK_3: 11980.047123860159
-  km_substrate1_PFL: 9334.112825913688
-  km_substrate1_PGK: 1919.6238174150703
-  km_substrate1_PIuabcpp: 81455.44419592615
-  km_substrate1_PPC: 5.792937264775963
-  km_substrate1_PPCK: 330421.890742057
-  km_substrate1_PYK: 133.91497828635562
-  km_substrate1_SUCDi: 7.80816082026635
-  km_substrate1_SUCOAS: 2579.1130334248737
-  km_substrate1_TALA: 16126.583588550386
-  km_substrate1_THD2pp: 98.49097017963932
-  km_substrate1_TKT1: 247.59571848278864
-  km_substrate1_TKT2: 304.716003774479
-  km_substrate20_LMPD_biomass_c_17_462: 117.0068468071557
-  km_substrate21_LMPD_biomass_c_17_462: 3701.5364705386955
-  km_substrate2_ACALD: 4215.515257811953
-  km_substrate2_ACS: 5204.381790554874
-  km_substrate2_AKGDH: 520745.3133900699
-  km_substrate2_ALCD2x: 371.7859813581707
-  km_substrate2_ATPS4rpp: 20.90784270598163
-  km_substrate2_CS: 3646.266743157063
-  km_substrate2_CYTBDpp: 0.06976311133273627
-  km_substrate2_CYTBO3_4pp: 0.003815103631835889
-  km_substrate2_G6PDH2r: 14.58386189296169
-  km_substrate2_GAPD: 492.1543544213623
-  km_substrate2_GLCptspp: 43595.04644127888
-  km_substrate2_GND: 659.2848694313401
-  km_substrate2_ICDHyr: 42.679824373790034
-  km_substrate2_LDH_D: 634.3972992635981
-  km_substrate2_LMPD_biomass_c_17_462: 12710.205779952894
-  km_substrate2_MALS: 150.4975786694752
-  km_substrate2_MDH: 3041.0307505280052
-  km_substrate2_ME1: 2310.878086894262
-  km_substrate2_ME2: 30.305652467353564
-  km_substrate2_NADH16pp: 5.32212259404498
-  km_substrate2_NADH5: 10.005781609415727
-  km_substrate2_NADTRHD: 1861.3919148211137
-  km_substrate2_PDH: 7372.45397684051
-  km_substrate2_PFK: 11831.733718595291
-  km_substrate2_PFK_3: 9798.076409494366
-  km_substrate2_PFL: 13725.322579751148
-  km_substrate2_PGK: 13804.016845736382
-  km_substrate2_PIuabcpp: 1586.9023174911135
-  km_substrate2_PPC: 489.7143488399581
-  km_substrate2_PPCK: 0.17606125046470691
-  km_substrate2_PYK: 374.00699169952526
-  km_substrate2_SUCDi: 258.0577283890154
-  km_substrate2_SUCOAS: 31542.747791975813
-  km_substrate2_TALA: 283.0178637401285
-  km_substrate2_THD2pp: 3.161111458028084
-  km_substrate2_TKT1: 4656241.39202659
-  km_substrate2_TKT2: 22.246442272436468
-  km_substrate3_ACALD: 104.59702629725676
-  km_substrate3_ACS: 69366.62581360075
-  km_substrate3_AKGDH: 2563.0623586955217
-  km_substrate3_GAPD: 20.18337769834535
-  km_substrate3_LMPD_biomass_c_17_462: 2049.578181052475
-  km_substrate3_PDH: 662.1269567354537
-  km_substrate3_SUCOAS: 171.75164464063658
-  km_substrate4_LMPD_biomass_c_17_462: 0.5333469797271775
-  km_substrate5_LMPD_biomass_c_17_462: 5538.363521231198
-  km_substrate6_LMPD_biomass_c_17_462: 15.252288234136383
-  km_substrate7_LMPD_biomass_c_17_462: 26251.018917688583
-  km_substrate8_LMPD_biomass_c_17_462: 5.505700405218104
-  km_substrate9_LMPD_biomass_c_17_462: 581.7722007980547
-  km_substrate_ACALDtpp: 0.009657590498552467
-  km_substrate_ACONTa: 114375.0334621079
-  km_substrate_ACONTb: 18.46194206415645
-  km_substrate_ACt2rpp: 0.0606309909335202
-  km_substrate_AKGt2rpp: 261.2772470272191
-  km_substrate_ATPM: 56227.457282905736
-  km_substrate_CITt3pp: 1208.8241664240818
-  km_substrate_CO2tpp: 12.739097231636112
-  km_substrate_D-LACt2pp: 0.09848756767149554
-  km_substrate_ENO: 535.9002219146831
-  km_substrate_ETOHtrpp: 0.3081829845327797
-  km_substrate_FBA: 11011.657755120796
-  km_substrate_FBA3: 2281.458502898188
-  km_substrate_FBP: 17483.696169677438
-  km_substrate_FORtppi: 0.4306889518964352
-  km_substrate_FUM: 665.010822433319
-  km_substrate_ICL: 52.46662157789806
-  km_substrate_MALt3pp: 277297.6387586405
-  km_substrate_O2tpp: 21.205080135331492
-  km_substrate_PGI: 31.468998616618954
-  km_substrate_PGL: 1.3337544251023108
-  km_substrate_PGM: 13.919263538146861
-  km_substrate_PIt2rpp: 26045.619513766767
-  km_substrate_PYRt2rpp: 1221.7233066797328
-  km_substrate_RPE: 20791.65544595021
-  km_substrate_RPI: 1215.6075011577811
-  km_substrate_SUCCt3pp: 875.7372918692789
-  km_substrate_TPI: 11733.001926238372
-  lac_D_e: 0.0007679912895354702
-  mal_L_e: 1700.0000000000032
-  o2_e: 4.192246338353529
-  pi_e: 9973.857723528243
-  pyr_e: 4198.046079950011
-  succ_e: 948.9999999999974
+  km_product10_LMPD_biomass_c_17_462: 197.07619931840955
+  km_product11_LMPD_biomass_c_17_462: 0.9162639754484937
+  km_product12_LMPD_biomass_c_17_462: 499.71507301877773
+  km_product13_LMPD_biomass_c_17_462: 9.89392683376853
+  km_product1_ACALD: 17984.956918136715
+  km_product1_ACS: 184.31121664357454
+  km_product1_AKGDH: 15.467824084102165
+  km_product1_ALCD2x: 24565.78434698176
+  km_product1_ATPM: 5023.990694221947
+  km_product1_CS: 399.1155607030366
+  km_product1_CYTBDpp: 2170.224732086963
+  km_product1_CYTBO3_4pp: 9066.83609338994
+  km_product1_FBA: 2571.5786010901725
+  km_product1_FBA3: 10758.241708685278
+  km_product1_FBP: 828.4473157083116
+  km_product1_G6PDH2r: 0.6919787308256371
+  km_product1_GAPD: 6.513729008482142
+  km_product1_GLCptspp: 6568.810879227931
+  km_product1_GND: 202.15169364347915
+  km_product1_ICDHyr: 188.0701783729554
+  km_product1_ICL: 6.592527403552773
+  km_product1_LDH_D: 2059.189939415329
+  km_product1_LMPD_biomass_c_17_462: 21242.68550709458
+  km_product1_MALS: 264.3846766853503
+  km_product1_MDH: 0.022192945252324788
+  km_product1_ME1: 1.1399577571434971
+  km_product1_ME2: 1239.9434598057046
+  km_product1_NADH16pp: 0.33482673963843407
+  km_product1_NADH5: 0.9207788644549287
+  km_product1_NADTRHD: 174.6605352545545
+  km_product1_PDH: 112.14667445741922
+  km_product1_PFK: 104688.52925523256
+  km_product1_PFK_3: 2944585.927182906
+  km_product1_PFL: 55.37308198967184
+  km_product1_PGK: 1.709846673344849
+  km_product1_PIuabcpp: 1598.1194244703402
+  km_product1_PPC: 7596.9989445625315
+  km_product1_PPCK: 0.5950394751031781
+  km_product1_PYK: 8609.02034853991
+  km_product1_SUCDi: 0.3618757582752771
+  km_product1_SUCOAS: 234.60212389987527
+  km_product1_TALA: 9804.42538218243
+  km_product1_THD2pp: 410.3093712918574
+  km_product1_TKT1: 28.108449025741628
+  km_product1_TKT2: 347.98338355412284
+  km_product2_ACALD: 44.225338184065066
+  km_product2_ACS: 59583.06466400478
+  km_product2_AKGDH: 1060.5876570817054
+  km_product2_ALCD2x: 88.29497405214863
+  km_product2_ATPM: 68760.5173598914
+  km_product2_CS: 907.6772223150979
+  km_product2_FBA: 105.05470118083002
+  km_product2_FBA3: 0.5045415563012304
+  km_product2_FBP: 80146.14694963906
+  km_product2_G6PDH2r: 48.88636382510474
+  km_product2_GAPD: 186.08923960320564
+  km_product2_GLCptspp: 42832.16906663314
+  km_product2_GND: 33.90784642044339
+  km_product2_ICDHyr: 246.98724180790663
+  km_product2_ICL: 762.9599839133273
+  km_product2_LDH_D: 50.42276547189192
+  km_product2_LMPD_biomass_c_17_462: 129734.66769149865
+  km_product2_MALS: 7.789551394230345
+  km_product2_MDH: 10.616655263958021
+  km_product2_ME1: 14305.272854660818
+  km_product2_ME2: 27683.413525785625
+  km_product2_NADH16pp: 689.0985982002538
+  km_product2_NADH5: 80690.69411669158
+  km_product2_NADTRHD: 43.38933045294784
+  km_product2_PDH: 684.4516569153005
+  km_product2_PFK: 38187.93621255
+  km_product2_PFK_3: 4081.8989133611317
+  km_product2_PFL: 1542.1494814343905
+  km_product2_PGK: 3937.7199506869483
+  km_product2_PIuabcpp: 33566.46723548577
+  km_product2_PPC: 0.005840743171514746
+  km_product2_PPCK: 8082.171519731541
+  km_product2_PYK: 1151.7352634545698
+  km_product2_SUCDi: 1381.264140624946
+  km_product2_SUCOAS: 281.19570719773145
+  km_product2_TALA: 11.180659068730144
+  km_product2_THD2pp: 17217.330554410473
+  km_product2_TKT1: 608.5601099937152
+  km_product2_TKT2: 12994.439597316996
+  km_product3_ACS: 371.84554825241344
+  km_product3_AKGDH: 53.29541218667129
+  km_product3_GND: 7547.46401903883
+  km_product3_ICDHyr: 110.88653224482057
+  km_product3_LMPD_biomass_c_17_462: 0.07686058035596516
+  km_product3_ME1: 1031.790915809957
+  km_product3_ME2: 2.420933193379876
+  km_product3_PDH: 0.9892144784776828
+  km_product3_PPCK: 821.4587559575319
+  km_product3_SUCOAS: 266169.3368224896
+  km_product4_LMPD_biomass_c_17_462: 3.06202134801263
+  km_product5_LMPD_biomass_c_17_462: 79.80458176533405
+  km_product6_LMPD_biomass_c_17_462: 187.42927921976238
+  km_product7_LMPD_biomass_c_17_462: 3162.131392540702
+  km_product8_LMPD_biomass_c_17_462: 6584.591663350805
+  km_product9_LMPD_biomass_c_17_462: 452.90126552656517
+  km_product_ACALDtpp: 625.2627971280795
+  km_product_ACONTa: 125.9646649795767
+  km_product_ACONTb: 863.4267398260782
+  km_product_ACt2rpp: 41264.623448223676
+  km_product_AKGt2rpp: 384.2038586459406
+  km_product_ATPS4rpp: 34835.14748574168
+  km_product_CITt3pp: 4758.278168653039
+  km_product_CO2tpp: 6.182715037172332
+  km_product_D-LACt2pp: 9.924726146910524
+  km_product_ENO: 35179.25429781574
+  km_product_ETOHtrpp: 984.217557639308
+  km_product_FORtppi: 7802.861714767519
+  km_product_FUM: 146.3233303420191
+  km_product_MALt3pp: 35274.01184126082
+  km_product_O2tpp: 0.9145617792103
+  km_product_PGI: 1001.6062955585423
+  km_product_PGL: 791.5028324810064
+  km_product_PGM: 188.25212709754905
+  km_product_PIt2rpp: 3008.9903751997067
+  km_product_PYRt2rpp: 456.6455069522462
+  km_product_RPE: 581.7168161549849
+  km_product_RPI: 12915.603466180788
+  km_product_SUCCt3pp: 3914.9938195752748
+  km_product_TPI: 1207.2499449039285
+  km_substrate10_LMPD_biomass_c_17_462: 10885.390058681845
+  km_substrate11_LMPD_biomass_c_17_462: 263.47816719979704
+  km_substrate12_LMPD_biomass_c_17_462: 39070.79033177066
+  km_substrate13_LMPD_biomass_c_17_462: 188.9549985612772
+  km_substrate14_LMPD_biomass_c_17_462: 236.1114088181946
+  km_substrate15_LMPD_biomass_c_17_462: 374.95106027208914
+  km_substrate16_LMPD_biomass_c_17_462: 41.22304155136411
+  km_substrate17_LMPD_biomass_c_17_462: 1127.0563166291527
+  km_substrate18_LMPD_biomass_c_17_462: 508.4730260990417
+  km_substrate19_LMPD_biomass_c_17_462: 0.36893204529271156
+  km_substrate1_ACALD: 1161.3533230795886
+  km_substrate1_ACS: 20.387272010711975
+  km_substrate1_AKGDH: 356.26954823810894
+  km_substrate1_ALCD2x: 3977.1994862569422
+  km_substrate1_ATPM: 2.947069006251083
+  km_substrate1_ATPS4rpp: 0.4841240954564487
+  km_substrate1_CS: 0.6020076307316425
+  km_substrate1_CYTBDpp: 0.04024485066433458
+  km_substrate1_CYTBO3_4pp: 0.0015447329247015443
+  km_substrate1_G6PDH2r: 0.7007933681553434
+  km_substrate1_GAPD: 33.010158589760465
+  km_substrate1_GLCptspp: 7.169205660382706
+  km_substrate1_GND: 283.49530393475334
+  km_substrate1_ICDHyr: 414.6968237588976
+  km_substrate1_LDH_D: 11.367163421564099
+  km_substrate1_LMPD_biomass_c_17_462: 0.04414032349875185
+  km_substrate1_MALS: 0.1856497163108381
+  km_substrate1_MDH: 773.0157993310831
+  km_substrate1_ME1: 40689.267401593694
+  km_substrate1_ME2: 359.6376677195862
+  km_substrate1_NADH16pp: 6829.07861918536
+  km_substrate1_NADH5: 5652.363071144113
+  km_substrate1_NADTRHD: 663.8877113756175
+  km_substrate1_PDH: 1263.7459029283511
+  km_substrate1_PFK: 6418.160566932759
+  km_substrate1_PFK_3: 54886.49926776759
+  km_substrate1_PFL: 148843.42580965345
+  km_substrate1_PGK: 1720.2024917885317
+  km_substrate1_PIuabcpp: 7168.906141647994
+  km_substrate1_PPC: 4.900776871920661
+  km_substrate1_PPCK: 776936.1984778652
+  km_substrate1_PYK: 2226.9918449615884
+  km_substrate1_SUCDi: 1645.1669694009267
+  km_substrate1_SUCOAS: 12234.967278748809
+  km_substrate1_TALA: 433.7456390547894
+  km_substrate1_THD2pp: 0.07930183074506032
+  km_substrate1_TKT1: 146711.33971972755
+  km_substrate1_TKT2: 9855.262764947143
+  km_substrate20_LMPD_biomass_c_17_462: 15.688843749105802
+  km_substrate21_LMPD_biomass_c_17_462: 4100.724564678658
+  km_substrate2_ACALD: 8542.677713741523
+  km_substrate2_ACS: 76.7164975605775
+  km_substrate2_AKGDH: 10.094476242492458
+  km_substrate2_ALCD2x: 19371.321049030885
+  km_substrate2_ATPS4rpp: 7.877311546243683
+  km_substrate2_CS: 91.1024443551288
+  km_substrate2_CYTBDpp: 19115.88237052822
+  km_substrate2_CYTBO3_4pp: 0.7874941381540084
+  km_substrate2_G6PDH2r: 2040.0070637866772
+  km_substrate2_GAPD: 15566.450761669817
+  km_substrate2_GLCptspp: 15.008667941133558
+  km_substrate2_GND: 0.176952217541319
+  km_substrate2_ICDHyr: 4.1756290483258205
+  km_substrate2_LDH_D: 9480.283060393258
+  km_substrate2_LMPD_biomass_c_17_462: 49749.33274512792
+  km_substrate2_MALS: 325.83095476565734
+  km_substrate2_MDH: 225594.71808602553
+  km_substrate2_ME1: 1096.1721118478717
+  km_substrate2_ME2: 0.015324662623929668
+  km_substrate2_NADH16pp: 12.746409473436582
+  km_substrate2_NADH5: 90.50720279059271
+  km_substrate2_NADTRHD: 7009.473631252101
+  km_substrate2_PDH: 872.5928695617349
+  km_substrate2_PFK: 82933.51127159545
+  km_substrate2_PFK_3: 1712.8760495620093
+  km_substrate2_PFL: 14.664792236573168
+  km_substrate2_PGK: 37795.57634050948
+  km_substrate2_PIuabcpp: 4184.06376540223
+  km_substrate2_PPC: 1406.6340196047527
+  km_substrate2_PPCK: 0.44930553896578623
+  km_substrate2_PYK: 93243.84692535028
+  km_substrate2_SUCDi: 50.762850518454755
+  km_substrate2_SUCOAS: 1.9582551496001364
+  km_substrate2_TALA: 772.6876090184242
+  km_substrate2_THD2pp: 39.08833329039656
+  km_substrate2_TKT1: 53.54236621466491
+  km_substrate2_TKT2: 98.72270509077929
+  km_substrate3_ACALD: 52.01617375552876
+  km_substrate3_ACS: 9539.446732873814
+  km_substrate3_AKGDH: 57316.38781932245
+  km_substrate3_GAPD: 118.89039645308183
+  km_substrate3_LMPD_biomass_c_17_462: 550.4907834628752
+  km_substrate3_PDH: 1567.7917676914699
+  km_substrate3_SUCOAS: 8.115976855270736
+  km_substrate4_LMPD_biomass_c_17_462: 705.0876907294629
+  km_substrate5_LMPD_biomass_c_17_462: 21363.764469813843
+  km_substrate6_LMPD_biomass_c_17_462: 6485.378035050393
+  km_substrate7_LMPD_biomass_c_17_462: 1523.5836276339392
+  km_substrate8_LMPD_biomass_c_17_462: 325.48104503319627
+  km_substrate9_LMPD_biomass_c_17_462: 224.14234787289408
+  km_substrate_ACALDtpp: 0.15320549027516964
+  km_substrate_ACONTa: 7028.29224491328
+  km_substrate_ACONTb: 6.816845226205973
+  km_substrate_ACt2rpp: 0.11075423990299897
+  km_substrate_AKGt2rpp: 3.0464283790268915e-06
+  km_substrate_CITt3pp: 3253.106118879085
+  km_substrate_CO2tpp: 0.20337566641041996
+  km_substrate_D-LACt2pp: 0.49115280417670365
+  km_substrate_ENO: 2388.1712385312403
+  km_substrate_ETOHtrpp: 0.008112307414325701
+  km_substrate_FBA: 1276.9250875638766
+  km_substrate_FBA3: 8964.901075941454
+  km_substrate_FBP: 10934.974302304268
+  km_substrate_FORtppi: 331.47848761945426
+  km_substrate_FUM: 272638.94429095543
+  km_substrate_ICL: 1093.4404036356816
+  km_substrate_MALt3pp: 15.281440351570533
+  km_substrate_O2tpp: 21073.204990553037
+  km_substrate_PGI: 2347.5113604945245
+  km_substrate_PGL: 26.737140017282755
+  km_substrate_PGM: 0.9216362549683003
+  km_substrate_PIt2rpp: 44110.97895236159
+  km_substrate_PYRt2rpp: 1.8466867768745214
+  km_substrate_RPE: 9513.667367348586
+  km_substrate_RPI: 150.54698351440874
+  km_substrate_SUCCt3pp: 547.2842791227802
+  km_substrate_TPI: 23371.08149064896
+  lac_D_e: 0.022732866723158038
+  mal_L_e: 10000.000000000004
+  o2_e: 417.06352425501046
+  pi_e: 200211.10116708704
+  pyr_e: 5.454205703742833
+  succ_e: 10000.000000000004
   total_enzyme_concentration_ACALDtpp: null
   total_enzyme_concentration_ACONTa: null
   total_enzyme_concentration_ACONTb: null
@@ -545,7 +587,6 @@ parameters:
   vmax_backward_ACONTb: null
   vmax_backward_ACt2rpp: null
   vmax_backward_AKGt2rpp: null
-  vmax_backward_ATPM: null
   vmax_backward_ATPS4rpp: null
   vmax_backward_CITt3pp: null
   vmax_backward_CO2tpp: null
@@ -569,71 +610,71 @@ parameters:
   vmax_backward_RPI: null
   vmax_backward_SUCCt3pp: null
   vmax_backward_TPI: null
-  vmax_forward_ACALD: 43055830.4416949
-  vmax_forward_ACALDtpp: 32.56645465443159
-  vmax_forward_ACONTa: 1780554418.1141284
-  vmax_forward_ACONTb: 44653641921.78724
-  vmax_forward_ACS: 60363523.785490215
-  vmax_forward_ACt2rpp: 6688.580414732433
-  vmax_forward_AKGDH: 3992504970.401358
-  vmax_forward_AKGt2rpp: 231.49700981525558
-  vmax_forward_ALCD2x: 1581.9457085588222
-  vmax_forward_ATPM: 1130162542.3723338
-  vmax_forward_ATPS4rpp: 334528651.5457167
-  vmax_forward_CITt3pp: 252130.6271668613
-  vmax_forward_CO2tpp: 41903213.07453272
-  vmax_forward_CS: 56459101438.761
-  vmax_forward_CYTBDpp: 779038.8056973029
-  vmax_forward_CYTBO3_4pp: 179201803.72791868
-  vmax_forward_D-LACt2pp: 0.3951609261540368
-  vmax_forward_ENO: 1832867123.9003065
-  vmax_forward_ETOHtrpp: 9772.921451011343
-  vmax_forward_FBA: 117482142.60916914
-  vmax_forward_FBA3: 1377063.0224079604
-  vmax_forward_FBP: 26468834.2267052
-  vmax_forward_FORtppi: 11333226.844525086
-  vmax_forward_FUM: 261819066.55806136
-  vmax_forward_G6PDH2r: 1976667223.9695117
-  vmax_forward_GAPD: 219990252.301714
-  vmax_forward_GLCptspp: 1034417484.4821535
-  vmax_forward_GND: 834654099.6721904
-  vmax_forward_ICDHyr: 141454343.3471896
-  vmax_forward_ICL: 1473959671.5840974
-  vmax_forward_LDH_D: 3.1699419148993497
-  vmax_forward_LMPD_biomass_c_17_462: 198916026874.114
-  vmax_forward_MALS: 249592138.71892998
-  vmax_forward_MALt3pp: 558254.8661796452
-  vmax_forward_MDH: 3232092256.910292
-  vmax_forward_ME1: 46450.59434993881
-  vmax_forward_ME2: 4817679.710705669
-  vmax_forward_NADH16pp: 27166531572.849228
-  vmax_forward_NADH5: 47318468.69515559
-  vmax_forward_NADTRHD: 1970569.1330711732
-  vmax_forward_O2tpp: 52276426406.1602
-  vmax_forward_PDH: 3151821915.8014216
-  vmax_forward_PFK: 396757790.3221509
-  vmax_forward_PFK_3: 29093738.48468549
-  vmax_forward_PFL: 1730368451.9628086
-  vmax_forward_PGI: 209801507.05321708
-  vmax_forward_PGK: 65441733904.72132
-  vmax_forward_PGL: 145061647.5211499
-  vmax_forward_PGM: 2287842.3559753825
-  vmax_forward_PIt2rpp: 17017118152.786709
-  vmax_forward_PIuabcpp: 12392618.853189107
-  vmax_forward_PPC: 3654551.8004641826
-  vmax_forward_PPCK: 501134.1048804535
-  vmax_forward_PYK: 169057086269.4613
-  vmax_forward_PYRt2rpp: 463.6371673798568
-  vmax_forward_RPE: 189197247830.35342
-  vmax_forward_RPI: 1428325.7589789503
-  vmax_forward_SUCCt3pp: 98601.92613489865
-  vmax_forward_SUCDi: 28915589.626668412
-  vmax_forward_SUCOAS: 4197793.990604563
-  vmax_forward_TALA: 483000889.162607
-  vmax_forward_THD2pp: 494496129.2727422
-  vmax_forward_TKT1: 5263971648989901.0
-  vmax_forward_TKT2: 106134297.45764937
-  vmax_forward_TPI: 2504249778.687015
+  vmax_forward_ACALD: 9388777.64038758
+  vmax_forward_ACALDtpp: 27.507889316909562
+  vmax_forward_ACONTa: 157944086.24207276
+  vmax_forward_ACONTb: 34780333156.48141
+  vmax_forward_ACS: 23339173.978088006
+  vmax_forward_ACt2rpp: 33.190904522889575
+  vmax_forward_AKGDH: 2425685667.512526
+  vmax_forward_AKGt2rpp: 0.0002862508581981354
+  vmax_forward_ALCD2x: 1947834.88715175
+  vmax_forward_ATPM: 30414681.728310302
+  vmax_forward_ATPS4rpp: 179736385.16742083
+  vmax_forward_CITt3pp: 577674.8030292919
+  vmax_forward_CO2tpp: 205664.74419208092
+  vmax_forward_CS: 815418610.0764513
+  vmax_forward_CYTBDpp: 4.040497024188914e+16
+  vmax_forward_CYTBO3_4pp: 1.2209483758717036e+20
+  vmax_forward_D-LACt2pp: 32555.941980886706
+  vmax_forward_ENO: 1118295874519.0312
+  vmax_forward_ETOHtrpp: 1.075199041676281
+  vmax_forward_FBA: 130376141.88710116
+  vmax_forward_FBA3: 3644831383.5324016
+  vmax_forward_FBP: 1898.50811768702
+  vmax_forward_FORtppi: 271338816.298639
+  vmax_forward_FUM: 55234944191.42687
+  vmax_forward_G6PDH2r: 18868171472.052147
+  vmax_forward_GAPD: 680749921.8502507
+  vmax_forward_GLCptspp: 45577232.44645317
+  vmax_forward_GND: 37525319.541491285
+  vmax_forward_ICDHyr: 18457190823371.67
+  vmax_forward_ICL: 1398456591.9931018
+  vmax_forward_LDH_D: 5620.763637399302
+  vmax_forward_LMPD_biomass_c_17_462: 16177648541187.504
+  vmax_forward_MALS: 31664850.654158104
+  vmax_forward_MALt3pp: 245076.20119166997
+  vmax_forward_MDH: 37382678829.18376
+  vmax_forward_ME1: 229962825.08915284
+  vmax_forward_ME2: 34377667.39797467
+  vmax_forward_NADH16pp: 163053022979780.66
+  vmax_forward_NADH5: 15314065045.352531
+  vmax_forward_NADTRHD: 34164933.35382032
+  vmax_forward_O2tpp: 3918832981.136895
+  vmax_forward_PDH: 18875753406.383762
+  vmax_forward_PFK: 1992819225.2513328
+  vmax_forward_PFK_3: 72600130.04863037
+  vmax_forward_PFL: 1487561662.7105088
+  vmax_forward_PGI: 77160839.08924493
+  vmax_forward_PGK: 201333846017.60532
+  vmax_forward_PGL: 196210015.78640163
+  vmax_forward_PGM: 19408920.993727356
+  vmax_forward_PIt2rpp: 3907864490.685401
+  vmax_forward_PIuabcpp: 630.8514737448127
+  vmax_forward_PPC: 33607055.6365001
+  vmax_forward_PPCK: 45557964822674.49
+  vmax_forward_PYK: 47626464.40651137
+  vmax_forward_PYRt2rpp: 492.62638566460953
+  vmax_forward_RPE: 167968807.0467246
+  vmax_forward_RPI: 28283.625331194162
+  vmax_forward_SUCCt3pp: 609752.2084094975
+  vmax_forward_SUCDi: 144946986.43450493
+  vmax_forward_SUCOAS: 2033793914.1819384
+  vmax_forward_TALA: 1936531322.637253
+  vmax_forward_THD2pp: 381044230.36364466
+  vmax_forward_TKT1: 20749935951235.887
+  vmax_forward_TKT2: 387994285.5072955
+  vmax_forward_TPI: 5259534959.973671
   volume_c: 1.0
   volume_e: 1.0
 reactants:
@@ -664,7 +705,9 @@ reactants:
   acald_e:
     compartment: e
     name: acald_e
-  accoa_c: *id001
+  accoa_c:
+    compartment: c
+    name: accoa_c
   acon_C_c:
     compartment: c
     name: acon_C_c
@@ -677,7 +720,9 @@ reactants:
   akg_e:
     compartment: e
     name: akg_e
-  amp_c: *id002
+  amp_c:
+    compartment: c
+    name: amp_c
   atp_c:
     compartment: c
     name: atp_c
@@ -765,7 +810,9 @@ reactants:
   nadp_c:
     compartment: c
     name: nadp_c
-  nadph_c: *id003
+  nadph_c:
+    compartment: c
+    name: nadph_c
   o2_c:
     compartment: c
     name: o2_c
@@ -784,14 +831,18 @@ reactants:
   pi_e:
     compartment: e
     name: pi_e
-  ppi_c: *id004
+  ppi_c:
+    compartment: c
+    name: ppi_c
   pyr_c:
     compartment: c
     name: pyr_c
   pyr_e:
     compartment: e
     name: pyr_e
-  q8_c: *id005
+  q8_c:
+    compartment: c
+    name: q8_c
   q8h2_c:
     compartment: c
     name: q8h2_c
@@ -824,7 +875,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: &id010
+      mechanism_stoichiometry: &id004
         product1: 1.0
         product2: 1.0
         substrate1: -1.0
@@ -838,7 +889,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ACALD
   ACALDtpp:
@@ -869,7 +921,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: &id007
+      mechanism_stoichiometry: &id001
         product1: 1.0
         product2: 1.0
         product3: 1.0
@@ -885,7 +937,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: ACS
   ACt2rpp:
@@ -897,18 +950,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: ACt2rpp
   AKGDH:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: co2_c
       product2: succoa_c
       product3: nadh_c
@@ -926,18 +981,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: AKGt2rpp
   ALCD2x:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: &id008
+      mechanism_stoichiometry: &id002
         product1: 1.0
         product2: 1.0
         substrate1: -1.0
@@ -949,20 +1006,26 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ALCD2x
   ATPM:
     enzyme: null
     mechanism:
-      class: UniBiReversibleHill
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry:
+        product1: 1.0
+        product2: 1.0
+        substrate1: -1.0
       product1: adp_c
       product2: pi_c
-      substrate: atp_c
+      substrate1: atp_c
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: ATPM
   ATPS4rpp:
@@ -975,11 +1038,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 3.0
+        mechanism_stoichiometry:
+          small_molecule: 3.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_e
     name: ATPS4rpp
   CITt3pp:
@@ -991,11 +1056,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: CITt3pp
   CO2tpp:
@@ -1010,7 +1077,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: cit_c
       product2: coa_c
       substrate1: oaa_c
@@ -1018,14 +1085,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: CS
   CYTBDpp:
     enzyme: null
     mechanism:
-      class: Convenience
-      mechanism_stoichiometry: &id009
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry: &id003
         product1: 2.0
         substrate1: -1.0
         substrate2: -2.0
@@ -1033,31 +1101,35 @@ reactions:
       substrate1: o2_c
       substrate2: q8h2_c
     modifiers:
-      DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+      HSM_'h_c':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_c
-      DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 4.0
+      HSM_'h_e':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: 4.0
         small_molecule: h_e
     name: CYTBDpp
   CYTBO3_4pp:
     enzyme: null
     mechanism:
-      class: Convenience
-      mechanism_stoichiometry: *id009
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry: *id003
       product1: q8_c
       substrate1: o2_c
       substrate2: q8h2_c
     modifiers:
-      DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -8.0
+      HSM_'h_c':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: -8.0
         small_molecule: h_c
-      DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 8.0
+      HSM_'h_e':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: 8.0
         small_molecule: h_e
     name: CYTBO3_4pp
   D-LACt2pp:
@@ -1069,11 +1141,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: D-LACt2pp
   ENO:
@@ -1120,7 +1194,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: FBP
   FORtppi:
@@ -1143,7 +1218,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadph_c
       product2: _6pgl_c
       substrate1: nadp_c
@@ -1151,14 +1226,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: G6PDH2r
   GAPD:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id010
+      mechanism_stoichiometry: *id004
       product1: _13dpg_c
       product2: nadh_c
       substrate1: nad_c
@@ -1170,7 +1246,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: g6p_c
       substrate1: pep_c
@@ -1181,7 +1257,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: &id011
+      mechanism_stoichiometry: &id005
         product1: 1.0
         product2: 1.0
         product3: 1.0
@@ -1198,7 +1274,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: nadph_c
       product2: co2_c
       product3: akg_c
@@ -1219,7 +1295,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: nadh_c
       substrate1: lac_D_c
@@ -1227,7 +1303,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: LDH_D
   LMPD_biomass_c_17_462:
@@ -1306,18 +1383,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 54927.291
+        mechanism_stoichiometry:
+          small_molecule: 54927.291
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -468.428
+        mechanism_stoichiometry:
+          small_molecule: -468.428
         small_molecule: h_e
     name: LMPD_biomass_c_17_462
   MALS:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: mal_L_c
       product2: coa_c
       substrate1: glx_c
@@ -1325,7 +1404,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: MALS
   MALt3pp:
@@ -1337,18 +1417,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: MALt3pp
   MDH:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: oaa_c
       product2: nadh_c
       substrate1: mal_L_c
@@ -1356,14 +1438,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: MDH
   ME1:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: co2_c
       product2: pyr_c
       product3: nadh_c
@@ -1375,7 +1458,7 @@ reactions:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: nadph_c
       product2: pyr_c
       product3: co2_c
@@ -1386,42 +1469,49 @@ reactions:
   NADH16pp:
     enzyme: null
     mechanism:
-      class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry: &id006
+        product1: 1.0
+        product2: 1.0
+        substrate1: -1.0
+        substrate2: -1.0
       product1: q8h2_c
       product2: nad_c
       substrate1: q8_c
       substrate2: nadh_c
     modifiers:
-      DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -4.0
+      HSM_'h_c':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: -4.0
         small_molecule: h_c
-      DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 3.0
+      HSM_'h_e':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: 3.0
         small_molecule: h_e
     name: NADH16pp
   NADH5:
     enzyme: null
     mechanism:
-      class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      class: IrrevMichaelisMenten
+      mechanism_stoichiometry: *id006
       product1: q8h2_c
       product2: nad_c
       substrate1: q8_c
       substrate2: nadh_c
     modifiers:
-      DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+      HSM_'h_c':
+        class: FirstOrderSmallMoleculeModifier
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: NADH5
   NADTRHD:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadp_c
       product2: nadh_c
       substrate1: nadph_c
@@ -1440,7 +1530,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: co2_c
       product2: accoa_c
       product3: nadh_c
@@ -1453,7 +1543,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: fdp_c
       product2: adp_c
       substrate1: f6p_c
@@ -1464,7 +1554,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: adp_c
       product2: s17bp_c
       substrate1: atp_c
@@ -1475,7 +1565,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: for_c
       product2: accoa_c
       substrate1: pyr_c
@@ -1494,7 +1584,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: _13dpg_c
       product2: adp_c
       substrate1: _3pg_c
@@ -1502,7 +1592,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: PGK
   PGL:
@@ -1514,7 +1605,8 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: PGL
   PGM:
@@ -1534,11 +1626,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: PIt2rpp
   PIuabcpp:
@@ -1557,14 +1651,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
     name: PIuabcpp
   PPC:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pi_c
       product2: oaa_c
       substrate1: co2_c
@@ -1572,14 +1667,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 2.0
+        mechanism_stoichiometry:
+          small_molecule: 2.0
         small_molecule: h_c
     name: PPC
   PPCK:
     enzyme: null
     mechanism:
       class: Convenience
-      mechanism_stoichiometry: *id011
+      mechanism_stoichiometry: *id005
       product1: co2_c
       product2: pep_c
       product3: adp_c
@@ -1588,14 +1684,15 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_c
     name: PPCK
   PYK:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: pyr_c
       product2: atp_c
       substrate1: pep_c
@@ -1611,11 +1708,13 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: PYRt2rpp
   RPE:
@@ -1643,18 +1742,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 1.0
+        mechanism_stoichiometry:
+          small_molecule: 1.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -1.0
+        mechanism_stoichiometry:
+          small_molecule: -1.0
         small_molecule: h_e
     name: SUCCt3pp
   SUCDi:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: fum_c
       substrate1: q8_c
@@ -1665,7 +1766,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id007
+      mechanism_stoichiometry: *id001
       product1: succoa_c
       product2: pi_c
       product3: adp_c
@@ -1678,7 +1779,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: f6p_c
       product2: e4p_c
       substrate1: s7p_c
@@ -1689,7 +1790,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: nadph_c
       product2: nad_c
       substrate1: nadp_c
@@ -1697,18 +1798,20 @@ reactions:
     modifiers:
       DSM_h_c:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: 2.0
+        mechanism_stoichiometry:
+          small_molecule: 2.0
         small_molecule: h_c
       DSM_h_e:
         class: DisplacementSmallMoleculeModifier
-        mechanism_stoichiometry: -2.0
+        mechanism_stoichiometry:
+          small_molecule: -2.0
         small_molecule: h_e
     name: THD2pp
   TKT1:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: g3p_c
       product2: s7p_c
       substrate1: xu5p_D_c
@@ -1719,7 +1822,7 @@ reactions:
     enzyme: null
     mechanism:
       class: H1GeneralizedReversibleHill
-      mechanism_stoichiometry: *id008
+      mechanism_stoichiometry: *id002
       product1: g3p_c
       product2: f6p_c
       substrate1: xu5p_D_c

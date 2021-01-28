@@ -1096,7 +1096,7 @@ reactions:
   CYTBDpp:
     enzyme: null
     mechanism:
-      class: Convenience
+      class: IrrevMichaelisMenten
       mechanism_stoichiometry: &id003
         product1: 2.0
         substrate1: -1.0
@@ -1106,12 +1106,12 @@ reactions:
       substrate2: q8h2_c
     modifiers:
       DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: -4.0
         small_molecule: h_c
       DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: 4.0
         small_molecule: h_e
@@ -1119,19 +1119,19 @@ reactions:
   CYTBO3_4pp:
     enzyme: null
     mechanism:
-      class: Convenience
+      class: IrrevMichaelisMenten
       mechanism_stoichiometry: *id003
       product1: q8_c
       substrate1: o2_c
       substrate2: q8h2_c
     modifiers:
       DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: -8.0
         small_molecule: h_c
       DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: 8.0
         small_molecule: h_e
@@ -1473,7 +1473,7 @@ reactions:
   NADH16pp:
     enzyme: null
     mechanism:
-      class: H1GeneralizedReversibleHill
+      class: IrrevMichaelisMenten
       mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: nad_c
@@ -1481,12 +1481,12 @@ reactions:
       substrate2: nadh_c
     modifiers:
       DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: -4.0
         small_molecule: h_c
       DSM_h_e:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: 3.0
         small_molecule: h_e
@@ -1494,7 +1494,7 @@ reactions:
   NADH5:
     enzyme: null
     mechanism:
-      class: H1GeneralizedReversibleHill
+      class: IrrevMichaelisMenten
       mechanism_stoichiometry: *id002
       product1: q8h2_c
       product2: nad_c
@@ -1502,7 +1502,7 @@ reactions:
       substrate2: nadh_c
     modifiers:
       DSM_h_c:
-        class: DisplacementSmallMoleculeModifier
+        class: FirstOrderSmallMoleculeModifier
         mechanism_stoichiometry:
           small_molecule: -1.0
         small_molecule: h_c

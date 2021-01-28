@@ -145,7 +145,13 @@ def boxplot(df, filename):
 
 
 
-def plot_population_per_variable(data, filename, stride = 1):
+def plot_population_per_variable(data,
+                                 filename,
+                                 stride = 1,
+                                 variables=None,
+                                 y_label='concentration',
+                                 x_label='time',
+                                 **kwargs):
     """
 
     :param data:
@@ -158,13 +164,21 @@ def plot_population_per_variable(data, filename, stride = 1):
     plots = OrderedDict()
 
     grouped = data.groupby('solution_id')
-    # colors = viridis(len(grouped))
 
-    for var in data.columns:
+    TOOLTIPS = [
+        ("index", "$index"),
+        ("(t,c)", "($x, $y)"),
+        ("species", "$name"),
+    ]
+
+    if variables is None:
+        variables = data.columns
+
+    for var in variables:
         if var in ['solution_id', 'time']:
             continue
 
-        p = figure(x_axis_type='datetime')
+        p = figure(tooltips=TOOLTIPS, **kwargs)
 
         for group, this_data in grouped:
             this_data = this_data.iloc[::stride]
@@ -173,12 +187,15 @@ def plot_population_per_variable(data, filename, stride = 1):
                    line_alpha=0.2)
 
         p.title.text = var
-
         plots[var] = p
-
         output_file(filename.format(var))
+
+        #Make the axsis pretty
+        # change just some things about the x-axis
+        p.xaxis.axis_label = x_label
+        # change just some things about the y-axis
+        p.yaxis.axis_label = y_label
+
         show(p)
         curdoc().clear()
 
-    # c = column([p for p in plots.values()])
-    # show(c)

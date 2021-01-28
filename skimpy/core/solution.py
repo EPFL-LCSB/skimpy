@@ -79,5 +79,5 @@ class ODESolutionPopulation:
 
                 self.data = pd.concat([self.data, new_block])
 
-    def plot(self, filename):
-        plot_population_per_variable(self.data, filename)
+    def plot(self, filename, variables=None, **kwargs):
+        plot_population_per_variable(self.data, filename, variables=variables, **kwargs)

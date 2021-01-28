@@ -125,6 +125,61 @@ class Reactor(ABC):
         return parameters
 
 
+    def parametrize(self, value_dict, model_name):
+        """
+        Set the parameters of a specified model
+        :param value_dict:
+        :param model_name:
+        :return:
+        """
+        model = self.models[model_name]
+
+        parameters = TabDict([])
+        for this_reaction in model.reactions.values():
+            reaction_params = TabDict({str(p.symbol): p for p in this_reaction.parameters.values()})
+            parameters.update(reaction_params)
+
+            # Compartment parameters
+        for this_comp in model.compartments.values():
+            comp_params = TabDict({str(p.symbol): p for p in this_comp.parameters.values()})
+            parameters.update(comp_params)
+
+        for key, value in value_dict.items():
+            if model_name+'_'+str(key) in parameters.keys():
+                parameters[model_name+'_'+str(key)].value = value
+
+
+    def add_boundary_condition(self, boundary_condition):
+        """
+        Enforces a boundary condition (e.g. a constant concentration) on the
+        kinetic model
+
+        :param boundary_condition: the boundary condition to enforce
+        :type boundary_condition: skimpy.core.BoundaryCondition
+        :return:
+        """
+        boundary_condition.link(self)
+        self.add_to_tabdict(boundary_condition, 'boundary_conditions')
+
+        # HOTFIX to be done better
+        boundary_condition.reactant.type = VARIABLE
+
+    def add_to_tabdict(self, element, kind):
+
+        the_tabdict = getattr(self, kind)
+
+        # Add an enzyme to the model
+        if element.name in the_tabdict:
+            error_msg = 'Reaction {} already exists in the model'
+            raise(Exception(error_msg.format(element.name)))
+
+        the_tabdict[element.name] = element
+
+        # TODO : Implement with metabolites
+        # for this_metabolite in reaction.metabolites:
+        #     self.metabolites.append(this_metabolite)
+        self._modified = True
+
     def compile_ode(self, sim_type=QSSA, ncpu=1, add_dilution=False,):
         """
 
@@ -151,6 +206,19 @@ class Reactor(ABC):
             # If data was stored previously in the initial conditions, recover it (needed for
             # serialization)
             self.initial_conditions.update(old_initial_conditions)
+
+    def initialize(self, value_dict, model_name):
+        """
+        Set the initial conditions for a single strain (excluding medium)
+        :param value_dict:
+        :param model_name:
+        :return:
+        """
+        for key,value in value_dict.items():
+            if not key in self.medium:
+                if model_name+'_'+str(key) in self.initial_conditions:
+                    self.initial_conditions[model_name+'_'+str(key)] = value
+
 
     def solve_ode(self, time_out, solver_type='cvode', **kwargs):
         """

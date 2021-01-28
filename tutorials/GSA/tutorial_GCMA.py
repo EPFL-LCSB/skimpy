@@ -41,7 +41,19 @@ from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
 
+from skimpy.analysis.oracle.load_pytfa_solution import load_fluxes, \
+    load_concentrations, load_equilibrium_constants
+
 from skimpy.analysis.oracle import *
+
+"""
+Parameters
+"""
+CONCENTRATION_SCALING = 1e6 # 1 mol to 1 mmol
+TIME_SCALING = 1 # 1hr
+# Parameters of the E. Coli cell
+DENSITY = 1200 # g/L
+GDW_GWW_RATIO = 0.3 # Assumes 70% Water
 
 """
 Import and curate a model
@@ -49,7 +61,6 @@ Import and curate a model
 
 this_cobra_model = import_matlab_model('../../models/toy_model.mat',
                                        'model')
-
 
 """
 Make tfa analysis of the model
@@ -115,55 +126,55 @@ small_molecules = ['h_c', 'h_e']
 model_gen = FromPyTFA(small_molecules=small_molecules)
 kmodel = model_gen.import_model(tmodel, solution.raw)
 
+fluxes = load_fluxes(solution.raw, tmodel, kmodel,
+                     density=DENSITY,
+                     ratio_gdw_gww=GDW_GWW_RATIO,
+                     concentration_scaling=CONCENTRATION_SCALING,
+                     time_scaling=TIME_SCALING)
 
-"""
-Sanitize the solution to match with the skimpy model
-"""
+concentrations = load_concentrations(solution.raw, tmodel, kmodel,
+                                     concentration_scaling=CONCENTRATION_SCALING)
 
-# Map fluxes back to reaction variables
-this_flux_solution = get_reaction_data(tmodel, solution.raw)
-# Create the flux dict
-flux_dict = this_flux_solution[[i for i in
-                                kmodel.reactions.keys()]].to_dict()
-
-# Create a concentration dict with consistent names
-variable_names = tmodel.log_concentration.list_attr('name')
-metabolite_ids = tmodel.log_concentration.list_attr('id')
-
-temp_concentration_dict = np.exp(solution.raw[variable_names]).to_dict()
-
-# Map concentration names
-mapping_dict = {k: sanitize_cobra_vars(v) for k, v in zip(variable_names,
-                                                          metabolite_ids)}
-concentration_dict = {mapping_dict[k]: v for k, v in
-                      temp_concentration_dict.items()}
-
-
+# Fetch equilibrium constants
+load_equilibrium_constants(solution.raw, tmodel, kmodel,
+                           concentration_scaling=CONCENTRATION_SCALING,
+                           in_place=True)
 
 """
 Sample the kinetic parameters based on linear stability
 """
 kmodel.prepare(mca=True)
+
 # Compile MCA functions
-kmodel.compile_mca(sim_type=QSSA)
+parameter_list = TabDict([(k, p.symbol) for k, p in
+                          kmodel.parameters.items() if
+                          p.name.startswith('vmax_forward')])
+
+kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
 # Initialize parameter sampler
 sampling_parameters = SimpleParameterSampler.Parameters(n_samples=10)
 sampler = SimpleParameterSampler(sampling_parameters)
 
 # Sample the model
-parameter_population = sampler.sample(kmodel, flux_dict,
-                                      concentration_dict)
+parameter_population = sampler.sample(kmodel, fluxes, concentrations)
 parameter_population = ParameterValuePopulation(parameter_population, kmodel)
 
 # Perform resampling
 resampler = SimpleResampler(sampling_parameters)
 parameters_to_resample = [kmodel.parameters.km_substrate_ENO, ]
-resampled_population = resampler.sample(kmodel, flux_dict,
-                                        concentration_dict, parameters_to_resample,
+resampled_population = resampler.sample(kmodel, fluxes, concentrations, parameters_to_resample,
                                         parameter_population._data)
 # ToDo user theParameterValuePopulation and ParameterValues objects as input and output of the sampling functions
 resampled_population = ParameterValuePopulation(resampled_population, kmodel)
 
 # Calculate the output for the two parameter populations
+flux_control_coeff_0 = kmodel.flux_control_fun(fluxes,
+                                             concentrations,
+                                             parameter_population._data)
 
+flux_control_coeff_1 = kmodel.flux_control_fun(fluxes,
+                                               concentrations,
+                                               resampled_population._data)
+
+# TODO: Calculate the sensitivity coeffcients!

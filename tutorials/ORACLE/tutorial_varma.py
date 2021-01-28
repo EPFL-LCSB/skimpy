@@ -158,13 +158,16 @@ for i, sample in samples.iterrows():
 
     # Calibrate the glucose transporter to have a Vmax of 10mmol/gDW/h
     pep_c = concentrations['pep_c']
-    kmodel.reactions.GLCptspp.parameters.km_substrate1.bounds = (pep_c*1e-4, pep_c*1e-3)
-
     pyr_c = concentrations['pyr_c']
     g6p_c = concentrations['g6p_c']
 
+    kmodel.reactions.GLCptspp.parameters.km_substrate1.bounds = (pep_c*1e-4, pep_c*1e-3)
     kmodel.reactions.GLCptspp.parameters.km_product1.bounds = (pyr_c*1.0, pyr_c*1e2)
     kmodel.reactions.GLCptspp.parameters.km_product2.bounds = (g6p_c*1.0, g6p_c*1e2)
+
+    # Unsaturated Accetate transporter
+    ac_c = concentrations['ac_c']
+    kmodel.reactions.ACt2rpp.parameters.km_product.bounds = (ac_c*1e2, ac_c*1e3)
 
     # ATP maintainance to be saturated
     atp_c = concentrations['atp_c']
@@ -224,7 +227,7 @@ Prune parameters
 """
 
 MAX_EIGENVALUES = -5/(20/60)    # 1/hr
-MIN_EIGENVALUES = -7e12
+MIN_EIGENVALUES = -3e11
 
 # Prune parameter based on eigenvalues
 is_selected = (lambda_max_all < MAX_EIGENVALUES ) & (lambda_min_all > MIN_EIGENVALUES )
@@ -246,6 +249,8 @@ parameter_population = ParameterValuePopulation(fast_parameters,
                                            kmodel=kmodel,
                                            index=fast_index)
 parameter_population.save('pruned_parameters.hdf5')
+
+
 
 """
 Basins of attraction
