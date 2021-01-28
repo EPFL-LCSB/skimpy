@@ -34,8 +34,9 @@ from pytfa.io.viz import get_reaction_data
 from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.utils.namespace import *
+from skimpy.sampling.simple_resampler import SimpleResampler
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
-from skimpy.core.solution import ODESolutionPopulation
+from skimpy.core.parameters import ParameterValuePopulation
 from skimpy.io.generate_from_pytfa import FromPyTFA
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
@@ -47,7 +48,7 @@ Import and curate a model
 """
 
 this_cobra_model = import_matlab_model('../../models/toy_model.mat',
-'model')
+                                       'model')
 
 
 """
@@ -56,14 +57,14 @@ Make tfa analysis of the model
 
 # Convert to a thermodynamics model
 thermo_data = load_thermoDB('../../data/thermo_data.thermodb')
-this_pytfa_model = pytfa.ThermoModel(thermo_data, this_cobra_model)
+tmodel = pytfa.ThermoModel(thermo_data, this_cobra_model)
 
 GLPK = 'optlang-glpk'
-this_pytfa_model.solver = GLPK
+tmodel.solver = GLPK
 
 # TFA conversion
-this_pytfa_model.prepare()
-this_pytfa_model.convert(add_displacement=True)
+tmodel.prepare()
+tmodel.convert(add_displacement=True)
 
 
 # We choose a flux directionality profile (FDP)
@@ -91,14 +92,14 @@ this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'Trp_nad':     (-100.0, 100.0),
                'Trp_nadh':    (-100.0, 100.0)}
 # Find a solution for this FDP
-solution = this_pytfa_model.optimize()
+solution = tmodel.optimize()
 
 # Force a minimal thermodynamic displacement
 min_log_displacement = 1e-1
-add_min_log_displacement(this_pytfa_model, min_log_displacement)
+add_min_log_displacement(tmodel, min_log_displacement)
 
 # Find a solution for the model
-solution = this_pytfa_model.optimize()
+solution = tmodel.optimize()
 
 
 """
@@ -112,7 +113,7 @@ Get a Kinetic Model
 small_molecules = ['h_c', 'h_e']
 
 model_gen = FromPyTFA(small_molecules=small_molecules)
-this_skimpy_model = model_gen.import_model(this_pytfa_model, solution.raw)
+kmodel = model_gen.import_model(tmodel, solution.raw)
 
 
 """
@@ -120,14 +121,14 @@ Sanitize the solution to match with the skimpy model
 """
 
 # Map fluxes back to reaction variables
-this_flux_solution = get_reaction_data(this_pytfa_model, solution.raw)
+this_flux_solution = get_reaction_data(tmodel, solution.raw)
 # Create the flux dict
 flux_dict = this_flux_solution[[i for i in
-                                this_skimpy_model.reactions.keys()]].to_dict()
+                                kmodel.reactions.keys()]].to_dict()
 
 # Create a concentration dict with consistent names
-variable_names = this_pytfa_model.log_concentration.list_attr('name')
-metabolite_ids = this_pytfa_model.log_concentration.list_attr('id')
+variable_names = tmodel.log_concentration.list_attr('name')
+metabolite_ids = tmodel.log_concentration.list_attr('id')
 
 temp_concentration_dict = np.exp(solution.raw[variable_names]).to_dict()
 
@@ -138,53 +139,31 @@ concentration_dict = {mapping_dict[k]: v for k, v in
                       temp_concentration_dict.items()}
 
 
+
 """
-Sample the kinetic parameters based on linear stablity 
+Sample the kinetic parameters based on linear stability
 """
-this_skimpy_model.prepare(mca=True)
+kmodel.prepare(mca=True)
 # Compile MCA functions
-this_skimpy_model.compile_mca(sim_type=QSSA)
+kmodel.compile_mca(sim_type=QSSA)
 
 # Initialize parameter sampler
-sampling_parameters = SimpleParameterSampler.Parameters(n_samples=5)
+sampling_parameters = SimpleParameterSampler.Parameters(n_samples=10)
 sampler = SimpleParameterSampler(sampling_parameters)
 
 # Sample the model
-parameter_population = sampler.sample(this_skimpy_model, flux_dict,
+parameter_population = sampler.sample(kmodel, flux_dict,
                                       concentration_dict)
+parameter_population = ParameterValuePopulation(parameter_population, kmodel)
 
-"""
-Calculate control coefficients
-"""
-parameter_list = TabDict([(k, p.symbol) for k, p in
-                          this_skimpy_model.parameters.items() if
-                          p.name.startswith('vmax_forward')])
+# Perform resampling
+resampler = SimpleResampler(sampling_parameters)
+parameters_to_resample = [kmodel.parameters.km_substrate_ENO, ]
+resampled_population = resampler.sample(kmodel, flux_dict,
+                                        concentration_dict, parameters_to_resample,
+                                        parameter_population._data)
+# ToDo user theParameterValuePopulation and ParameterValues objects as input and output of the sampling functions
+resampled_population = ParameterValuePopulation(resampled_population, kmodel)
 
-this_skimpy_model.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
+# Calculate the output for the two parameter populations
 
-flux_control_coeff = this_skimpy_model.flux_control_fun(flux_dict,
-                                                        concentration_dict,
-                                                        parameter_population)
-
-
-"""
-Integrate the ODEs
-"""
-
-this_skimpy_model.compile_ode(sim_type=QSSA)
-
-
-this_skimpy_model.initial_conditions = TabDict([(k, v)for k, v in
-                                                concentration_dict.items()])
-
-solutions = []
-for parameters in parameter_population:
-    this_skimpy_model.parameters = parameters
-    this_sol_qssa = this_skimpy_model.solve_ode(np.linspace(0.0, 0.5, 1000),
-                                                solver_type='cvode')
-    solutions.append(this_sol_qssa)
-
-this_sol_qssa.plot('output/tutorial_oracle_toy.html')
-
-solpop = ODESolutionPopulation(solutions)
-solpop.plot('output/tutorial_oracle_pop_{}.html')
