@@ -48,7 +48,7 @@ def load_fluxes(solution_raw,tmodel,kmodel,
                           "is required as input or field of kmodel")
 
     # Flux solution input assumed to be mmol/gDW/hr
-    flux_scaling_factor =  1e-3 / (ratio_gdw_gww / density) \
+    flux_scaling_factor =  1e-3 * (ratio_gdw_gww * density) \
                            * concentration_scaling \
                            / time_scaling
 
