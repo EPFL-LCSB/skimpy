@@ -54,7 +54,8 @@ class SimpleParameterSampler(ParameterSampler):
                concentration_dict,
                only_stable=True,
                min_max_eigenvalues=False,
-               seed=123):
+               seed=123,
+               bounds_sample=(0,1),):
 
         parameter_population = []
         smallest_eigenvalues = []
@@ -62,6 +63,7 @@ class SimpleParameterSampler(ParameterSampler):
 
         self.seed = seed
         np.random.seed(self.seed)
+        self.bounds_sample = bounds_sample
 
         # Unpack fluxes and concentration into arrays consitent with the
         # compiled functions
@@ -181,7 +183,8 @@ class SimpleParameterSampler(ParameterSampler):
             saturations = []
         else:
             n_sats = len(compiled_model.saturation_parameter_function.sym_saturations)
-            saturations = sample(n_sats)
+            a,b = self.bounds_sample
+            saturations = sample(n_sats)*(b-a) + a
 
         # Calculate the Km's
         compiled_model.saturation_parameter_function(

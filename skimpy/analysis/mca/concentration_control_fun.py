@@ -40,10 +40,12 @@ class ConcentrationControlFunction:
                  independent_elasticity_function,
                  dependent_elasticity_function,
                  parameter_elasticity_function,
+                 volume_ratio_function,
                  conservation_relation,
                  independent_variable_ix,
                  dependent_variable_ix,
                  ):
+
         self.model = model
         self.reduced_stoichometry = reduced_stoichometry
         self.dependent_elasticity_function = dependent_elasticity_function
@@ -52,6 +54,7 @@ class ConcentrationControlFunction:
         self.independent_variable_ix = independent_variable_ix
         self.dependent_variable_ix = dependent_variable_ix
         self.conservation_relation = conservation_relation
+        self.volume_ratio_function = volume_ratio_function
 
     def __call__(self,  flux_dict, concentration_dict, parameter_population):
 
@@ -66,25 +69,34 @@ class ConcentrationControlFunction:
         # Only consider independent concentrations
         concentrations = [concentration_dict[r] for r in self.model.reactants]
 
-        num_parameters = len(self.parameter_elasticity_function.expressions)
+        num_parameters = len(self.parameter_elasticity_function.respective_variables)
         num_concentration = len(self.independent_variable_ix)
         population_size = len(parameter_population)
 
-        concentration_control_coefficients = zeros((num_concentration,num_parameters,population_size))
+        concentration_control_coefficients = zeros((num_concentration, num_parameters, population_size))
 
         for i,parameters in enumerate(parameter_population):
 
             flux_matrix = diags(array(fluxes), 0).tocsc()
 
+            if self.volume_ratio_function is None:
+                volume_ratios = array([1, ] * len(concentrations) )
+            else:
+                volume_ratios = self.volume_ratio_function(parameters)
+
             # Elasticity matrix
 
             if self.conservation_relation.nnz == 0:
                 # If there are no moieties
+                volume_ratio_matrix =  diags(array(volume_ratios)).tocsc()
+
                 elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
 
             else:
-                # If there are omieties
+                # If there are moieties
                 ix = self.independent_variable_ix
+
+                volume_ratio_matrix = diags(array(volume_ratios)[ix]).tocsc()
 
                 elasticity_matrix = self.independent_elasticity_function(concentrations, parameters)
 
@@ -94,18 +106,19 @@ class ConcentrationControlFunction:
                                     L0=self.conservation_relation,
                                     all_dependent_ix=self.dependent_variable_ix,
                                     all_independent_ix=self.independent_variable_ix,
+                                    volume_ratios=volume_ratios
                                 )
 
                 # Calculate the effective elasticises
                 elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
                                      .dot(dependent_weights)
 
-            N_E_V = self.reduced_stoichometry.dot(flux_matrix).dot(elasticity_matrix)
+            N_E_V = volume_ratio_matrix.dot(self.reduced_stoichometry).dot(flux_matrix).dot(elasticity_matrix)
             N_E_V_inv = sparse_inv(N_E_V)
 
             parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
 
-            N_E_P = self.reduced_stoichometry.dot(flux_matrix).dot(parameter_elasticity_matrix)
+            N_E_P = volume_ratio_matrix.dot(self.reduced_stoichometry).dot(flux_matrix).dot(parameter_elasticity_matrix)
 
             this_cc = - N_E_V_inv.dot(N_E_P)
             concentration_control_coefficients[:,:,i] = this_cc.todense()

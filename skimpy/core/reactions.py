@@ -36,15 +36,18 @@ class Reaction(object):
     def __init__(self, name, reactants, mechanism, parameters=None, inhibitors=None, enzyme=None):
         self.name = name
         self.enzyme = enzyme
+
         if inhibitors is not None:
             self.mechanism = mechanism(name=name,
                                        reactants=reactants,
                                        parameters=parameters,
-                                       inhibitors=inhibitors)
+                                       inhibitors=inhibitors,
+                                       enzyme=enzyme)
         else:
             self.mechanism = mechanism(name=name,
                                        reactants=reactants,
-                                       parameters=parameters)
+                                       parameters=parameters,
+                                       enzyme=enzyme)
         self.modifiers = TabDict([])
 
     # Hooks to the mechanism attributes for convenience
@@ -77,30 +80,29 @@ class Reaction(object):
                     reactant_stoichiometry[this_reactant] = v
 
         for this_modifier in self.modifiers.values():
-            this_mod_sm = this_modifier.reactants.small_molecule
-            if this_mod_sm.type == VARIABLE:
-                reactant_stoichiometry[this_mod_sm] = this_modifier.reactant_stoichiometry
+            for k,v in this_modifier.reactants.items():
+                if v.type == VARIABLE and this_modifier.reactant_stoichiometry[k] != 0:
+                    reactant_stoichiometry[v] = this_modifier.reactant_stoichiometry[k]
         return reactant_stoichiometry
 
     @property
     def parameters(self):
-        parameters = TabDict( (k,r) for k,r in self.mechanism.parameters.items()
-                                    if r.type == PARAMETER)
+        parameters = TabDict( (k, r) for k, r in self.mechanism.parameters.items()
+                                     if r.type == PARAMETER)
         parameters.update(TabDict((k, r) for k, r in self.mechanism.reactants.items()
                              if r.type == PARAMETER))
 
         for this_modifier in self.modifiers.values():
-            this_params = TabDict( (k,r) for k,r in this_modifier.parameters.items()
-                                     if r.type == PARAMETER)
+            this_params = TabDict( (k, r) for k, r in this_modifier.parameters.items()
+                                          if r.type == PARAMETER)
             this_params.update(TabDict((k, r) for k, r in this_modifier.reactants.items()
-                                  if r.type == PARAMETER))
+                                              if r.type == PARAMETER))
             parameters.update(this_params)
-
         return parameters
 
     @parameters.setter
     def parameters(self, value):
-        for name,p in value.items():
+        for name, p in value.items():
             p.suffix = self.name
         self.mechanism.parameters = value
 

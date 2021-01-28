@@ -157,6 +157,7 @@ class Reactant(Item):
     def __init__(self, name, value = None, model=None, suffix = ''):
         Item.__init__(self, name, value=value, model=model, suffix=suffix)
         self.type = VARIABLE
+        self.compartment = None
 
 
 class ReactantSet(ItemSet):

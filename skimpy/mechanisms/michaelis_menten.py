@@ -69,10 +69,10 @@ class ReversibleMichaelisMenten(KineticMechanism):
                                                             ])
 
 
-    def __init__(self, name, reactants, parameters=None):
+    def __init__(self, name, reactants, parameters=None, **kwargs):
         # FIXME dynamic linking, separaret parametrizations from model init
         # FIXME Reaction has a mechanism, and this is a mechanism
-        KineticMechanism.__init__(self, name, reactants, parameters)
+        KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
     def get_qssa_rate_expression(self):
         s = self.reactants.substrate.symbol
@@ -82,7 +82,7 @@ class ReversibleMichaelisMenten(KineticMechanism):
         kmp = self.parameters.km_product.symbol
 
         keq = self.parameters.k_equilibrium.symbol
-        if self.with_catalyst_concentration:
+        if self.enzyme is not None:
             enzyme = self.reactants.enzyme.symbol
             kcat = self.parameters.kcat_forward.symbol
             vmaxf = kcat*enzyme

@@ -102,7 +102,11 @@ class ElasticityFunction:
 
         return elasticiy_matrix
 
-    def get_dependent_weights(self, concentration_vector, L0, all_independent_ix, all_dependent_ix):
+    def get_dependent_weights(self, concentration_vector,
+                              L0,
+                              all_independent_ix,
+                              all_dependent_ix,
+                              volume_ratios = None):
 
         # TODO This derivation does not allow cross dependencies of dependent metabolites!
         # Usually you can find basis that omit this
@@ -115,6 +119,8 @@ class ElasticityFunction:
         Xi = X[all_independent_ix]
         Xd = X[all_dependent_ix]
 
+
+
         # L0 = [Fd | Fi]
         # Thus Fd*x_d = -Fi*xi + C
         # xd = (Fd^-1).(-Fi*xi + C)
@@ -124,11 +130,17 @@ class ElasticityFunction:
         # Qd = dxd / xd * xi / dxi
         # Qd = ( xd^-1 ) * dxd/dxi * xi
 
-        # Fi Factors for in dependent concentrations
-        Fi = L0[:, all_independent_ix]
+        if volume_ratios is None:
+            # Fi Factors for in dependent concentrations
+            Fi = L0[:, all_independent_ix]
+            # Fd Factors for dependent concentrations
+            Fd = L0[:, all_dependent_ix]
 
-        # Fd Factors for dependent concentrations
-        Fd = L0[:, all_dependent_ix]
+        else:
+            v_d_ = diags( reciprocal(volume_ratios[all_dependent_ix])).tocsc()
+            Fd = L0[:, all_dependent_ix].dot(v_d_)
+            v_i_ = diags( reciprocal(volume_ratios[all_independent_ix])).tocsc()
+            Fi = L0[:, all_independent_ix].dot(v_i_)
 
         dxd_dxi = sparse_inv(Fd).dot(-Fi)
 

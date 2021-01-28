@@ -76,6 +76,11 @@ class FluxControlFunction:
 
         for i, parameters in enumerate(parameter_population):
 
+            if self.concentration_control_fun.volume_ratio_function is None:
+                volume_ratios = array([1, ] * len(concentrations) )
+            else:
+                volume_ratios = self.concentration_control_fun.volume_ratio_function(parameters)
+
             # Elasticity matrix
             if self.conservation_relation.nnz == 0:
                 # If there are no moieties
@@ -91,6 +96,7 @@ class FluxControlFunction:
                                     L0=self.conservation_relation,
                                     all_dependent_ix=self.dependent_variable_ix,
                                     all_independent_ix=self.independent_variable_ix,
+                                    volume_ratios=volume_ratios
                                 )
 
                 # Calculate the effective elasticises

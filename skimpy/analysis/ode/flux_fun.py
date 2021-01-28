@@ -50,7 +50,7 @@ class FluxFunction:
         the_variable_keys = [x for x in variables]
         sym_vars = list(symbols(the_variable_keys+the_param_keys))
 
-        self.function = make_cython_function(sym_vars, expr.values(), simplify=False, pool=pool)
+        self.function = make_cython_function(sym_vars, expr.values(), simplify=True, pool=pool)
 
 
     def __call__(self,concentrations,  parameters=None):

@@ -53,7 +53,8 @@ def test_fluxes():
 
     calc_fluxes = make_flux_fun(dummy_model, ELEMENTARY)
 
-    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
+    parameter_values = {k:v.value for k,v in dummy_model.parameters.items()}
+    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameters=parameter_values)
 
 
     dummy_model.compile_ode(sim_type=QSSA)
@@ -65,8 +66,8 @@ def test_fluxes():
     this_sol_full = dummy_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
     calc_fluxes = make_flux_fun(dummy_model, QSSA)
-
-    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
+    parameter_values = {k:v.value for k,v in dummy_model.parameters.items()}
+    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameters=parameter_values)
 
 def test_export():
     export_to_yaml(dummy_model, dummy_model_path)
@@ -75,7 +76,7 @@ def test_cobra_import():
     from skimpy.io.generate_from_cobra import FromCobra
     from cobra.io.mat import load_matlab_model
 
-    this_cobra_model = load_matlab_model(join(file_dir,'..','models','toy_model.mat'), 'ToyModel_DP')
+    this_cobra_model = load_matlab_model(join(file_dir,'..','models','toy_model.mat'), 'model')
 
     model_gen = FromCobra()
     this_skimpy_model = model_gen.import_model(this_cobra_model)

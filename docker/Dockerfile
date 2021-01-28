@@ -1,4 +1,4 @@
-FROM python:3.5-stretch
+FROM python:3.6-stretch
 # Install missing deps
 USER root
 # Install unix requirements for the docker
@@ -17,7 +17,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libflint-dev    \
         libgmp-dev      \
 		yasm            \
-    && rm -rf /var/lib/apt/lists/*
+		xvfb            \
+		xauth           \
+		ffmpeg          \
+        firefox-esr
 
 ENV USER skimpy
 ENV HOME /home/$USER
@@ -33,18 +36,20 @@ RUN mkdir /src
 COPY src/ /src/
 
 # Copy python package requirements
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --upgrade pipenv
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-
-
-# Install python packages
-#COPY install_pytfa_dev.sh .
-#RUN /bin/bash install_pytfa_dev.sh
-
 
 COPY ./utils /utils
 # Make executable
 RUN chmod +x /utils/*.sh
+
+# Install sundials
+RUN /utils/install_chrome.sh
+
+# Clean up lists
+RUN rm -rf /var/lib/apt/lists/*
 
 # Install sundials
 RUN /utils/install_sundials.sh
@@ -52,7 +57,7 @@ RUN /utils/install_sundials.sh
 # Export environment variables from installation
 ENV SUNDIALS_INCLUDEDIR ="${HOME}/sundials-3.1.1/include"
 ENV SUNDIALS_LIBDIR ="${HOME}/sundials-3.1.1/lib"
-ENV SUNDIALS_INST="${HOME}/sundials-2.7.0"
+ENV SUNDIALS_INST="${HOME}/sundials-3.1.1"
 # Install python interface to sundials
 #modify this
 RUN pip install 'scikits.odes== 2.4.1'
@@ -76,7 +81,7 @@ RUN mkdir /skimpy
 
 COPY .bashrc $HOME
 RUN chown "$USER" "$HOME/.bashrc"
-RUN chown -R "$USER" "$HOME/.cache"
+#RUN chown -R "$USER" "$HOME/.cache"
 
 #Finalizing installation
 
@@ -84,7 +89,11 @@ USER $USER
 RUN mkdir ./work
 WORKDIR ./work
 
-
 # Load your package in development mode on startup
-ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && $0 $*"]
+#ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy/docker/pytfa && \
+#                                pip install --user -e /skimpy[ORACLE] && \
+#                                $0 $*"]
+ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && \
+                                $0 $*"]
+
 CMD /bin/bash

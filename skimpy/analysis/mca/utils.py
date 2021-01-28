@@ -94,6 +94,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         for non_int_ix in list(non_integer_rxn_idx):
             rxn_array = S_integer[:,non_int_ix]
             nonzero = np.where(rxn_array)[0]
+            # TODO Pass a parameter option to limit denom
             denoms = [Fraction(x[0,0]).limit_denominator().denominator for x in rxn_array[nonzero]]
             gcd = functools.reduce(lambda a, b: a * b // math.gcd(a, b), denoms)
 
@@ -102,7 +103,13 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         S_integer = S_integer.astype(int)
         left_basis = left_integer_nullspace(S_integer)
 
+
     if left_basis.any():
+        # Check if the conservation relations are constent with the rank deficency!
+        rank_deficency = S.shape[0] - np.linalg.matrix_rank(S)
+        if left_basis.shape[0] != rank_deficency:
+            raise RuntimeError("There are not as many conservation realations as the rank deficieny of the matrix!"
+                               "Check stoichiometry!")
 
         L0, pivot = Matrix(left_basis).rref()
 
@@ -180,30 +187,14 @@ def get_dep_indep_vars_from_basis(L0, all_dependent_ix=None, concentrations=None
         # Indices for dependent metabolites indices
         all_dependent_ix = []
 
-        # For each line, get an exclusive representative.
-        # There should be at least as many exclusive representatives as lines
+        # Find dependents using the rref pivot
+        # This turn out to much more reliable compared to the old method of comparing the
+        # the number of occurances in other moieties.
+        # Further it results in an emperocally hier propability of finding stable models
+        # Missing a mathematical prove for this. Still happy it works! 
 
-        # Iterate over mojeties and start with the ones with least members
-        for row in sorted(row_dict, key=lambda k: len(row_dict[k])):
-            mojetie_vars = row_dict[row]
-            # Get all unassigned metabolites participating in this mojetie
-            unassigned_vars = [x for x in set(mojetie_vars)
-                .difference(all_independent_ix + all_dependent_ix)]
-            # Get the metabolite that participates in least mojeties:
-            if concentrations is None:
-                unassigned_vars_sorted = sorted(unassigned_vars,
-                                                key=lambda k: L0[:, k].count_nonzero())
-            else:
-                # The largest concentrations to be dependent
-                unassigned_vars_sorted = sorted(unassigned_vars,
-                                                key=lambda k: concentrations[k],
-                                                reverse=True)
-            # Choose a representative dependent metabolite:
-            if unassigned_vars_sorted:
-                all_dependent_ix.append(unassigned_vars_sorted[0])
-            else:
-                raise Exception('Could not find an dependent var that is not already used'
-                                ' in {}'.format(mojetie_vars))
+        _, all_dependent_ix = Matrix(L0.todense()).rref()
+        all_dependent_ix = list(all_dependent_ix)
 
     else:
         # The depednent ix are defined as an input

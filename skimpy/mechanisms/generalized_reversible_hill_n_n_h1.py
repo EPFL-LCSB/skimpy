@@ -71,6 +71,7 @@ def make_generalized_reversible_hill_n_n_h1(stoichiometry):
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'kcat_forward':[ODE,MCA,QSSA],
                           'k_equilibrium': [ODE, MCA, QSSA],
                           }
 
@@ -108,8 +109,8 @@ def make_generalized_reversible_hill_n_n_h1(stoichiometry):
         ElementaryReactions = namedtuple('ElementaryReactions',[])
 
 
-        def __init__(self, name, reactants, parameters=None):
-            KineticMechanism.__init__(self, name, reactants, parameters)
+        def __init__(self, name, reactants, parameters=None, **kwargs):
+            KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
         def get_qssa_rate_expression(self):
             # NOTE: THis should not be done based on the symbol of the reactant
@@ -127,7 +128,11 @@ def make_generalized_reversible_hill_n_n_h1(stoichiometry):
 
 
             keq = self.parameters.k_equilibrium.symbol
-            vmaxf = self.parameters.vmax_forward.symbol
+            if self.enzyme is None:
+                vmaxf = self.parameters.vmax_forward.symbol
+            else:
+                vmaxf = self.parameters.kcat_forward.symbol * \
+                        self.reactants.enzyme.symbol
 
             fwd_nominator = vmaxf
             bwd_nominator = vmaxf/keq

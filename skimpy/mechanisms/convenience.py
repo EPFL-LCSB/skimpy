@@ -59,6 +59,7 @@ def make_convenience(stoichiometry):
 
         reactant_list = []
         parameter_list = {'vmax_forward': [ODE, MCA, QSSA],
+                          'kcat_forward': [ODE,MCA,QSSA],
                           'k_equilibrium': [ODE, MCA, QSSA], }
 
         parameter_reactant_links = {}
@@ -92,10 +93,10 @@ def make_convenience(stoichiometry):
         ElementaryReactions = namedtuple('ElementaryReactions',[])
 
 
-        def __init__(self, name, reactants, parameters=None):
+        def __init__(self, name, reactants, parameters=None, **kwargs):
             # FIXME dynamic linking, separaret parametrizations from model init
             # FIXME Reaction has a mechanism, and this is a mechanism
-            KineticMechanism.__init__(self, name, reactants, parameters)
+            KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
         def get_qssa_rate_expression(self):
             reactant_km_relation = {self.reactants[v].symbol: k
@@ -109,7 +110,12 @@ def make_convenience(stoichiometry):
 
 
             keq = self.parameters.k_equilibrium.symbol
-            vmaxf = self.parameters.vmax_forward.symbol
+            #TODO EXTEND TO ALL OTHER MECHANISMS
+            if self.enzyme is None:
+                vmaxf = self.parameters.vmax_forward.symbol
+            else:
+                vmaxf = self.parameters.kcat_forward.symbol * \
+                        self.reactants.enzyme.symbol
 
             common_denominator_substrates = 1
             fwd_nominator = vmaxf

@@ -38,14 +38,14 @@ class KineticMechanism(ABC):
                  reactants,
                  parameters=None,
                  inhibitors=None,
-                 with_catalyst_concentration=False):
+                 enzyme=None):
 
         # ABC.__init__()
         self.name = name
         self.reactants = reactants
         self.inhibitors = None
         self._parameters = None
-        self.with_catalyst_concentration = with_catalyst_concentration
+        self.enzyme = enzyme
 
         if parameters is not None:
             self._parameters = parameters
@@ -53,8 +53,8 @@ class KineticMechanism(ABC):
         if inhibitors is not None:
             self.inhibitors = inhibitors
 
-        if with_catalyst_concentration:
-            self.reactants['enzyme'] = Reactant(self.name)
+        if enzyme is not None:
+            self.reactants['enzyme'] = Reactant(enzyme)
 
     def __reduce__(self):
             return KineticMechanism.__class__.__name__

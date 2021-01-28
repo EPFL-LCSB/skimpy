@@ -81,7 +81,7 @@ class ParameterValuePopulation(object):
             # Todo check for indexable
             self._data = [ ParameterValues(d,kmodel=kmodel) for d in data]
             if index is None:
-                self._index = [str(i) for i,_ in enumerate(data) ]
+                self._index = TabDict((str(i),i) for i,_ in enumerate(data))
             else:
                 self._index = TabDict((k,i) for i,k in enumerate(index))
 
@@ -91,7 +91,7 @@ class ParameterValuePopulation(object):
             raise TypeError("Type {} is not supported".format(type(data)))
 
     def __getitem__(self,  index):
-        if self._index  is None:
+        if self._index is None:
             return self._data[index]
         else:
             return self._data[self._index[index]]
@@ -102,6 +102,7 @@ class ParameterValuePopulation(object):
         # TODO more central way ?
         param_names = np.array([k for k,v  in self._data[0]._parameter_values.items() if not (v is None)],
                                dtype=object)
+
         string_dt = h5py.special_dtype(vlen=str)
 
         f.create_dataset('parameter_names', data=param_names, dtype=string_dt)
@@ -127,10 +128,11 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
     if upper_index is None:
         upper_index = int(np.array(f.get('num_parameters_sets')))
 
-    param_names = np.array(f.get('parameter_names'))
+    # deconde
+    param_names = f.get('parameter_names')[:].astype(np.unicode_)
 
     try:
-        index = np.array(f.get('index'))
+        index = f.get('index')[:].astype(np.unicode_)
         if index[0] is None:
             index = None
     except: # Put an error here
@@ -138,7 +140,7 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
 
     for i in range(lower_index,upper_index):
         this_param_set = 'parameter_set_{}'.format(i)
-        param_values = np.array(f.get(this_param_set))
+        param_values = f.get(this_param_set)[:].astype(np.float)
         this_data = {k:v for k,v in zip(param_names,param_values)}
         data.append(this_data)
     if index is None:

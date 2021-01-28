@@ -51,18 +51,21 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
             # Update rate expressions
             for this_mod in this_reaction.modifiers.values():
                 this_mod(this_reaction.mechanism.reaction_rates)
-            this_reaction.mechanism.update_qssa_rate_expression()
+                this_reaction.mechanism.update_qssa_rate_expression()
 
-            # Add modifier expressions
-            for this_mod in this_reaction.modifiers.values():
-                small_mol = this_mod.reactants['small_molecule']
-                sm = small_mol.symbol
-                flux = this_reaction.mechanism.reaction_rates['v_net']
-                flux_expression_sm = flux*this_mod.reactant_stoichiometry
-                this_reaction.mechanism.expressions[sm] = flux_expression_sm
-                # Add small molecule parameters if they are
-                if small_mol.type == PARAMETER:
-                    this_reaction.mechanism.expression_parameters.update([small_mol.symbol])
+                for r_type, reactant in this_mod.reactants.items():
+                    # Add massbalances for modfier reactants if as non-zero stoich
+                    if this_mod.reactant_stoichiometry[r_type] == 0:
+                        continue
+                    
+                    mod_sym = reactant.symbol
+                    flux = this_reaction.mechanism.reaction_rates['v_net']
+                    flux_expression = flux * this_mod.reactant_stoichiometry[r_type]
+                    this_reaction.mechanism.expressions[mod_sym] = flux_expression
+
+                    # Add small molecule parameters if they are
+                    if reactant.type == PARAMETER:
+                        this_reaction.mechanism.expression_parameters.update([mod_sym])
 
             all_data.append((this_reaction.mechanism.expressions,
                              this_reaction.mechanism.expression_parameters))

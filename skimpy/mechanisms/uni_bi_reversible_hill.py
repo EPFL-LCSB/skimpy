@@ -56,6 +56,7 @@ class UniBiReversibleHill(KineticMechanism):
     Parameters = make_parameter_set(__name__,
                                         {
                                             'vmax_forward': [ODE, MCA, QSSA],
+                                            'kcat_forward':[ODE,MCA,QSSA],
                                             'k_equilibrium':[ODE, MCA, QSSA],
                                             'hill_coefficient': [ODE, MCA, QSSA],
                                             'km_substrate': [ODE, MCA, QSSA],
@@ -80,8 +81,8 @@ class UniBiReversibleHill(KineticMechanism):
     ElementaryReactions = namedtuple('ElementaryReactions',[])
 
 
-    def __init__(self, name, reactants, parameters=None):
-        KineticMechanism.__init__(self, name, reactants, parameters)
+    def __init__(self, name, reactants, parameters=None, **kwargs):
+        KineticMechanism.__init__(self, name, reactants, parameters, **kwargs)
 
     def get_qssa_rate_expression(self):
         reactant_km_relation = {self.reactants[v].symbol: k
@@ -97,7 +98,12 @@ class UniBiReversibleHill(KineticMechanism):
 
 
         keq = self.parameters.k_equilibrium.symbol
-        vmaxf = self.parameters.vmax_forward.symbol
+        
+        if self.enzyme is None:
+            vmaxf = self.parameters.vmax_forward.symbol
+        else:
+            vmaxf = self.parameters.kcat_forward.symbol * \
+                    self.reactants.enzyme.symbol
 
         s = substrates['substrate'].symbol
         p1 = products['product1'].symbol
