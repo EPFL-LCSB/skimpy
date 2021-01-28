@@ -44,7 +44,8 @@ class FluxParameterFunction():
                              for rxn in model.reactions.values()]
 
         sym_vars = self.sym_parameters+self.sym_concentrations
-        self.function = make_cython_function(sym_vars, self.expressions, simplify=False, pool=model.pool)
+        self.function = make_cython_function(sym_vars, self.expressions, simplify=True,
+                                             pool=model.pool)
 
     def __call__(self,
                  model,

@@ -86,7 +86,7 @@ def convert_cobra_to_tfa(cobra_model):
     tmodel.convert(add_displacement = True)
 
     # Set the solver
-    tmodel.solver = CPLEX
+    tmodel.solver = GLPK
     # Set solver options
     tmodel.solver.configuration.tolerances.optimality = 1e-9
     tmodel.solver.configuration.tolerances.feasibility = 1e-9
@@ -108,7 +108,7 @@ def prepare_tfa_model_for_kinetic_import(tmodel):
     # Add minimum flux requirements basal fluxes 1e-6
     # safe: ensure that fluxes that cant obey the minimum requirement are removed
 
-    tmodel = add_min_flux_requirements(tmodel, BASL_FLUX, inplace=True, safe=True)
+    tmodel = add_min_flux_requirements(tmodel, BASL_FLUX, inplace=True )
     solution = tmodel.optimize()
 
     # Fix the flux directionality profile (FDP)
@@ -176,8 +176,8 @@ def test_compile_mca():
     kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
 
-@pytest.mark.dependency(name=['test_sampling_linear_pathway','test_compile_mca'])
-def test_oracle_sampling():
+@pytest.mark.dependency(name=['test_parameter_sampling_linear_pathway','test_compile_mca'])
+def test_oracle_parameter_sampling():
 
     # Initialize parameter sampler
     sampling_parameters = SimpleParameterSampler.Parameters(n_samples=100)
@@ -188,7 +188,14 @@ def test_oracle_sampling():
 
 
 
-@pytest.mark.dependency(name=['test_oracle_sampling','test_compile_mca'])
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
+def test_oracle_flux_concentration_sampling():
+
+    pass
+
+
+
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
 def test_oracle_ode():
 
     # Initialize parameter sampler
@@ -214,7 +221,7 @@ def test_oracle_ode():
     solpop = ODESolutionPopulation(solutions)
 
 
-@pytest.mark.dependency(name=['test_oracle_sampling','test_compile_mca'])
+@pytest.mark.dependency(name=['test_oracle_parameter_sampling','test_compile_mca'])
 def test_oracle_mca():
 
 
@@ -236,3 +243,5 @@ def test_oracle_mca():
     concentration_control_coeff = kmodel.concentration_control_fun(flux_dict,
                                                                    concentration_dict,
                                                                    parameter_population)
+
+

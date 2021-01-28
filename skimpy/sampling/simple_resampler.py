@@ -25,9 +25,7 @@ limitations under the License.
 
 """
 
-from collections import namedtuple
 import numpy as np
-from numpy.random import sample
 from scipy.linalg import eigvals as eigenvalues
 from sympy import Symbol
 
@@ -39,10 +37,15 @@ from skimpy.sampling import SimpleParameterSampler
 class SimpleResampler(SimpleParameterSampler):
     """
     A parameter sampler that tries to resample parameters that are not included
-    in the given fixed_parameter_population. The maximum number of trials to get
-    a stable model is implemented differently than `SimpleParameterSampler`, the
-    maximum number of trials is defined per sample in
-    `fixed_parameter_population`
+    in the given fixed_parameter_population.
+
+    The maximum number of trials to get a stable model is implemented
+    differently than `SimpleParameterSampler`. In `SimpleParameterSampler` the
+    maximum number of trials is the maximum # of sampling attemps to get a
+    stable model when `.sample()` is called. Here, maximum number of trials is
+    defined per parameter vector in `fixed_parameter_population`. If a certain
+    parameter vector exceeds the maximum # of trials to get a stable model, the
+    method moves to the next parameter vector in `fixed_parameter_population`
 
     Used for performing Global Sensitivity Analysis
     """
@@ -51,9 +54,11 @@ class SimpleResampler(SimpleParameterSampler):
                compiled_model,
                flux_dict,
                concentration_dict,
+               parameters_to_resample,
                fixed_parameter_population,
                min_max_eigenvalues=False,
-               seed=123):
+               seed=321):  # TODO: this seed needs to be different from the
+                           # `SimpleParameterSampler` seed. should it be removed? 
 
         parameter_population = []
         smallest_eigenvalues = []
@@ -74,26 +79,26 @@ class SimpleResampler(SimpleParameterSampler):
         symbolic_concentrations_dict = {Symbol(k): v
                                         for k, v in concentration_dict.items()}
 
-        trials = 0
+        # TODO: remove this? should already be done in `SimpleParameterSampler`
+        if not hasattr(compiled_model, 'saturation_parameter_function')\
+           or not hasattr(compiled_model, 'flux_parameter_function'):
+            self._compile_sampling_functions(
+                compiled_model,
+                symbolic_concentrations_dict,
+                flux_dict)
 
-        # Compile functions
-        self._compile_sampling_functions(
-            compiled_model,
-            symbolic_concentrations_dict,
-            flux_dict)
-
-        for this_parameter in fixed_parameter_population:
-
+        # Try to re-sample for each supplied parameter vector
+        for these_parameters in fixed_parameter_population:
+            # only try 10 times to get a stable model, else skip to next
             trials = 0
-            while trials < 1e4:
+            while trials < 10:
                 # try get a stable model
                 parameter_sample = self._sample_saturation_step_compiled(
                     compiled_model,
                     symbolic_concentrations_dict,
-                    flux_dict)
-
-                # combine the resampled paramters with those from the
-                # fixed_parameter_population
+                    flux_dict,
+                    parameters_to_resample=parameters_to_resample,
+                    fixed_parameters=these_parameters)
 
                 # Check stability: real part of all eigenvalues of the jacobian
                 # is <= 0
@@ -101,9 +106,6 @@ class SimpleResampler(SimpleParameterSampler):
                                                             concentrations,
                                                             parameter_sample)
 
-                # largest_eigenvalue = eigenvalues(this_jacobian, k=1,
-                # which='LR', return_eigenvectors=False)
-                # Test suggests that this is apparently much faster ....
                 this_real_eigenvalues = np.real(sorted(
                     eigenvalues(this_jacobian.todense())))
 
@@ -115,14 +117,18 @@ class SimpleResampler(SimpleParameterSampler):
                 compiled_model.logger.info('Model is stable? {} '
                                            '(max real part eigv: {})'.
                                            format(is_stable, largest_eigenvalue))
+
+                # Save the sample if stable, exit the `while` loop
                 if is_stable:
                     parameter_population.append(parameter_sample)
                     largest_eigenvalues.append(largest_eigenvalue)
                     smallest_eigenvalues.append(smallest_eigenvalue)
-                    continue
-                trials += 1
+                    break
+                else:
+                    trials += 1
 
         if min_max_eigenvalues:
-            return parameter_population, largest_eigenvalues, smallest_eigenvalues
+            return parameter_population, largest_eigenvalues, \
+                   smallest_eigenvalues
         else:
             return parameter_population

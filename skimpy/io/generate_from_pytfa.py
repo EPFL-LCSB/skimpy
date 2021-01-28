@@ -70,16 +70,19 @@ class FromPyTFA(FromCobra):
         for this_reaction in pytfa_model.reactions:
             if not check_boundary_reaction(this_reaction):
 
-                k_eq, deltag0 = self.get_equlibrium_constant(pytfa_model,
+                k_eq, delta_g0, delta_g = self.get_equlibrium_constant(pytfa_model,
                                                              pytfa_solution_raw,
                                                              this_reaction,
                                                              scaling_factor=concentration_scaling_factor)
 
                 # Check the reversibility of the reaction
-                if deltag0 < -self.max_revesible_deltag_0:
+                forward = delta_g < 0
+                backward = delta_g > 0
+                large_delta_g0 = abs(delta_g0) > self.max_revesible_deltag_0
+                if forward and large_delta_g0:
                     # Forward
                     irrev_direction = 1
-                elif deltag0 > self.max_revesible_deltag_0:
+                elif backward and large_delta_g0:
                     # Barckwards
                     irrev_direction = -1
                 else:
@@ -123,9 +126,14 @@ class FromPyTFA(FromCobra):
         # We here calculate the delta G from
         try:
             scaling_order = sum(this_reaction.metabolites.values() )
-
             var_delta_g = pytfa_model.delta_g.get_by_id(this_reaction.id).name
             deltag0 = pytfa_solution_data[var_delta_g]
+            deltag  = pytfa_solution_data[var_delta_g]
+            is_in_model = True
+        except KeyError:
+            is_in_model = False
+
+        if is_in_model:
             # Calculate the deltaG0 based on the reactants that will
             # be part in the model
             for met, s in pytfa_model.reactions.get_by_id(this_reaction.id).metabolites.items():
@@ -135,13 +143,15 @@ class FromPyTFA(FromCobra):
                     met_lc = pytfa_solution_data[var_met_lc]
                     deltag0 -= s * RT * (met_lc + log(scaling_factor))
 
-        except KeyError:
+        else:
             deltag0 = self.dummy_dgo
+            deltag  = 0
 
         k_eq = deltag0_to_keq(deltag0,
                               temp,
                               gas_constant=gas_constant)
-        return k_eq, deltag0
+
+        return k_eq, deltag0, deltag
 
 
 

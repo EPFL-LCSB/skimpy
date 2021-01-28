@@ -25,53 +25,82 @@ limitations under the License.
 
 """
 
-import Cython
+import ctypes
 import re
 import os
 
-import multiprocessing
+import numpy as np
 
+import tempfile
+
+import multiprocessing
 from sympy.printing import ccode
 
-CYTHON_DECLARATION = "# cython: boundscheck=True, wraparound=False,"+\
-                     "nonecheck=True, initializecheck=False , optimize=False, language=c++\n"
 
-SQRT_FUNCTION = "cdef extern from \"math.h\": \n double sqrt(double x) \n"
-EXP_FUNCTION = "cdef extern from \"math.h\": \n double exp(double x) \n"
+"""
+TODO: 
+We currently use cython to generate the code, this offers a safe type conversion.
+The generated cython code wraps every line in a function increasing the compilation
+and execution time 
+But as sympy code printer directly prints C-code we should use this to generate a swig interface.
+"""
 
-def _set_cflags():
-    """ Suppress cython warnings by setting -w flag """
+# This should be plat form depednent using distrtools
+COMPILER = "gcc -fPIC -shared -w -O3"
 
-    flags = '-w -O0'
+# Test to write our own compiler
+INCLUDE = "#include <stdlib.h>\n" \
+          "#include <math.h>\n"
 
-    if 'CFLAGS' not in os.environ:
-        os.environ['CFLAGS'] = flags
-    elif not flags in os.environ['CFLAGS']:
-        os.environ['CFLAGS'] = os.environ['CFLAGS'] + " " + flags
+FUNCTION_DEFINITION_HEADER = "void function(double *input_array, double *output_array){ \n"
+FUNCTION_DEFINITION_FOOTER = ";\n}"
 
-
-
-def make_cython_function(symbols, expressions, quiet=True, simplify=True, pool=None):
+def make_cython_function(symbols, expressions, quiet=True, simplify=True, optimize=False, pool=None):
 
     code_expressions = generate_vectorized_code(symbols,
                                                 expressions,
                                                 simplify=simplify,
                                                 pool=pool)
 
-    _set_cflags()
+
+    # Write the code to a temp file
+    code = INCLUDE + FUNCTION_DEFINITION_HEADER + code_expressions + FUNCTION_DEFINITION_FOOTER
+    path_to_c_file = write_code_to_tempfile(code)
+    path_to_so_file = path_to_c_file.replace('.c', '.so')
+
+    # Compile the code
+    cmd = " ".join([COMPILER, '-o ',path_to_so_file, path_to_c_file] )
+    # Todo catch errors
+    # Todo catch errors
+    os.system(cmd)
+
+    # Import the function
+    fun = ctypes.CDLL(path_to_so_file)
 
     def this_function(input_array,output_array):
+        # Input pointers
+        fun.function.argtypes = [ctypes.POINTER(ctypes.c_double),
+                                 ctypes.POINTER(ctypes.c_double),]
+        #Cast to numpy float
+        if not type(input_array) ==  np.ndarray.dtype:
+            input_array = np.array(input_array, dtype=np.float)
 
-        code = CYTHON_DECLARATION+SQRT_FUNCTION+EXP_FUNCTION+code_expressions
-
-        Cython.inline(code,
-                     language_level=3,
-                     quiet=quiet,)
+        #x.ctypes.data_as(ctypes.POINTER(ctypes.c_long))
+        fun.function(input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_double)) ,
+                     output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), )
 
     return this_function
 
+def write_code_to_tempfile(code,file_path=None):
+    if file_path is None:
+        # make a tempfile
+        (_, file_path) = tempfile.mkstemp(suffix = '.c')
 
-def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
+    with open(file_path, "w") as text_file:
+        text_file.write(code)
+    return file_path
+
+def generate_vectorized_code(inputs, expressions, simplify=True, optimize=False, pool=None):
     # input substitution dict:
     input_subs = {str(e): "input_array[{}]".format(i)
                   for i, e in enumerate(inputs)}
@@ -95,14 +124,39 @@ def generate_vectorized_code(inputs, expressions, simplify=True, pool=None):
             i, e = zip(*enumerate(expressions))
             cython_code = pool.map(generate_a_code_line, zip(i, e, input_subs_input))
 
-    cython_code = '\n'.join(cython_code)
+    cython_code = ';\n'.join(cython_code)
 
     return cython_code
 
 
-def generate_a_code_line_simplfied(input):
+from sympy import cse
+
+def generate_a_code_line_simplfied(input , optimize=False):
     i, e, input_subs = input
-    cython_code = "output_array[{}] = {} ".format(i,ccode(e.simplify()))
+
+    # Use common sub expressions instead of simpilfy
+    if optimize:
+        common_sub_expressions, main_expression = cse(e.simplify())
+    else:
+        common_sub_expressions, main_expression = cse(e)
+    #print(main_expression)
+    cython_code = ''
+    for this_cse in common_sub_expressions:
+        cython_code=cython_code+'double {} = {} ;\n'.format(str(this_cse[0]),
+                                                    ccode(this_cse[1],standard='C99'))
+
+
+    cython_code = cython_code+"output_array[{}] = {} ;".format(i,ccode(main_expression[0]
+                                                                      ,standard='C99')
+                                                              )
+
+    # Subtitute generated common subexpression with unique common_sub_expresion names
+    for this_cse in common_sub_expressions:
+        gen_sym = str(this_cse[0])
+        unique_sym = "cse_{}_{}".format(i,gen_sym)
+        cython_code = re.sub(r"{}".format(gen_sym), r"{}".format(unique_sym),
+                             cython_code)
+
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",
@@ -116,9 +170,15 @@ def generate_a_code_line_simplfied(input):
     return cython_code
 
 
-def generate_a_code_line(input):
+def generate_a_code_line(input, optimize=False):
     i, e, input_subs = input
-    cython_code = "output_array[{}] = {} ".format(i,ccode(e))
+
+    if optimize:
+        cython_code = "output_array[{}] = {} ".format(i, ccode(e.simplify()), standard='C99')
+    else:
+        cython_code = "output_array[{}] = {} ".format(i,ccode(e, standard='C99'))
+
+
     # Substitute integers in the cython code
     cython_code = re.sub(r"(\ |\+|\-|\*|\(|\)|\/|\,)([1-9])(\ |\+|\-|\*|\(|\)|\/|\,)",
                          r"\1 \2.0 \3 ",

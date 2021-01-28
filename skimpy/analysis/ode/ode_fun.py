@@ -62,18 +62,19 @@ class ODEFunction:
         expressions = [self.expressions[x] for x in self.variables.values()]
 
         # Awsome magic
-        self.function = make_cython_function(sym_vars, expressions, simplify=False, pool=pool)
+        self.function = make_cython_function(sym_vars, expressions, simplify=True, pool=pool)
 
     @property
     def parameters(self):
-        return TabDict((k, self.model.parameters[robust_index(k)].value)
+        model_params = self.model.parameters
+        return TabDict((k, model_params[robust_index(k)].value)
                        for k in self._parameters)
 
     @parameters.setter
     def parameters(self, value):
         self._parameters = value
 
-    def get_parames(self):
+    def get_params(self):
         self._parameters_values = self.parameters.values()
 
     # @property

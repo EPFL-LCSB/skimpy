@@ -75,14 +75,17 @@ class SimpleParameterSampler(ParameterSampler):
         symbolic_concentrations_dict = {Symbol(k): v
                                         for k, v in concentration_dict.items()}
 
+        # Compile functions for calculating Km's and Vmax's
+        if not hasattr(compiled_model, 'saturation_parameter_function')\
+           or not hasattr(compiled_model, 'flux_parameter_function'):
+            self._compile_sampling_functions(
+                compiled_model,
+                symbolic_concentrations_dict,
+                flux_dict)
+
+        # Sample as long as max trials aren't exceeded and we haven't reached
+        # target population size
         trials = 0
-
-        # Compile functions
-        self._compile_sampling_functions(
-            compiled_model,
-            symbolic_concentrations_dict,
-            flux_dict)
-
         while (len(
                 parameter_population) < self.parameters.n_samples) or trials > 1e6:
 
@@ -99,8 +102,7 @@ class SimpleParameterSampler(ParameterSampler):
             # largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
             #                                  return_eigenvectors=False)
             # Test suggests that this is apparently much faster ....
-            this_real_eigenvalues = np.real(sorted(
-                eigenvalues(this_jacobian.todense())))
+            this_real_eigenvalues = sorted(np.real(eigenvalues(this_jacobian.todense())))
 
             largest_eigenvalue = this_real_eigenvalues[-1]
             smallest_eigenvalue = this_real_eigenvalues[0]
@@ -129,7 +131,7 @@ class SimpleParameterSampler(ParameterSampler):
                                     concentrations,
                                     fluxes):
         """
-        Compiles the function for sampling using theano
+        Compiles the function for sampling using cython
         :param model:
         """
         model.saturation_parameter_function = SaturationParameterFunction(model,
@@ -143,10 +145,12 @@ class SimpleParameterSampler(ParameterSampler):
     def _sample_saturation_step_compiled(self,
                                          compiled_model,
                                          concentration_dict,
-                                         flux_dict):
+                                         flux_dict,
+                                         parameters_to_resample=None,
+                                         fixed_parameters=None):
 
         """
-        Sample one set of saturations using theano complied functions
+        Sample one set of saturations using cython complied functions
         :param compiled_model:
         :param concentration_dict:
         :param flux_dict:
@@ -171,6 +175,7 @@ class SimpleParameterSampler(ParameterSampler):
            or not hasattr(compiled_model, 'flux_parameter_function'):
             raise RuntimeError("Function for sampling not complied")
 
+        # Sample appropriate # of saturations
         if not compiled_model.saturation_parameter_function.sym_saturations:
             n_stats = 0
             saturations = []
@@ -178,11 +183,13 @@ class SimpleParameterSampler(ParameterSampler):
             n_sats = len(compiled_model.saturation_parameter_function.sym_saturations)
             saturations = sample(n_sats)
 
-        # Calcualte the Km's
+        # Calculate the Km's
         compiled_model.saturation_parameter_function(
             saturations,
             parameter_sample,
-            concentration_dict
+            concentration_dict,
+            parameters_to_resample,
+            fixed_parameters
         )
 
         # Calculate the Vmax's

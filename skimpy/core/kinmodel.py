@@ -306,7 +306,7 @@ class KineticModel(object):
                                       for variable in self.variables]
 
         #Update fixed parameters
-        self.ode_fun.get_parames()
+        self.ode_fun.get_params()
 
         # #if parameters are empty try to fetch from model
         # if not self.ode_fun._parameter_values:

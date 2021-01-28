@@ -75,6 +75,7 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
                           'hill_coefficient': [ODE, MCA, QSSA]}
 
         parameter_reactant_links = {}
+        reactant_parameter_links = {}
         reactant_stoichiometry = {}
 
         num_substrates = 1
@@ -86,6 +87,7 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
                 reactant_list.append(substrate)
                 parameter_list[km_substrate] = [ODE, MCA, QSSA]
                 parameter_reactant_links[km_substrate] = substrate
+                reactant_parameter_links[substrate] = km_substrate
                 reactant_stoichiometry[substrate] = float(s)
                 num_substrates += 1
 
@@ -95,6 +97,7 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
                 reactant_list.append(product)
                 parameter_list[km_product] = [ODE, MCA, QSSA]
                 parameter_reactant_links[km_product] = product
+                reactant_parameter_links[product] = km_product
                 reactant_stoichiometry[product] = float(s)
                 num_products += 1
 
@@ -109,8 +112,10 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
             KineticMechanism.__init__(self, name, reactants, parameters)
 
         def get_qssa_rate_expression(self):
-            reactant_km_relation = {self.reactants[v].symbol: k
-                                    for k, v in self.parameter_reactant_links.items()}
+            # NOTE: THis should not be done based on the symbol of the reactant
+            # In case a reactant is duplicate due to mechanistic reasons!
+            # reactant_km_relation = {self.reactants[v].symbol: k
+            #                         for k, v in self.parameter_reactant_links.items()}
 
             substrates = TabDict([(k, self.reactants[k])
                                   for k in self.reactant_list
@@ -129,7 +134,7 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
-                kms = self.parameters[reactant_km_relation[s]].symbol
+                kms = self.parameters[self.reactant_parameter_links[type]].symbol
                 stoich = self.reactant_stoichiometry[type]
                 fwd_nominator *= (s/kms)**abs(stoich)
                 bwd_nominator *= kms**(-1*abs(stoich))
@@ -142,11 +147,13 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
             common_denominator = 1
 
             h = self.parameters.hill_coefficient.symbol
-            for this_product,this_substrate in zip(substrates.values(),products.values()):
-                s = this_substrate.symbol
-                p = this_product.symbol
-                kms = self.parameters[reactant_km_relation[s]].symbol
-                kmp = self.parameters[reactant_km_relation[p]].symbol
+            for this_product,this_substrate in zip(substrates.items(),products.items()):
+                substrate_type = this_substrate[0]
+                product_type = this_product[0]
+                s = this_substrate[1].symbol
+                p = this_product[1].symbol
+                kms = self.parameters[self.reactant_parameter_links[substrate_type]].symbol
+                kmp = self.parameters[self.reactant_parameter_links[product_type]].symbol
 
                 common_denominator *= (1 + (p/kmp + s/kms)**h)\
                                       / (p/kmp + s/kms)**(h-1)
@@ -162,15 +169,23 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
 
             expressions = {}
 
+            # TODO Find a better solution to handle duplicate substrates
+            # The dict currently does not allow for this 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 stoich = self.reactant_stoichiometry[type]
-                expressions[s] = stoich*rate_expression
+                if s in expressions.keys():
+                    expressions[s] += stoich * rate_expression
+                else:
+                    expressions[s] = stoich*rate_expression
 
             for type, this_product in products.items():
                 p = this_product.symbol
                 stoich = self.reactant_stoichiometry[type]
-                expressions[p] = stoich * rate_expression
+                if p in expressions.keys():
+                    expressions[p] += stoich * rate_expression
+                else:
+                    expressions[p] = stoich*rate_expression
 
             self.expressions = expressions
             self.expression_parameters = self.get_parameters_from_expression(rate_expression)
@@ -182,16 +197,25 @@ def make_generalized_reversible_hill_n_n(stoichiometry):
 
             products= {k:r for k,r in self.reactants.items()
                           if k.startswith('product')}
-            
+
+            expressions = {}
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 stoich = self.reactant_stoichiometry[type]
-                self.expressions[s] = stoich*self.reaction_rates['v_net']
+                if s in expressions.keys():
+                    expressions[s] += stoich * self.reaction_rates['v_net']
+                else:
+                    expressions[s] = stoich*self.reaction_rates['v_net']
 
             for type, this_product in products.items():
                 p = this_product.symbol
                 stoich = self.reactant_stoichiometry[type]
-                self.expressions[p] = stoich*self.reaction_rates['v_net']
+                if p in expressions.keys():
+                    expressions[p] += stoich * self.reaction_rates['v_net']
+                else:
+                    expressions[p] = stoich * self.reaction_rates['v_net']
+
+                self.expressions = expressions
 
 
         """"

@@ -1,12 +1,13 @@
 import pytest
 # Test models
-from skimpy.mechanisms import *
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
+from skimpy.utils.namespace import *
 from tests.utils import build_linear_pathway_model
 
 
+
 @pytest.mark.dependency(name='build_linear_pathway_model')
-def test_sampling_linear_pathway():
+def test_parameter_sampling_linear_pathway():
     this_model = build_linear_pathway_model()
 
     this_model.prepare(mca=True)
@@ -14,8 +15,7 @@ def test_sampling_linear_pathway():
 
 
     flux_dict = {'E1': 1.0, 'E2': 1.0, 'E3': 1.0}
-    concentration_dict = {'A': 3.0, 'B': 2.0, 'C': 1.0, 'D': 0.5}
-
+    concentration_dict = {'A': 10.0, 'B': 5.0, 'C': 1.0, 'D': 0.05}
 
     parameters = SimpleParameterSampler.Parameters(n_samples=10)
     sampler = SimpleParameterSampler(parameters)

@@ -32,7 +32,7 @@ from numpy.linalg import eig
 from skimpy.utils import TabDict
 from skimpy.analysis.ode import FluxFunction
 
-def modal_matrix(kmodel,concentration_dict,parameters):
+def modal_matrix(kmodel,concentration_dict,parameters, flux_modes=False):
     """
     This function computes the transformation matrix W as described in Chapter 4 of
     Heinrich, Reinhart, and Stefan Schuster. The regulation of cellular systems.
@@ -70,7 +70,7 @@ def modal_matrix(kmodel,concentration_dict,parameters):
 
     # Sort flux according to reactions
     fluxes = [fluxes[rxn] for rxn in kmodel.reactions]
-    jacobian = kmodel.jacobian_fun(fluxes, concentrations, parameters)
+    jacobian = kmodel.jacobian_fun(fluxes, concentrations, parameters, flux_jacobian=flux_modes)
 
     # The transformation matrix W is given by the eigenrows of the jacobian M,
     # or by the eigenvalues of the transpose of the jacobian M.
@@ -79,7 +79,9 @@ def modal_matrix(kmodel,concentration_dict,parameters):
     _,W = eig(jacobian.todense().T)
 
     index = Index([np.real(v) for v in lam], name ='eigenvalues')
-
-    columns = [kmodel.reactants.iloc(i)[0] for i in kmodel.independent_variables_ix]
+    if flux_modes:
+        columns = kmodel.reactions.keys()
+    else:
+        columns = [kmodel.reactants.iloc(i)[0] for i in kmodel.independent_variables_ix]
 
     return DataFrame(W, index=index, columns=columns)
