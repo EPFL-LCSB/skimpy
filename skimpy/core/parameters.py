@@ -31,6 +31,7 @@ from pandas import Series
 import h5py
 
 import numpy as np
+import pandas as pd
 
 class ParameterValues(object):
     """
@@ -85,8 +86,17 @@ class ParameterValuePopulation(object):
             else:
                 self._index = TabDict((k,i) for i,k in enumerate(index))
 
-        elif type(data) == pd.DataFrame():
-            pass
+        elif type(data) == pd.DataFrame:
+            raise NotImplemented("Type {} is not supported yet in progress".format(type(data)))
+
+        elif type(data) == ParameterValues:
+            # Todo check for indexable
+            self._data = [ d for d in data]
+            if index is None:
+                self._index = TabDict((str(i),i) for i,_ in enumerate(data))
+            else:
+                self._index = TabDict((k,i) for i,k in enumerate(index))
+
         else:
             raise TypeError("Type {} is not supported".format(type(data)))
 
