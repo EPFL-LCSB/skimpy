@@ -57,8 +57,10 @@ class SimpleResampler(SimpleParameterSampler):
                parameters_to_resample,
                fixed_parameter_population,
                min_max_eigenvalues=False,
-               seed=321):  # TODO: this seed needs to be different from the
-                           # `SimpleParameterSampler` seed. should it be removed? 
+               seed=321,
+               bounds_sample=(0,1),):
+                # TODO: this seed needs to be different from the
+                # `SimpleParameterSampler` seed. should it be removed?
 
         parameter_population = []
         smallest_eigenvalues = []
@@ -66,7 +68,8 @@ class SimpleResampler(SimpleParameterSampler):
 
         self.seed = seed
         np.random.seed(self.seed)
-
+        self.bounds_sample = bounds_sample
+                
         # Unpack fluxes and concentration into arrays consitent with the
         # compiled functions
 
