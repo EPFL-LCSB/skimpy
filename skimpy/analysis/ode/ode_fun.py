@@ -35,7 +35,8 @@ from warnings import warn
 
 
 class ODEFunction:
-    def __init__(self, model, variables, expressions, parameters, pool=None, with_time=False):
+    def __init__(self, model, variables, expressions, parameters,
+                 pool=None, with_time=False, custom_ode_update=None):
         """
         Constructor for a precompiled function to solve the ode epxressions
         numerically
@@ -49,6 +50,7 @@ class ODEFunction:
         self.expressions = expressions
         self.model = model
         self.with_time = with_time
+        self.custom_ode_update=custom_ode_update
         # Link to the model
         self._parameters = parameters
 
@@ -86,3 +88,6 @@ class ODEFunction:
         else:
             input_vars = list(y)+list(self._parameters_values)
         self.function(input_vars, ydot)
+        
+        if not self.custom_ode_update is None:
+            self.custom_ode_update( t, y, ydot)

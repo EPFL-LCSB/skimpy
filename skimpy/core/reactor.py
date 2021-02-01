@@ -180,7 +180,7 @@ class Reactor(ABC):
         #     self.metabolites.append(this_metabolite)
         self._modified = True
 
-    def compile_ode(self, sim_type=QSSA, ncpu=1, add_dilution=False,):
+    def compile_ode(self, sim_type=QSSA, ncpu=1, add_dilution=False, custom_ode_update=None):
         """
 
         :param sim_type:
@@ -195,7 +195,8 @@ class Reactor(ABC):
         if self._modified or self.sim_type != sim_type:
             # Compile ode function
             ode_fun, variables = make_reactor_ode_fun(self, sim_type, pool=self.pool,
-                                                      add_dilution=add_dilution)
+                                                      add_dilution=add_dilution,
+                                                      custom_ode_update=custom_ode_update)
             # TODO define the init properly
             self.ode_fun = ode_fun
             self._modified = False
@@ -249,7 +250,8 @@ class Reactor(ABC):
         return ODESolution(self, solution)
 
 
-def make_reactor_ode_fun(reactor, sim_type, pool=None, add_dilution=False ):
+def make_reactor_ode_fun(reactor, sim_type, pool=None, add_dilution=False,
+                         custom_ode_update=None):
     """
     This function generates the symbolic expressions for a reactor model
 
@@ -344,7 +346,8 @@ def make_reactor_ode_fun(reactor, sim_type, pool=None, add_dilution=False ):
         this_boundary_condition(expr)
 
     # Make vector function from expressions
-    ode_fun = ODEFunction(reactor, variables, expr, parameters_list, pool=pool)
+    ode_fun = ODEFunction(reactor, variables, expr, parameters_list, pool=pool,
+                          custom_ode_update=custom_ode_update)
 
     return ode_fun, variables
 
