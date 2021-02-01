@@ -52,7 +52,12 @@ def animate_fluxes(flux_time_data,
                    chrome=DEFAULT_CHROME,
                    reaction_scale=None,
                    min_flux=None,
-                   max_flux=None):
+                   max_flux=None,
+                   time_size=12,
+                   time_unit='h',
+                   x_time=0.95,
+                   y_time=0.9,
+                   ):
 
     if min_flux is None:
         min_flux = flux_time_data.min().min()
@@ -92,12 +97,21 @@ def animate_fluxes(flux_time_data,
         cmd = "{} {} {}".format(XVFB_DOCKER, chrome, SCREENSHOT.format('tmp.png', 'tmp.html'))
         os.system(cmd)
 
+        # Add time text
+        ylim = plt.gca().get_ylim()
+        xlim = plt.gca().get_xlim()
+        y = (ylim[1] - ylim[0]) * y_time + ylim[0]
+        x = (xlim[1] - xlim[0]) * x_time + xlim[0]
+        text = plt.text(x, y, '{:.1f} {}'.format(t,time_unit),
+                        horizontalalignment='right',
+                        fontsize=time_size)
+
+
         img = mgimg.imread('tmp.png')
         imgplot = plt.imshow(img)
 
-
         # append AxesImage object to the list
-        myimages.append([imgplot])
+        myimages.append([imgplot,text])
 
     plt.axis('off')
     fig.tight_layout()
