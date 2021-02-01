@@ -66,6 +66,12 @@ class ParameterValues(object):
         if item.__class__ is Symbol:
             return self._parameter_values[self._sym_to_str[item]]
 
+    def __setitem__(self, item, value):
+        if item.__class__ is  str:
+                self._parameter_values[item] = value
+        if item.__class__ is Symbol:
+                self._parameter_values[self._sym_to_str[item]] = value
+
     def items(self):
         return self._parameter_values.items()
 
