@@ -53,6 +53,7 @@ class Reactor(ABC):
                  biomass_scaling,
                  boundary_conditions=None,
                  extracellular_compartment='e',
+                 custom_variables=[],
                  ):
         """
 
@@ -103,7 +104,9 @@ class Reactor(ABC):
 
         self.boundary_conditions = iterable_to_tabdict(boundary_conditions)
         self.initial_conditions = iterable_to_tabdict([])
+
         self._modified = True
+        self.custom_variables = iterable_to_tabdict(custom_variables)
 
     @property
     def variables(self):
@@ -114,6 +117,7 @@ class Reactor(ABC):
                                      if v.name not in self.medium])
             variables.update(this_rectants)
             # Add the biomass
+        variables.update(self.custom_variables)
         return variables
 
     @property
@@ -311,6 +315,9 @@ def make_reactor_ode_fun(reactor, sim_type, pool=None, add_dilution=False,
 
     for k,biomass in reactor.biomass_variables.items():
         volume_ratios[k] = 1.0
+
+    for k,var in reactor.custom_variables.items():
+            volume_ratios[k] = 1.0
 
     # Make default ODE expressions
     expr = make_expressions(variables,expression_list, volume_ratios=volume_ratios, pool=pool)
