@@ -38,5 +38,6 @@ from .irrev_hill import *
 from .rev_massaction import *
 from .bi_uni_reversible_hill import *
 from .uni_bi_reversible_hill import *
+from .gene_expression import *
 
 from .mechanism import KineticMechanism

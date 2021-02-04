@@ -214,7 +214,7 @@ class KineticModel(object):
         """
         for this_reaction in self.reactions.values():
             this_mechanism = this_reaction.mechanism
-            if hasattr(this_mechanism, 'inhibitors'):
+            if not this_mechanism.inhibitors is None:
                 for this_keys, this_inhibitor in this_mechanism.inhibitors.items():
                     if this_inhibitor.name in self.reactants:
                         this_mechanism.inhibitors[this_keys] = self.reactants[this_inhibitor.name]
