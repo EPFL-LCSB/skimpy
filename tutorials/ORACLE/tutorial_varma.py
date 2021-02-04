@@ -223,7 +223,7 @@ lambda_min_all = pd.concat(lambda_min_all, axis=1)
 
 
 """
-Prune parameters
+Prune parameters based on the time scales
 """
 
 MAX_EIGENVALUES = -5/(20/60)    # 1/hr
@@ -252,65 +252,4 @@ parameter_population.save('pruned_parameters.hdf5')
 
 
 
-"""
-Basins of attraction
-"""
-
-
-
-"""
-Metabolic control analysis 
-"""
-
-from skimpy.utils.tabdict import TabDict
-from skimpy.utils.namespace import *
-from skimpy.utils.tensor import Tensor
-
-# Compile with parameter elasticities
-parameter_list = TabDict([(k, p.symbol) for k, p in kmodel.parameters.items()
-                          if p.name.startswith('vmax_forward')])
-
-kmodel.compile_mca(sim_type=QSSA,ncpu=NCPU, parameter_list=parameter_list)
-
-sample_idx = list(parameter_population._index.keys())
-
-flux_control_data = []
-
-for ix in sample_idx:
-    #Add parameters
-    kmodel.parameters = parameter_population[ix]
-    # Get reference concentrations
-    tfa_id,_ = ix.split(',')
-    tfa_id = int(tfa_id)
-    sample = samples.loc[tfa_id]
-    # Load fluxes and concentrations
-    fluxes = load_fluxes(sample, tmodel, kmodel,
-                         density=DENSITY,
-                         ratio_gdw_gww=GDW_GWW_RATIO,
-                         concentration_scaling=CONCENTRATION_SCALING,
-                         time_scaling=TIME_SCALING)
-    concentrations = load_concentrations(sample, tmodel, kmodel,
-                                         concentration_scaling=CONCENTRATION_SCALING)
-    flux_control_coeff = kmodel.flux_control_fun(fluxes,
-                                                 concentrations,
-                                                 [parameter_population[ix]])
-    flux_control_data.append(flux_control_coeff._data)
-
-# Make tensor for the population level
-fcc_data = np.concatenate(flux_control_data, axis=2)
-
-flux_index = pd.Index(kmodel.reactions.keys(), name="flux")
-parameter_index = pd.Index(kmodel.flux_control_fun.parameter_elasticity_function.respective_variables, name="parameter")
-sample_index = pd.Index(sample_idx, name="sample")
-
-flux_control_coeff = Tensor(fcc_data, [flux_index, parameter_index, sample_index])
-mean_fcc = flux_control_coeff.mean('sample')
-
-# TODO PLOT STUFF
-
-"""
-Enzyme perturbations analysis
-"""
-
-
-
+    
