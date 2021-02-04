@@ -50,8 +50,8 @@ class ODESolution:
 
         self.concentrations = pd.DataFrame.from_dict(concentrations, orient='columns')
 
-    def plot(self, filename=''):
-        timetrace_plot(self.time, self.species, filename, legend=self.names)
+    def plot(self, filename='', **kwargs):
+        timetrace_plot(self.time, self.species, filename, legend=self.names, **kwargs)
 
     def copy(self):
         return deepcopy(self)
