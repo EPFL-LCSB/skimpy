@@ -1,0 +1,36 @@
+models:
+  strain_1: "./../../models/varma_strain_1.yml"
+
+biomass:
+  strain_1: "LMPD_biomass_c_17_462"
+
+biomass_scaling:
+  strain_1: 1000.0 # i.e. 1000 flux units i.e. 1g growth
+
+extracellular_compartment: e
+
+initial_medium:
+  glc_D_e: 0.12 #ISO unit
+  pi_e: 25e-3 #
+  co2_e: 1e-07
+  o2_e: 0.000496
+  h_e: 1e-07
+
+reactor_volume: 1.0e15 # Units of cell volume! here v_cell in units of 1 mum^3 = 1e-15 L
+
+scaling:
+  concentration: 1e6
+  density: 1200.0
+  gDW_gWW: 0.30
+  time: 1.0
+
+boundary_conditions:
+  CC_co2_e:
+    class: ConstantConcentration
+    reactant: co2_e
+  CC_o2_e:
+    class: ConstantConcentration
+    reactant: o2_e
+  CC_h_e:
+    class: ConstantConcentration
+    reactant: h_e
