@@ -62,6 +62,11 @@ class Reaction(object):
                                      if r.type == VARIABLE)
             reactants.update(this_reactants)
 
+        if not self.mechanism.inhibitors is None:
+            regulators = TabDict( (k,r) for k,r in self.mechanism.inhibitors.items()
+                                 if r.type == VARIABLE)
+            reactants.update(regulators)
+
         return reactants
 
     @reactants.setter
