@@ -78,7 +78,7 @@ def modal_matrix(kmodel,concentration_dict,parameters, flux_modes=False):
     lam,_ = eig(jacobian.todense())
     _,W = eig(jacobian.todense().T)
 
-    index = Index([np.real(v) for v in lam], name ='eigenvalues')
+    index = Index(lam, name ='eigenvalues')
     if flux_modes:
         columns = kmodel.reactions.keys()
     else:
