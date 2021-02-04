@@ -82,9 +82,9 @@ this_model.initial_conditions['MAPK'] = 300.0
 
 this_sol_full = this_model.solve_ode(np.linspace(0.0, 1000.0, 1000), solver_type='cvode')
 
-this_sol_full.plot('output/time_signaling_response.html')
+this_sol_full.plot('output/time_signaling_response.html', )
 
-input = np.linspace(1e-3,1,100)
+input = np.logspace(-3,0,100)
 output = []
 for vmax in input:
     this_model.parameters.vmax_forward_Receptor.value = vmax
@@ -96,7 +96,10 @@ output = np.array(output)
 
 timetrace_plot(input, output,
                filename='output/input_output.html',
-               legend=['MAPKP','MAPKKP','MAPKKKP'])
+               legend=['MAPKP','MAPKKP','MAPKKKP'],
+               x_axis_type="log",legend_location='top_left'
+               )
+
 
 
 
