@@ -39,7 +39,9 @@ def timetrace_plot(time, data,
                    legend=None,
                    x_label='',
                    y_label='',
-                   legend_location=None):
+                   legend_location=None,
+                   export_svg=False,
+                   **kwargs):
     """
     Classic time vs. Y-value plot.
 
@@ -65,7 +67,7 @@ def timetrace_plot(time, data,
         ("species", "$name"),
     ]
     # PLOTS
-    p = figure(tooltips=TOOLTIPS)
+    p = figure(tooltips=TOOLTIPS, **kwargs)
 
     for e in range(num_species):
         if legend is not None:
@@ -93,7 +95,12 @@ def timetrace_plot(time, data,
     p.xaxis.axis_label = x_label
     # change just some things about the y-axis
     p.yaxis.axis_label = y_label
-    show(p)
+
+    if export_svg:
+        p.output_backend = 'svg'
+        export_svgs(p,filename=filename )
+    else:
+        show(p)
 
 
 def boxplot(df, filename):
