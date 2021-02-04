@@ -65,15 +65,15 @@ tmodel.solver.configuration.tolerances.feasibility = 1e-9
 # Define the reactor medium
 #Glucose  to 10 g/L = 0.056 mol/l 1/2 Reactor concentration
 GLUCOSE_CONCENTRATION = 0.056
-PHOSPHATE = 250*1e-3
+PHOSPHATE = 10e-3
 CARBON_DIOXIDE = 1e-7
 OXYGEN = 8e-3*0.062 # 8 mg/L 1g = 0.062 mol
 
 tmodel.log_concentration.get_by_id('glc-D_e').variable.ub = np.log(GLUCOSE_CONCENTRATION*1.2)
 tmodel.log_concentration.get_by_id('glc-D_e').variable.lb = np.log(GLUCOSE_CONCENTRATION*0.8)
 
-tmodel.log_concentration.get_by_id('pi_e').variable.ub = np.log(PHOSPHATE*1.2)
 tmodel.log_concentration.get_by_id('pi_e').variable.lb = np.log(PHOSPHATE*0.8)
+tmodel.log_concentration.get_by_id('pi_e').variable.ub = np.log(PHOSPHATE*1.2)
 
 tmodel.log_concentration.get_by_id('co2_e').variable.ub = np.log(CARBON_DIOXIDE*1.2)
 tmodel.log_concentration.get_by_id('co2_e').variable.lb = np.log(CARBON_DIOXIDE*0.8)
@@ -81,9 +81,21 @@ tmodel.log_concentration.get_by_id('co2_e').variable.lb = np.log(CARBON_DIOXIDE*
 tmodel.log_concentration.get_by_id('o2_e').variable.ub = np.log(OXYGEN*1.2)
 tmodel.log_concentration.get_by_id('o2_e').variable.lb = np.log(OXYGEN*0.8)
 
-
 # Enforce glucose transporter displacements
 tmodel.thermo_displacement.GLCptspp.variable.ub = -2.0
+
+# Reduce the other
+# Constraint non-medium concentrations to be lower then muM
+LC_SECRETION = np.log(1e-6)
+secretions = [r for r in tmodel.boundary if r.upper_bound <= 0]
+for sec in secretions:
+    for met in sec.metabolites:
+        if met.id in ['h2o_2', 'h_e']:
+            continue
+        try:
+            tmodel.log_concentration.get_by_id(met.id).variable.upper_bound = LC_SECRETION
+        except KeyError:
+            pass
 
 
 # Test feasiblity

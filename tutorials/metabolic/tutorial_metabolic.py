@@ -50,12 +50,12 @@ TIME_SCALING = 1 # 1hr to 1min
 DENSITY = 1200 # g/L
 GDW_GWW_RATIO = 0.3 # Assumes 70% Water
 
-kmodel =  load_yaml_model('./../../models/varma_strain_2.yml')
+kmodel =  load_yaml_model('./../../models/varma_strain_1.yml')
 tmodel = load_json_model('./../../models/tfa_varma.json')
 
 # Reference steady-state data
 ref_solution = pd.read_csv('./../../data/tfa_reference_strains.csv',
-                           index_col=0).loc['strain_2',:]
+                           index_col=0).loc['strain_1',:]
 
 ref_concentrations = load_concentrations(ref_solution, tmodel, kmodel,
                                          concentration_scaling=CONCENTRATION_SCALING)
@@ -119,7 +119,7 @@ for p,v in desings.items():
     # Implement parameter desing
     kmodel.parameters[p].value = kmodel.parameters[p].value*v
 
-    sol = kmodel.solve_ode(np.logspace(-9,1.0, 1000),
+    sol = kmodel.solve_ode(np.logspace(-9,0, 1000),
                              solver_type='cvode')
 
     # Calculate fluxes:
@@ -133,9 +133,9 @@ for p,v in desings.items():
     this_fluxes.index = sol.time
     fluxes.append(this_fluxes)
 
-ldh_fluxes = np.array([fluxes[0]['LDH_D'].values, fluxes[1]['LDH_D'].values ])
+ldh_fluxes = np.array([fluxes[0]['LDH_D'].values, fluxes[1]['LDH_D'].values ]).T
 
-timetrace_plot(sol.time,ldh_fluxes.T ,
+timetrace_plot(sol.time,ldh_fluxes ,
                filename='output/ldh_flux.html',
                legend=['2 x [LDH]','2 x [GAPD]'],
                )
