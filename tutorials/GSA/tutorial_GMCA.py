@@ -152,29 +152,80 @@ parameter_list = TabDict([(k, p.symbol) for k, p in
 
 kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
+# Define a function that calculates model output (flux control coefficients)
+# from sampled model parameters
+
+# Choose a subset of Vmax's to analyse
+outputs_to_analyse = ['vmax_forward_ENO','vmax_forward_GLYCK','vmax_forward_PGK']
+def calculate_model_output(model_parameters):
+    # calculate all flux control coefficients
+    flux_control_coeff_0 = kmodel.flux_control_fun(fluxes,
+                                                concentrations,
+                                                model_parameters._data)
+
+    # Choose a particular reaction we want to analyse
+    df = flux_control_coeff_0.slice_by('flux','ENO')
+    # Select only some of the Vmax's
+    df = df[df.index.isin(outputs_to_analyse)]
+    return df
+
 # Initialize parameter sampler
 sampling_parameters = SimpleParameterSampler.Parameters(n_samples=10)
 sampler = SimpleParameterSampler(sampling_parameters)
 
-# Sample the model
+# Sample the model (A matrix)
 parameter_population = sampler.sample(kmodel, fluxes, concentrations)
 parameter_population = ParameterValuePopulation(parameter_population, kmodel)
 
-# Perform resampling
-resampler = SimpleResampler(sampling_parameters)
-parameters_to_resample = [kmodel.parameters.km_substrate_ENO, ]
-resampled_population = resampler.sample(kmodel, fluxes, concentrations, parameters_to_resample,
-                                        parameter_population._data)
-# ToDo user theParameterValuePopulation and ParameterValues objects as input and output of the sampling functions
-resampled_population = ParameterValuePopulation(resampled_population, kmodel)
+# Construct B,C matrices given parameter_population and parameters_to_resample
+parameters_to_resample = [[kmodel.parameters.km_substrate_ENO, ],
+                          [kmodel.parameters.km_product_ENO, ],
+                          [kmodel.parameters.km_substrate1_PGK, ],
+                          [kmodel.parameters.km_substrate2_PGK, ],
+                          [kmodel.parameters.km_substrate1_GLYCK, ],
+                          [kmodel.parameters.km_substrate2_GLYCK, ]]
 
-# Calculate the output for the two parameter populations
-flux_control_coeff_0 = kmodel.flux_control_fun(fluxes,
-                                             concentrations,
-                                             parameter_population._data)
+df_si = pd.DataFrame(index=outputs_to_analyse)
+df_st = pd.DataFrame(index=outputs_to_analyse)
 
-flux_control_coeff_1 = kmodel.flux_control_fun(fluxes,
-                                               concentrations,
-                                               resampled_population._data)
+for this_parameter in parameters_to_resample:
+    outer_set = [i for i in kmodel.parameters.values() if i not in this_parameter]
 
-# TODO: Calculate the sensitivity coeffcients!
+    # Resample the initial parameter_population according to this_parameter
+    resampler = SimpleResampler(sampling_parameters)
+
+    resampled_population_B = resampler.sample(kmodel, fluxes, concentrations,
+                                              outer_set,
+                                              parameter_population._data)
+    resampled_population_B = ParameterValuePopulation(resampled_population_B, kmodel)
+
+    resampled_population_C = resampler.sample(kmodel, fluxes, concentrations,
+                                              this_parameter,
+                                              parameter_population._data)
+    resampled_population_C = ParameterValuePopulation(resampled_population_C, kmodel)
+
+
+    # Calculate output
+    df_A = calculate_model_output(parameter_population)
+    df_B = calculate_model_output(resampled_population_B)
+    df_C = calculate_model_output(resampled_population_C)
+
+    # Calculate sensitivity indices for each flux control coefficient/model output
+    df_sensitivity_indices = pd.DataFrame(columns=['si', 'st'])
+
+    for index in df_A.index:
+        n = len(df_A.loc[index])
+        f0 = np.sum(df_A.loc[index])/n
+
+        si = (np.dot(df_A.loc[index], df_B.loc[index])/n - f0**2) / (np.dot(df_A.loc[index], df_A.loc[index])/n - f0**2)
+        st = (np.dot(df_A.loc[index], df_C.loc[index])/n - f0**2) / (np.dot(df_A.loc[index], df_A.loc[index])/n - f0**2)
+
+        df_sensitivity_indices.loc[index] = pd.Series({'si':si, 'st':st})
+
+    df_si[this_parameter[0].symbol] = df_sensitivity_indices['si']
+    df_st[this_parameter[0].symbol] = df_sensitivity_indices['st']
+
+# TODO: concatenate A,B,C in to one parameter pop to have only one function call
+# to calculate_model_output
+# TODO: specify parameters_to_resample as a dict, so that we can resample groups
+# of parameters and let the user name these groups
