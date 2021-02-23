@@ -156,7 +156,7 @@ kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 # from sampled model parameters
 
 # Choose a subset of Vmax's to analyse
-outputs_to_analyse = ['vmax_forward_ENO','vmax_forward_GLYCK','vmax_forward_PGK']
+outputs_to_analyse = ['vmax_forward_ENO','vmax_forward_PGK']
 def calculate_model_output(model_parameters):
     # calculate all flux control coefficients
     flux_control_coeff_0 = kmodel.flux_control_fun(fluxes,
@@ -170,7 +170,7 @@ def calculate_model_output(model_parameters):
     return df
 
 # Initialize parameter sampler
-sampling_parameters = SimpleParameterSampler.Parameters(n_samples=10)
+sampling_parameters = SimpleParameterSampler.Parameters(n_samples=200)
 sampler = SimpleParameterSampler(sampling_parameters)
 
 # Sample the model (A matrix)
@@ -180,10 +180,12 @@ parameter_population = ParameterValuePopulation(parameter_population, kmodel)
 # Construct B,C matrices given parameter_population and parameters_to_resample
 parameters_to_resample = [[kmodel.parameters.km_substrate_ENO, ],
                           [kmodel.parameters.km_product_ENO, ],
+                          [kmodel.parameters.km_substrate_PGM, ],
+                          [kmodel.parameters.km_product_PGM, ],
                           [kmodel.parameters.km_substrate1_PGK, ],
                           [kmodel.parameters.km_substrate2_PGK, ],
-                          [kmodel.parameters.km_substrate1_GLYCK, ],
-                          [kmodel.parameters.km_substrate2_GLYCK, ]]
+                          [kmodel.parameters.km_product1_PGK, ],
+                          [kmodel.parameters.km_product2_PGK, ]]
 
 df_si = pd.DataFrame(index=outputs_to_analyse)
 df_st = pd.DataFrame(index=outputs_to_analyse)
