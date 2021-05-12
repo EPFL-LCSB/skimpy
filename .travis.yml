@@ -14,8 +14,8 @@ before_install:
  - pip install -r docker/requirements.txt
  - source docker/utils/install_sundials.sh
  
- - export SUNDIALS_INCLUDEDIR ="${HOME}/sundials-3.1.1/include"
- - export SUNDIALS_LIBDIR ="${HOME}/sundials-3.1.1/lib"
+ - export SUNDIALS_INCLUDEDIR="${HOME}/sundials-3.1.1/include"
+ - export SUNDIALS_LIBDIR="${HOME}/sundials-3.1.1/lib"
  - export SUNDIALS_INST="${HOME}/sundials-3.1.1"
  
  - pip install scikits.odes==2.4.1
