@@ -10,7 +10,7 @@ branches:
  - dev
 
 env:
-  - SUNDIALS_INCLUDEDIR="${HOME}/sundials-3.1.1/include" SUNDIALS_LIBDIR="${HOME}/sundials-3.1.1/lib" SUNDIALS_INST="${HOME}/sundials-3.1.1" LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/sundials-3.1.1/lib" D_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"  
+  - SUNDIALS_INCLUDEDIR="${HOME}/sundials-3.1.1/include" SUNDIALS_LIBDIR="${HOME}/sundials-3.1.1/lib" SUNDIALS_INST="${HOME}/sundials-3.1.1" LD_LIBRARY_PATH="{$LD_LIBRARY_PATH}:/sundials-3.1.1/lib" LD_LIBRARY_PATH="{$LD_LIBRARY_PATH}:/usr/local/lib"  
   
 before_install:
  - sudo apt-get install -y --no-install-recommends fort77 gfortran libmpfr-dev libflint-2.5.2 libflint-dev libopenblas-dev liblapack-dev libgmp-dev yasm
