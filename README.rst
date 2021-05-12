@@ -143,7 +143,7 @@ The software in this repository is put under an APACHE-2.0 licensing scheme - pl
 
 .. |license| image:: http://img.shields.io/badge/license-APACHE2-blue.svg
    :target: https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt
-.. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=dev
+.. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=master
    :target: https://travis-ci.org/EPFL-LCSB/skimpy
 .. |Codecov| image:: https://img.shields.io/codecov/c/github/EPFL-LCSB/skimpy.svg
    :target: https://codecov.io/gh/EPFL-LCSB/skimpy
