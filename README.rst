@@ -30,7 +30,7 @@ Further the following pip-python packages are required
 
 .. |license| image:: http://img.shields.io/badge/license-APACHE2-blue.svg
    :target: https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt
-.. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=master
+.. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=dev
    :target: https://travis-ci.org/EPFL-LCSB/skimpy
 .. |Codecov| image:: https://img.shields.io/codecov/c/github/EPFL-LCSB/skimpy.svg
    :target: https://codecov.io/gh/EPFL-LCSB/skimpy
