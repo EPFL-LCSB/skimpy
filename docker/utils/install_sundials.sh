@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#wget https://computation.llnl.gov/projects/sundials/download/sundials-2.7.0.tar.gz
-wget https://computation.llnl.gov/projects/sundials/download/sundials-3.1.1.tar.gz
+wget https://github.com/LLNL/sundials/releases/download/v3.1.1/sundials-3.1.1.tar.gz
 tar -xzf sundials-3.1.1.tar.gz -C $HOME
 cd $HOME/sundials-3.1.1
 
