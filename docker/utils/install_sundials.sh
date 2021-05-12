@@ -7,6 +7,7 @@ cd $HOME/sundials-3.1.1
 mkdir $HOME/sundials-3.1.1/builddir
 cd $HOME/sundials-3.1.1/builddir
 cmake -DLAPACK_ENABLE=ON \
+      -DSUNDIALS_INDEX_SIZE=64 \
       -DCMAKE_INSTALL_PREFIX=$HOME/sundials-3.1.1 \
       $HOME/sundials-3.1.1
 
