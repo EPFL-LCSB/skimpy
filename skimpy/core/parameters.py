@@ -84,6 +84,9 @@ class ParameterValues(object):
 
 class ParameterValuePopulation(object):
     def __init__(self,data, kmodel=None, index=None):
+
+        self.kmodel = kmodel
+
         if type(data) == list:
             # Todo check for indexable
             self._data = [ ParameterValues(d,kmodel=kmodel) for d in data]
@@ -112,7 +115,24 @@ class ParameterValuePopulation(object):
         else:
             return self._data[self._index[index]]
 
+    def mean(self):
+        """
+        :return Computes the mean parameter values for the population:
+        """
+        if self._index is None:
+            this_mean = pd.DataFrame(data= [dict(self._data[i]) for i in self._data.keys() ]).mean()
+        else:
+            this_mean = pd.DataFrame(data=[dict(self._data[self._index[i]]) for i in self._index ]).mean()
+
+        return ParameterValues(this_mean, kmodel)
+
+
     def save(self,filename):
+        """
+        Saves the parameter population as hdf5 file
+        :param filename: string XXX.h5 / XXX.hdf5
+        :return:
+        """
         f = h5py.File(filename, 'w') #TODO catch existing file?
 
         # TODO more central way ?

@@ -10,7 +10,7 @@ SKiMPy: Symbolic Kinetic Models in Python.
 
 .. toctree::
    :numbered:
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    quickstart
