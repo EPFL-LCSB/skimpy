@@ -123,8 +123,8 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 kms = self.parameters[reactant_km_relation[s]].symbol
-
-                forward_rate_expression *= s/(s+kms)
+                # To make this expression stick ...
+                forward_rate_expression *= (s/(s+kms))**1.0
 
             rate_expression = forward_rate_expression-backward_rate_expression
 
