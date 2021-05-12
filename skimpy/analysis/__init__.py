@@ -8,7 +8,7 @@
 
 [---------]
 
-Copyright 2017 Laboratory of Computational Systems Biotechnology (LCSB),
+Copyright 2018 Laboratory of Computational Systems Biotechnology (LCSB),
 Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
 
 Licensed under the Apache License, Version 2.0 (the "License");

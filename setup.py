@@ -6,8 +6,29 @@
 """
 
 from setuptools import setup, find_packages
+from distutils.extension import Extension
+from Cython.Build import cythonize
+from Cython.Distutils import build_ext
+
+
+
 
 version_tag = '0.0.1'
+
+
+extensions = [
+            Extension("skimpy.nullspace",
+                      sources=["skimpy/cython/nullspace.pyx"],
+                      library_dirs=['/usr/lib'],
+                      extra_compile_args=[],
+                      extra_link_args=['-lgmp','-lflint'],
+                      include_dirs=[],
+                      language = 'c',
+                      libraries=['/usr/local/lib/libgmp.so.23',
+                                 '/usr/local/lib/libflint.so.13'],
+                      )
+            ,]
+
 
 setup(name='skimpy',
       version=version_tag,
@@ -17,11 +38,27 @@ setup(name='skimpy',
       download_url='https://github.com/EPFL-LCSB/skimpy/archive/'+version_tag+'.tar.gz',
       install_requires=['sympy',
                         'pytest',
-                        'scipy'],
+                        'scipy',
+                        'numpy',
+                        'pandas',
+                        'bokeh',
+                        'Cython',
+                        'scikits.odes==2.4.1',
+                        'deap',
+                        'dill',
+                        'h5py',
+                        'escher',
+                        'matplotlib',
+                        ],
       packages = find_packages(),
       python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
       description='SKiMPy adds Thermodynamics-based Flux Analysis',
       keywords=['skimpy','kinetic','models'],
+      extras_require={ 'ORACLE':  ["pytfa"], },
+
+      #ext_modules=cythonize(extensions ),
+      ext_modules=extensions,
+      cmdclass={'build_ext': build_ext},
 
       license='Apache2',
 
