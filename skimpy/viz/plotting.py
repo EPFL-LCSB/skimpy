@@ -28,7 +28,6 @@ from collections import OrderedDict
 from bokeh.plotting import figure, output_file, show, curdoc, ColumnDataSource
 from bokeh.layouts import column
 from bokeh.palettes import Spectral11, viridis
-from bokeh.io import export_svgs
 
 import numpy as np
 import pandas as pd
@@ -40,7 +39,7 @@ def timetrace_plot(time, data,
                    x_label='',
                    y_label='',
                    legend_location=None,
-                   export_svg=False,
+                   backend='webgl',
                    **kwargs):
     """
     Classic time vs. Y-value plot.
@@ -96,11 +95,8 @@ def timetrace_plot(time, data,
     # change just some things about the y-axis
     p.yaxis.axis_label = y_label
 
-    if export_svg:
-        p.output_backend = 'svg'
-        export_svgs(p,filename=filename )
-    else:
-        show(p)
+    p.output_backend = backend
+    show(p)
 
 
 def boxplot(df, filename):

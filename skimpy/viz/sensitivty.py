@@ -27,53 +27,56 @@ limitations under the License.
 import numpy as np
 
 from bokeh.plotting import figure, output_file
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, FactorRange
 from bokeh.io import curdoc, show
+from bokeh.transform import factor_cmap
 
-
-def plot_control_coefficients(control_coeffs,
-                              filename='map.html',
-                              top=10,
-                              color='#3399FF',
-                              backend='webgl',
-                              x_label='',
-                              y_label='',
-                              **kwargs):
+def plot_sobol_coefficients(Si,
+                            St,
+                            filename='map.html',
+                            colors=['#3399FF','#205f99'],
+                            backend='webgl',
+                            width=0.9,
+                            x_label='',
+                            y_label='',
+                            **kwargs):
     """
-
-    :param control_coeffs: pandas Series
-    :param top:
-    :param sorted:
+    Plot sensitivity coefficients
+    :param Si: pd.Series
+    :param St: pd.Series
+    :param filename: String
+    :param colors:
+    :param backend:
+    :param x_label:
+    :param y_label:
     :param kwargs:
     :return:
     """
-    if not top is None:
-        temp_data = control_coeffs.abs().sort_values()
-        temp_data = temp_data.iloc[-top:]
-        data = control_coeffs[temp_data.index]
-    else:
-        data = control_coeffs
+
 
     # output to static HTML file
     output_file(filename)
+    index = ['Si','St']
+    x = [ (str(v),i) for v in St.index for i in index]
+    counts = sum(zip( Si.values, St.values), () )
+    source = ColumnDataSource(dict(x=x,
+                                   counts=counts))
 
-    source = ColumnDataSource(dict(y=list(data.index),
-                                   right=data.values,))
+    plot = figure( x_range=FactorRange(*x),
+                   **kwargs,)
 
-    plot = figure(
-        y_range=list(data.index),
-        **kwargs,)
-
-    plot.hbar(y="y",
-              right="right",
-              left=0,
-              height=0.5,
-              fill_color=color,
+    plot.vbar(x="x",
+              top="counts",
+              width=width,
+              fill_color=factor_cmap('x', palette=colors, factors=index, start=1, end=2),
               source=source)
 
     # Make the axsis pretty
     plot.xaxis.axis_label = x_label
     plot.yaxis.axis_label = y_label
+
+    plot.y_range.start = 0
+    plot.x_range.range_padding = 0.1
 
     plot.output_backend = backend
     show(plot)

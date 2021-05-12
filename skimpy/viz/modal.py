@@ -46,7 +46,7 @@ def plot_modal_matrix(M, filename='map.html',
                       clustered=False,
                       x_label='',
                       y_label='',
-                      export_svg=False,
+                      backend='webgl',
                       **kwargs):
 
     # output to static HTML file
@@ -106,8 +106,5 @@ def plot_modal_matrix(M, filename='map.html',
     p.xaxis.axis_label = x_label
     p.yaxis.axis_label = y_label
 
-    if export_svg:
-        p.output_backend = 'svg'
-        export_svgs(p, filename=filename)
-    else:
-        show(p)
+    p.output_backend = backend
+    show(p)
