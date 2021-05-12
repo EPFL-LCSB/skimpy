@@ -9,20 +9,17 @@ branches:
  - master
  - dev
 
+env:
+  - SUNDIALS_INCLUDEDIR="${HOME}/sundials-3.1.1/include"
+  - SUNDIALS_LIBDIR="${HOME}/sundials-3.1.1/lib"
+  - SUNDIALS_INST="${HOME}/sundials-3.1.1"
+  - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/sundials-3.1.1/lib":"/usr/local/lib"  
+  
 before_install:
  - sudo apt-get install -y --no-install-recommends fort77 gfortran libmpfr-dev libflint-2.5.2 libflint-dev libopenblas-dev liblapack-dev libgmp-dev yasm
  - pip install -r docker/requirements.txt
  - source docker/utils/install_sundials.sh
- 
- - export SUNDIALS_INCLUDEDIR="${HOME}/sundials-3.1.1/include"
- - export SUNDIALS_LIBDIR="${HOME}/sundials-3.1.1/lib"
- - export SUNDIALS_INST="${HOME}/sundials-3.1.1"
- 
  - pip install scikits.odes==2.4.1
- 
- - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/sundials-3.1.1/lib"
- - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
- 
  - pip install pytest-cov
 install:
  - cd $TRAVIS_BUILD_DIR
