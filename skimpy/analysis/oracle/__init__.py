@@ -29,4 +29,5 @@ from .add_min_displacement import *
 from .dummy_free_energies import *
 from .minimum_fluxes import *
 from .fix_directionality import *
-from .load_pytfa_solution import * 
+from .load_pytfa_solution import *
+from .flux_concentration_ratios import *
