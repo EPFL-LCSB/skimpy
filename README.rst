@@ -90,7 +90,6 @@ To get right into building kinetic models please find below a simple example to 
     metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
                                                        product = 'B')
 
-    ## QSSA Method
     parameters = ReversibleMichaelisMenten.Parameters(
         vmax_forward = 1.0,
         k_equilibrium=2.0,
@@ -116,18 +115,6 @@ To get right into building kinetic models please find below a simple example to 
     this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
     this_sol_qssa.plot('output/uni_uni_base_out_qssa.html')
-
-    ## Full rate method
-    this_model.compile_ode(sim_type = ELEMENTARY)
-
-    this_model.initial_conditions['A'] = 1.0
-    this_model.initial_conditions['B'] = 1.0
-    this_model.initial_conditions['pfk'] = 0.8
-    this_model.initial_conditions['EC_pfk'] = 0.2
-
-    this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
-
-    this_sol_full.plot('output/uni_uni_base_out_elemetary.html')
 
 
 More information can be found
