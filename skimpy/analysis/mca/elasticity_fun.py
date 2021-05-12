@@ -81,7 +81,8 @@ class ElasticityFunction:
         # self.function = theano_function(sym_vars, expressions,
         #                                 on_unused_input='ignore')
 
-        self.function = make_cython_function(sym_vars, expressions, pool=pool, simplify=True)
+        self.function = make_cython_function(sym_vars, expressions, pool=pool,
+                                             simplify=True, optimize=True)
 
     def __call__(self, variables, parameters):
         """
