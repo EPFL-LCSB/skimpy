@@ -19,6 +19,9 @@ before_install:
  - export SUNDIALS_INST="${HOME}/sundials-3.1.1"
  
  - pip install scikits.odes==2.4.1
+ 
+ - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/sundials-3.1.1/lib"
+ 
  - pip install pytest-cov
 install:
  - cd $TRAVIS_BUILD_DIR
