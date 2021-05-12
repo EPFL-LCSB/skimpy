@@ -1,27 +1,51 @@
 Quick start
 ===========
 
-The tutorial files detail thoroughly normal usages of the SKiMPy package. They
-are grouped into categories, and can be found at::
+In this quick start tutorial we introduce the main functions to build and manipulate SKiMpy models. 
 
-    skimpy
-    └── tutorials/
-        ├── basics
-        │   ├── tutorial_boundaries.py
-        │   ├── tutorial_import_cobra.py
-        │   └── tutorial_ode_with_fluxes.py
-        ├── mechanisms
-        │   ├── tutorial_convenience.py
-        │   ├── tutorial_from_thermo_data.py
-        │   └── tutorial_michaelismenten.py
-        ├── ORACLE
-        │   ├── tutorial_small_ecoli.py
-        │   └── tutorial_toy.py
-        └── parameter_sampling
-            ├── tutorial_dependent_non_linear_fluxes.py
-            └── tutorial_non_linear_fluxes.py
+.. code-block:: python
 
+    import numpy as np
+    from skimpy.core import *
+    from skimpy.mechanisms import *
 
-Cheers,
+    name = 'pfk'
+    metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
+                                                       product = 'B')
 
-The SKiMPy team
+    # Define reaction parameters
+    parameters = ReversibleMichaelisMenten.Parameters(
+        vmax_forward = 1.0,
+        k_equilibrium=2.0,
+        km_substrate = 10.0,
+        km_product = 10.0,
+        total_enzyme_concentration = 1.0,
+    )
+
+    # Create the reaction object
+    pfk = Reaction(name=name,
+                   mechanism = ReversibleMichaelisMenten,
+                   reactants=metabolites,
+                   )
+
+    # Create a model
+    this_model = KineticModel()
+    
+    # Add the reaction
+    this_model.add_reaction(pfk)
+    
+    # Assing the parameters to the model 
+    this_model.parametrize_by_reaction({pfk.name:parameters})
+    
+    # Compile the symbolic expressions of the ODE system
+    this_model.compile_ode()
+
+    # Assing initial conditions
+    this_model.initial_conditions['A'] = 1.0
+    this_model.initial_conditions['B'] = 1.0
+
+    # solve the ODEs
+    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
+
+    this_sol_qssa.plot('output/uni_uni_base_out_qssa.html')
+
