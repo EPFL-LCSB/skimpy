@@ -116,7 +116,7 @@ kmodel.compile_ode(sim_type = QSSA)
 kmodel.initial_conditions['arabinose'] = 10.
 
 sol = kmodel.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
-sol.plot('output/time_response.html')
+sol.plot('output/time_response.html', backend='svg')
 
 
 input = np.logspace(-5,1,100)
@@ -132,5 +132,7 @@ output = np.array(output)
 timetrace_plot(input, output,
                filename='output/input_output.html',
                legend=['SP6','lacl','GFP',],
-               x_axis_type="log",)
+               x_axis_type="log",
+               backend='svg',
+               )
 

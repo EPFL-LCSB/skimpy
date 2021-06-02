@@ -91,7 +91,8 @@ timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentratio
                filename='output_multi/time_response.html',
                legend=species,
                x_label='time [h]',
-               y_label='concentrations [M]',)
+               y_label='concentrations [M]',
+               backend='svg',)
 
 MASS_PER_CELL = 1e-12 #[g]
 species = ['biomass_strain_1', 'biomass_strain_2']
@@ -100,7 +101,8 @@ timetrace_plot(sol.time, sol.concentrations[species].values*MASS_PER_CELL,
                legend=species,
                x_label='time [h]',
                y_label='biomass [g]',
-               legend_location='top_left')
+               legend_location='top_left',
+               backend='svg',)
 
 
 
@@ -114,6 +116,7 @@ timetrace_plot(sol.time[:-1], mu,
                legend=species,
                x_label='time [h]',
                y_label='growth rate [1/h]',
+               backend='svg',
                )
 
 # Medium
@@ -122,7 +125,8 @@ timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentratio
                filename='output_multi/time_response_medium.html',
                legend=species,
                x_label='time [h]',
-               y_label='concentrations [M]',)
+               y_label='concentrations [M]',
+               backend='svg',)
 
 
 

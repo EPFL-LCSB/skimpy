@@ -82,7 +82,7 @@ this_model.initial_conditions['MAPK'] = 300.0
 
 this_sol_full = this_model.solve_ode(np.linspace(0.0, 1000.0, 1000), solver_type='cvode')
 
-this_sol_full.plot('output/time_signaling_response.html', )
+this_sol_full.plot('output/time_signaling_response.html', backend='svg',)
 
 input = np.logspace(-3,0,100)
 output = []
@@ -96,8 +96,10 @@ output = np.array(output)
 
 timetrace_plot(input, output,
                filename='output/input_output.html',
-               legend=['MAPKP','MAPKKP','MAPKKKP'],
-               x_axis_type="log",legend_location='top_left'
+               legend=['MAPKP', 'MAPKKP', 'MAPKKKP'],
+               x_axis_type="log",
+               legend_location='top_left',
+               backend='svg',
                )
 
 

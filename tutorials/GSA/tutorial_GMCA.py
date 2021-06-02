@@ -29,7 +29,7 @@ import numpy as np
 
 import pytfa
 from pytfa.io import import_matlab_model, load_thermoDB
-from pytfa.io.viz import get_reaction_data
+from pytfa.io.viz import get_reaction_data, export_reactions_for_escher
 
 from skimpy.core import *
 from skimpy.mechanisms import *
@@ -45,6 +45,7 @@ from skimpy.analysis.oracle.load_pytfa_solution import load_fluxes, \
     load_concentrations, load_equilibrium_constants
 
 from skimpy.analysis.oracle import *
+from skimpy.viz.sensitivty import plot_sobol_coefficients
 
 """
 Parameters
@@ -79,8 +80,7 @@ tmodel.convert(add_displacement=True)
 
 
 # We choose a flux directionality profile (FDP)
-# with minium fluxes of 1e-3
-
+# with minium fluxes of 1.0
 this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'DM_2h3oppan': (1e-3, 100.0),
                'DM_adp':      (-100.0, -1e-3),
@@ -91,10 +91,10 @@ this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'DM_nadh':     (1e-3, 100.0),
                'DM_pep':      (1e-3, 100.0),
                'ENO':         (2.0, 100.0),
-               'GLYCK':       (1e-3, 100.0),
-               'GLYCK2':      (-100, -1e-3),
-               'PGK':         (1e-3, 100.0),
-               'PGM':         (1e-3, 100.0),
+               'GLYCK':       (1.0, 100.0),
+               'GLYCK2':      (1.0, 100.0),
+               'PGK':         (1.0, 100.0),
+               'PGM':         (1.0, 100.0),
                'TRSARr':      (2.0, 10.0),
                'Trp_adp':     (-100.0, 100.0),
                'Trp_atp':     (-100.0, 100.0),
@@ -102,6 +102,11 @@ this_bounds = {'DM_13dpg':    (-10.0, -2.0),
                'Trp_h2o':     (-100.0, 100.0),
                'Trp_nad':     (-100.0, 100.0),
                'Trp_nadh':    (-100.0, 100.0)}
+
+for b, (lb, ub) in this_bounds.items():
+    tmodel.reactions.get_by_id(b).bounds = (lb, ub)
+
+
 # Find a solution for this FDP
 solution = tmodel.optimize()
 
@@ -112,6 +117,8 @@ add_min_log_displacement(tmodel, min_log_displacement)
 # Find a solution for the model
 solution = tmodel.optimize()
 
+# Export solution for Escher
+export_reactions_for_escher(tmodel,solution.raw, 'output/reference_fluxes.csv')
 
 """
 Get a Kinetic Model
@@ -157,6 +164,7 @@ kmodel.compile_mca(sim_type=QSSA, parameter_list=parameter_list)
 
 # Choose a subset of Vmax's to analyse
 outputs_to_analyse = ['vmax_forward_ENO','vmax_forward_PGK']
+
 def calculate_model_output(model_parameters):
     # calculate all flux control coefficients
     flux_control_coeff_0 = kmodel.flux_control_fun(fluxes,
@@ -231,3 +239,10 @@ for this_parameter in parameters_to_resample:
 # to calculate_model_output
 # TODO: specify parameters_to_resample as a dict, so that we can resample groups
 # of parameters and let the user name these groups
+
+# Plot
+plot_sobol_coefficients(df_si.loc['vmax_forward_ENO'],
+                        df_st.loc['vmax_forward_ENO'],
+                        filename='output/eno_si_st.html',
+                        colors=['#3399FF','#205f99'],
+                        backend='svg')

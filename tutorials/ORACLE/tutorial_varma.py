@@ -102,7 +102,7 @@ for sec in secretions:
 print(tmodel.optimize())
 
 samples = sample(tmodel, NUM_TFA_SAMPLES, method='achr')
-samples.to_csv('./output/samples.csv'.format())
+samples.to_csv('./output/samples_fdp1_1000.csv'.format())
 
 """
 Parameter sampling 

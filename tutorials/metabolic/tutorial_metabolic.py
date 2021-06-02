@@ -77,7 +77,9 @@ M = modal_matrix(kmodel,ref_concentrations,parameter_values)
 
 plot_modal_matrix(M,filename='./output/modal_matrix.html',
                   plot_width=800, plot_height=600,
-                  clustered=True )
+                  clustered=True,
+                  backend='svg',
+                  )
 
 """
 Metabolic control analysis
@@ -97,7 +99,10 @@ flux_control_coeff = kmodel.flux_control_fun(ref_fluxes,
 lac_control_coeff = flux_control_coeff.slice_by('sample',0).loc['LDH_D', :]
 
 lac_control_coeff.index = [v.replace('vmax_forward_','') for v in lac_control_coeff.index ]
-plot_control_coefficients(lac_control_coeff,filename='./output/lac_control_coeff.html',)
+plot_control_coefficients(lac_control_coeff,
+                          filename='./output/lac_control_coeff.html',
+                          backend='svg',
+                          )
 
 """
 Large parameter perturbations 
@@ -138,9 +143,11 @@ ldh_fluxes = np.array([fluxes[0]['LDH_D'].values, fluxes[1]['LDH_D'].values ]).T
 timetrace_plot(sol.time,ldh_fluxes ,
                filename='output/ldh_flux.html',
                legend=['2 x [LDH]','2 x [GAPD]'],
+               backend='svg'
                )
 
 
 """
 Basins of attraction
 """
+
