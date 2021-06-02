@@ -115,6 +115,23 @@ class ParameterValuePopulation(object):
         else:
             return self._data[self._index[index]]
 
+    def __len__(self,):
+        return len(self._data)
+
+    # Define the iterator
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.n < len(self._data):
+            result = self._data[self._index[self.n]]
+            self.n += 1
+            return result
+        else:
+            raise StopIteration
+
+
     def mean(self):
         """
         :return Computes the mean parameter values for the population:
