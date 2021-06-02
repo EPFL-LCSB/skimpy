@@ -36,6 +36,10 @@ ELEMENTARY = 'elementary'
 NUMERICAL = 'numerical'
 SYMBOLIC = 'symbolic'
 
+""" MCA Types """
+NET = 'net'
+SPLIT = 'split'
+
 
 """ Item types """
 PARAMETER = 'parameter'
@@ -48,6 +52,5 @@ JOULE = 'JOULE'
 
 
 """ OTHER """
-
 WATER_FORMULA = 'H2O'
 

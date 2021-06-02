@@ -252,14 +252,14 @@ def make_gamma_fun(kinetic_model):
     :param kinetic_model:
     :return:
     """
-    reactions = kinetic_model.reactions.keys()
+    reactions = kinetic_model.reactions.values()
     all_parameters = []
-
+    expr = TabDict([])
     for r in reactions:
         keq = r.parameters.k_equilibrium.symbol
-        expr[r.id] = 1/keq
-        for v,s in r.reactant_stoichiometry.items():
-            expr[r.id] *= v**-s
+        expr[r.name] = 1/keq
+        for v, s in r.reactant_stoichiometry.items():
+            expr[r.name] *= v.symbol**s
         all_parameters.append(keq)
 
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)

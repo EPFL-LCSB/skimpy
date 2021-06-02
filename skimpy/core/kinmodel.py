@@ -27,7 +27,9 @@ limitations under the License.
 
 from scikits.odes import ode
 from skimpy.analysis.ode.utils import make_ode_fun
+from skimpy.analysis.ode.utils import make_gamma_fun
 from skimpy.analysis.ode.symbolic_jacobian_fun import SymbolicJacobianFunction
+
 from skimpy.analysis.mca.make import make_mca_functions
 from skimpy.analysis.mca.prepare import prepare_mca
 from skimpy.analysis.mca import *
@@ -348,7 +350,7 @@ class KineticModel(object):
 
         return ODESolution(self, solution)
 
-    def compile_mca(self, parameter_list=[], sim_type=QSSA, ncpu=1):
+    def compile_mca(self, parameter_list=[], mca_type=NET, sim_type=QSSA, ncpu=1):
             """
             Compile MCA expressions: elasticities, jacobian
             and control coeffcients
@@ -365,13 +367,18 @@ class KineticModel(object):
                 parameter_elasticities_fun, \
                     = make_mca_functions(self,
                                          parameter_list,
-                                         sim_type=sim_type
+                                         sim_type=sim_type,
+                                         mca_type=mca_type,
                                         )
 
                 self.independent_elasticity_fun = independent_elasticity_fun
                 self.dependent_elasticity_fun = dependent_elasticity_fun
                 self.parameter_elasticities_fun = parameter_elasticities_fun
 
+                if mca_type == SPLIT:
+                    self.displacement_function = make_gamma_fun(self)
+                else:
+                    self.displacement_function = None
 
                 # Build functions for stability and control coefficient's
                 self.jacobian_fun = JacobianFunction(
@@ -392,7 +399,9 @@ class KineticModel(object):
                     self.volume_ratio_func,
                     self.conservation_relation,
                     self.independent_variables_ix,
-                    self.dependent_variables_ix)
+                    self.dependent_variables_ix,
+                    displacement_function=self.displacement_function,
+                    mca_type=mca_type)
 
                 self.flux_control_fun = FluxControlFunction(
                     self,
@@ -403,4 +412,5 @@ class KineticModel(object):
                     self.conservation_relation,
                     self.independent_variables_ix,
                     self.dependent_variables_ix,
-                    self.concentration_control_fun)
+                    self.concentration_control_fun,
+                    mca_type=mca_type)

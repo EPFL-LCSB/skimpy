@@ -32,6 +32,7 @@ from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
 
 from skimpy.utils.tensor import Tensor
+from skimpy.utils.namespace import SPLIT, NET
 
 
 class FluxControlFunction:
@@ -45,7 +46,9 @@ class FluxControlFunction:
                  independent_variable_ix,
                  dependent_variable_ix,
                  concentration_control_fun,
+                 mca_type=NET,
                  ):
+
         self.model = model
         self.reduced_stoichometry = reduced_stoichometry
         self.dependent_elasticity_function = dependent_elasticity_function
@@ -56,6 +59,9 @@ class FluxControlFunction:
         self.conservation_relation = conservation_relation
 
         self.concentration_control_fun = concentration_control_fun
+
+        self.mca_type = mca_type
+
 
     def __call__(self, flux_dict, concentration_dict, parameter_population):
 
@@ -69,8 +75,14 @@ class FluxControlFunction:
         concentrations = [concentration_dict[r] for r in self.model.reactants]
 
         num_parameters = len(self.parameter_elasticity_function.respective_variables)
-        num_fluxes = len(fluxes)
+
+        if self.mca_type == NET:
+            num_fluxes = len(fluxes)
+        elif self.mca_type == SPLIT:
+            num_fluxes = len(fluxes)*2
+
         population_size = len(parameter_population)
+
 
         flux_control_coefficients = zeros((num_fluxes,num_parameters,population_size))
 
@@ -110,7 +122,13 @@ class FluxControlFunction:
             this_cc = elasticity_matrix.dot(C_Xi_P[:,:,0]) + parameter_elasticity_matrix
             flux_control_coefficients[:,:,i] = this_cc
 
-        flux_index = pd.Index(self.model.reactions.keys(), name="flux")
+        if self.mca_type == NET:
+            flux_index = pd.Index(self.model.reactions.keys(), name="flux")
+        elif self.mca_type == SPLIT:
+            fwd_fluxes = ["fwd_"+k for k in self.model.reactions.keys()]
+            bwd_fluxes = ["bwd_"+k for k in self.model.reactions.keys()]
+            flux_index = pd.Index(fwd_fluxes+bwd_fluxes, name="flux")
+
         parameter_index = pd.Index(self.parameter_elasticity_function.respective_variables, name="parameter")
         sample_index = pd.Index(range(population_size), name="sample")
 

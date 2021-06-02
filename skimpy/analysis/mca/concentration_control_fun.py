@@ -30,8 +30,10 @@ from numpy import array, zeros
 
 from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
+from scipy.sparse import hstack
 
 from skimpy.utils.tensor import Tensor
+from skimpy.utils.namespace import SPLIT, NET
 
 class ConcentrationControlFunction:
     def __init__(self,
@@ -44,6 +46,8 @@ class ConcentrationControlFunction:
                  conservation_relation,
                  independent_variable_ix,
                  dependent_variable_ix,
+                 mca_type=NET,
+                 displacement_function=None,
                  ):
 
         self.model = model
@@ -55,6 +59,9 @@ class ConcentrationControlFunction:
         self.dependent_variable_ix = dependent_variable_ix
         self.conservation_relation = conservation_relation
         self.volume_ratio_function = volume_ratio_function
+
+        self.displacement_function = displacement_function
+        self.mca_type = mca_type
 
     def __call__(self,  flux_dict, concentration_dict, parameter_population):
 
@@ -75,9 +82,24 @@ class ConcentrationControlFunction:
 
         concentration_control_coefficients = zeros((num_concentration, num_parameters, population_size))
 
+
         for i,parameters in enumerate(parameter_population):
 
-            flux_matrix = diags(array(fluxes), 0).tocsc()
+            # net control coeffecients
+            if self.mca_type == NET:
+                flux_matrix = diags(array(fluxes), 0).tocsc()
+                effective_reduced_stoichiometry = self.reduced_stoichometry
+
+            # fwd and bwd control coeffecients
+            elif self.mca_type == SPLIT:
+                displacements = self.displacement_function(concentration_dict, parameters=parameters)
+
+                forward_fluxes = [1/(1-displacements[r]) * flux_dict[r] for r in self.model.reactions]
+                backward_fluxes = [displacements[r]/(1-displacements[r]) * flux_dict[r]
+                                   for r in self.model.reactions]
+                flux_matrix = diags(array(forward_fluxes+backward_fluxes), 0).tocsc()
+                effective_reduced_stoichiometry = hstack([self.reduced_stoichometry, -self.reduced_stoichometry],
+                                                         format='csc')
 
             if self.volume_ratio_function is None:
                 volume_ratios = array([1, ] * len(concentrations) )
@@ -88,7 +110,7 @@ class ConcentrationControlFunction:
 
             if self.conservation_relation.nnz == 0:
                 # If there are no moieties
-                volume_ratio_matrix =  diags(array(volume_ratios)).tocsc()
+                volume_ratio_matrix = diags(array(volume_ratios)).tocsc()
 
                 elasticity_matrix = self.independent_elasticity_function(concentrations,parameters)
 
@@ -113,12 +135,14 @@ class ConcentrationControlFunction:
                 elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
                                      .dot(dependent_weights)
 
-            N_E_V = volume_ratio_matrix.dot(self.reduced_stoichometry).dot(flux_matrix).dot(elasticity_matrix)
+
+
+            N_E_V = volume_ratio_matrix.dot(effective_reduced_stoichiometry).dot(flux_matrix).dot(elasticity_matrix)
             N_E_V_inv = sparse_inv(N_E_V)
 
             parameter_elasticity_matrix = self.parameter_elasticity_function(concentrations, parameters)
 
-            N_E_P = volume_ratio_matrix.dot(self.reduced_stoichometry).dot(flux_matrix).dot(parameter_elasticity_matrix)
+            N_E_P = volume_ratio_matrix.dot(effective_reduced_stoichiometry).dot(flux_matrix).dot(parameter_elasticity_matrix)
 
             this_cc = - N_E_V_inv.dot(N_E_P)
             concentration_control_coefficients[:,:,i] = this_cc.todense()

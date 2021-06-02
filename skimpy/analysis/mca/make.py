@@ -29,11 +29,12 @@ from skimpy.analysis.mca.elasticity_fun import ElasticityFunction
 from skimpy.analysis.mca.utils import get_dlogx_dlogy
 from skimpy.utils import iterable_to_tabdict
 from skimpy.utils.general import join_dicts
-from skimpy.utils.namespace import QSSA, PARAMETER, TQSSA, ELEMENTARY
+from skimpy.utils.namespace import QSSA, PARAMETER, TQSSA, ELEMENTARY, NET, SPLIT
 
 from skimpy.utils import TabDict, iterable_to_tabdict
 
-def make_mca_functions(kinetic_model,parameter_list,sim_type):
+
+def make_mca_functions(kinetic_model,parameter_list,sim_type, mca_type=NET):
     """ Create the elasticity and flux functions for MCA
     :param kinmodel:
     :param parameter_list:
@@ -81,8 +82,15 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type):
 
 
     # Get flux expressions for the net
-    all_flux_expressions = [this_reaction.mechanism.reaction_rates['v_net'] \
-                           for this_reaction in kinetic_model.reactions.values()]
+    if mca_type == NET:
+        all_flux_expressions = [this_reaction.mechanism.reaction_rates['v_net'] \
+                               for this_reaction in kinetic_model.reactions.values()]
+    elif mca_type == SPLIT:
+        all_flux_expressions_fwd = [this_reaction.mechanism.reaction_rates['v_fwd'] \
+                                for this_reaction in kinetic_model.reactions.values()]
+        all_flux_expressions_bwd = [this_reaction.mechanism.reaction_rates['v_bwd'] \
+                                    for this_reaction in kinetic_model.reactions.values()]
+        all_flux_expressions = all_flux_expressions_fwd + all_flux_expressions_bwd
 
     all_expr, all_parameters = list(zip(*all_data))
 
