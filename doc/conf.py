@@ -19,8 +19,10 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+ORIGIN_PATH = os.path.abspath('..')
+sys.path.insert(0, ORIGIN_PATH)
 
+SRC_PATH = os.path.abspath('../skimpy')
 
 # -- General configuration ------------------------------------------------
 
@@ -37,6 +39,9 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'autoapi.extension',]
+
+# Document Python Code
+autoapi_dirs = [SRC_PATH]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
