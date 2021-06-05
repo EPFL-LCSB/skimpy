@@ -25,6 +25,7 @@ limitations under the License.
 
 """
 
+import sympy
 
 from sympy import sympify
 from .mechanism import KineticMechanism,ElementrayReactionStep
@@ -118,7 +119,7 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
                         self.reactants.enzyme.symbol
 
             forward_rate_expression = vmaxf
-            backward_rate_expression = 0
+            backward_rate_expression = sympy.S.Zero
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol

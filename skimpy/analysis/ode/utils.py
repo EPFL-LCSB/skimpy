@@ -256,11 +256,16 @@ def make_gamma_fun(kinetic_model):
     all_parameters = []
     expr = TabDict([])
     for r in reactions:
-        keq = r.parameters.k_equilibrium.symbol
-        expr[r.name] = 1/keq
-        for v, s in r.reactant_stoichiometry.items():
-            expr[r.name] *= v.symbol**s
-        all_parameters.append(keq)
+        try:
+            
+            keq = r.parameters.k_equilibrium.symbol
+            expr[r.name] = 1/keq
+            for v, s in r.reactant_stoichiometry.items():
+                expr[r.name] *= v.symbol**s
+            all_parameters.append(keq)
+
+        except AttributeError:
+            pass
 
     all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
 

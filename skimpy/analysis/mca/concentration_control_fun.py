@@ -26,7 +26,7 @@ limitations under the License.
 """
 
 import pandas as pd
-from numpy import array, zeros
+from numpy import array, zeros, append
 
 from scipy.sparse import diags
 from scipy.sparse.linalg import inv as sparse_inv
@@ -34,6 +34,7 @@ from scipy.sparse import hstack
 
 from skimpy.utils.tensor import Tensor
 from skimpy.utils.namespace import SPLIT, NET
+from skimpy.analysis.mca.utils import get_reversible_fluxes
 
 class ConcentrationControlFunction:
     def __init__(self,
@@ -94,10 +95,11 @@ class ConcentrationControlFunction:
             elif self.mca_type == SPLIT:
                 displacements = self.displacement_function(concentration_dict, parameters=parameters)
 
-                forward_fluxes = [1/(1-displacements[r]) * flux_dict[r] for r in self.model.reactions]
-                backward_fluxes = [displacements[r]/(1-displacements[r]) * flux_dict[r]
-                                   for r in self.model.reactions]
-                flux_matrix = diags(array(forward_fluxes+backward_fluxes), 0).tocsc()
+                forward_fluxes, backward_fluxes = get_reversible_fluxes(flux_dict,
+                                                                        displacements,
+                                                                        self.model.reactions)
+
+                flux_matrix = diags(append(forward_fluxes, backward_fluxes), 0).tocsc()
                 effective_reduced_stoichiometry = hstack([self.reduced_stoichometry, -self.reduced_stoichometry],
                                                          format='csc')
 
@@ -155,3 +157,4 @@ class ConcentrationControlFunction:
         tensor_ccc = Tensor(concentration_control_coefficients, [concentration_index,parameter_index,sample_index])
 
         return tensor_ccc
+

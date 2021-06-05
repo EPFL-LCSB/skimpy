@@ -25,6 +25,7 @@ limitations under the License.
 
 """
 
+import sympy
 
 from sympy import sympify
 from .mechanism import KineticMechanism,ElementrayReactionStep
@@ -102,7 +103,7 @@ def make_irrev_massaction(stoichiometry):
             kf = self.parameters.vmax_forward.symbol
 
             forward_rate_expression = kf
-            backward_rate_expression = 0
+            backward_rate_expression = sympy.S.Zero
 
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol

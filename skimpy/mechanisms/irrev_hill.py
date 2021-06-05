@@ -25,6 +25,7 @@ limitations under the License.
 
 """
 
+import sympy
 
 from sympy import sympify
 from numpy import abs as np_abs
@@ -103,7 +104,7 @@ class IrreversibleHill(KineticMechanism):
         hill_effect = (s/kms)**(h-1)
 
         fwd_nominator = vmaxf*s/kms*hill_effect
-        bwd_nominator = 0
+        bwd_nominator = sympy.S.Zero
 
         common_denominator = 1 + (s/kms)**h
 

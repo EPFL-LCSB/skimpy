@@ -51,6 +51,28 @@ from ...utils.namespace import *
 sparse_matrix = csc_matrix
 
 
+def get_reversible_fluxes(net_fluxes, displacements, reactions):
+    """
+
+    :param net_fluxes: dict of net-fluxes
+    :param displacements: dict of displacements for reversible reactions
+    :param reactions: list of reaction names
+    :return:
+    """
+    forward_fluxes = np.zeros(len(reactions))
+    backward_fluxes = np.zeros(len(reactions))
+
+    for i, r in enumerate(reactions):
+        # Check if reaction is reversible
+        if r in displacements.keys():
+            forward_fluxes[i] = 1/(1-displacements[r]) * net_fluxes[r]
+            backward_fluxes[i] = displacements[r]/(1-displacements[r]) * net_fluxes[r]
+        else:
+            forward_fluxes[i] = net_fluxes[r]
+            backward_fluxes[i] = 0
+
+    return forward_fluxes, backward_fluxes
+
 
 def get_dlogx_dlogy(sympy_expression, variable):
     """
