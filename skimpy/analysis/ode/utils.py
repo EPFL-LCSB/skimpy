@@ -257,11 +257,28 @@ def make_gamma_fun(kinetic_model):
     expr = TabDict([])
     for r in reactions:
         try:
-            
             keq = r.parameters.k_equilibrium.symbol
             expr[r.name] = 1/keq
-            for v, s in r.reactant_stoichiometry.items():
+
+            # Here we need to get all variables and parameters
+            reactant_stoichiometry = TabDict([])
+            for k, v in r.mechanism.reactant_stoichiometry.items():
+                this_reactant = r.mechanism.reactants[k]
+                if this_reactant in reactant_stoichiometry.keys():
+                    reactant_stoichiometry[this_reactant] += v
+                else:
+                    reactant_stoichiometry[this_reactant] = v
+
+            for this_modifier in r.modifiers.values():
+                for k,v in this_modifier.reactants.items():
+                    if this_modifier.reactant_stoichiometry[k] != 0:
+                        reactant_stoichiometry[v] = this_modifier.reactant_stoichiometry[k]
+
+            for v, s in reactant_stoichiometry.items():
                 expr[r.name] *= v.symbol**s
+                if v.type == PARAMETER:
+                    all_parameters.append(v.symbol)
+
             all_parameters.append(keq)
 
         except AttributeError:
