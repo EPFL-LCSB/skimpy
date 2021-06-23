@@ -12,7 +12,7 @@ data/thermo_data.thermodb filter=lfs diff=lfs merge=lfs -text
 
 
 # Set the default behavior, in case people don't have core.autocrlf set.
-* text=auto
+#* text=auto
 
 # Declare files that will always have CRLF line endings on checkout.
 *.bat text eol=crlf
