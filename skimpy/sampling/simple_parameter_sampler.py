@@ -55,7 +55,8 @@ class SimpleParameterSampler(ParameterSampler):
                only_stable=True,
                min_max_eigenvalues=False,
                seed=123,
-               bounds_sample=(0,1),):
+               bounds_sample=(0,1),
+               max_trials=1e6):
 
         parameter_population = []
         smallest_eigenvalues = []
@@ -89,7 +90,7 @@ class SimpleParameterSampler(ParameterSampler):
         # target population size
         trials = 0
         while (len(
-                parameter_population) < self.parameters.n_samples) or trials > 1e6:
+                parameter_population) < self.parameters.n_samples) and trials < max_trials:
 
             parameter_sample = self._sample_saturation_step_compiled(
                 compiled_model,
