@@ -45,20 +45,26 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type, mca_type=NET):
     # TODO This should be a method in KineticModel that stores the expressions
     if sim_type == QSSA:
         all_data = []
-
-        #TODO Modifiers sould be applicable for all simulation types
+        # TODO Modifiers should be applicable for all simulation types
         for this_reaction in kinetic_model.reactions.values():
             this_reaction.mechanism.get_qssa_rate_expression()
             # Update rate expressions
             for this_mod in this_reaction.modifiers.values():
                 this_mod(this_reaction.mechanism.reaction_rates)
-                this_reaction.mechanism.update_qssa_rate_expression()
+            this_reaction.mechanism.update_qssa_rate_expression()
+
+            # Add modifier expressions
+            for this_mod in this_reaction.modifiers.values():
+                # Get parameters from modifiers
+                for p_type, parameter in this_mod.parameters.items():
+                    mod_sym = parameter.symbol
+                    this_reaction.mechanism.expression_parameters.update([mod_sym])
 
                 for r_type, reactant in this_mod.reactants.items():
                     # Add massbalances for modfier reactants if as non-zero stoich
                     if this_mod.reactant_stoichiometry[r_type] == 0:
                         continue
-                    
+
                     mod_sym = reactant.symbol
                     flux = this_reaction.mechanism.reaction_rates['v_net']
                     flux_expression = flux * this_mod.reactant_stoichiometry[r_type]
@@ -68,8 +74,12 @@ def make_mca_functions(kinetic_model,parameter_list,sim_type, mca_type=NET):
                     if reactant.type == PARAMETER:
                         this_reaction.mechanism.expression_parameters.update([mod_sym])
 
+            flux = this_reaction.mechanism.reaction_rates['v_net']
+            dxdt = this_reaction.mechanism.expressions
+            parameters = this_reaction.mechanism.expression_parameters
+
             all_data.append((this_reaction.mechanism.expressions,
-                             this_reaction.mechanism.expression_parameters))
+                         this_reaction.mechanism.expression_parameters))
 
     elif sim_type == TQSSA:
         raise(NotImplementedError)
