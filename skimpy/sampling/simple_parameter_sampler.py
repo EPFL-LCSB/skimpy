@@ -32,6 +32,8 @@ from numpy.random import sample
 from scipy.linalg import eigvals as eigenvalues
 from sympy import Symbol
 
+import scipy
+
 from skimpy.utils.namespace import *
 
 from skimpy.sampling import ParameterSampler, SaturationParameterFunction, FluxParameterFunction
@@ -55,7 +57,7 @@ class SimpleParameterSampler(ParameterSampler):
                only_stable=True,
                min_max_eigenvalues=False,
                seed=123,
-               bounds_sample=(0,1),
+               bounds_sample=(0, 1),
                max_trials=1e6):
 
         parameter_population = []
@@ -105,7 +107,16 @@ class SimpleParameterSampler(ParameterSampler):
             # largest_eigenvalue = eigenvalues(this_jacobian, k=1, which='LR',
             #                                  return_eigenvectors=False)
             # Test suggests that this is apparently much faster ....
-            this_real_eigenvalues = sorted(np.real(eigenvalues(this_jacobian.todense())))
+
+            #this_real_eigenvalues = sorted(np.real(eigenvalues(this_jacobian.todense())))
+
+            # Next level optimization using direclty the lapack function
+            lamr, lami, vl, vr, info = scipy.linalg.lapack.dgeev(this_jacobian.todense(),
+                                                                 compute_vl=1,
+                                                                 compute_vr=0,
+                                                                 )
+
+            this_real_eigenvalues = sorted(lamr)
 
             largest_eigenvalue = this_real_eigenvalues[-1]
             smallest_eigenvalue = this_real_eigenvalues[0]

@@ -27,12 +27,13 @@ limitations under the License.
 
 from pandas import DataFrame, Index
 import numpy as np
+import scipy
 
 from numpy.linalg import eig
 from skimpy.utils import TabDict
 from skimpy.analysis.ode import FluxFunction
 
-def modal_matrix(kmodel,concentration_dict,parameters, flux_modes=False):
+def modal_matrix(kmodel,concentration_dict,parameters, flux_modes=False, tolerance=1e-12):
     """
     This function computes the transformation matrix W as described in Chapter 4 of
     Heinrich, Reinhart, and Stefan Schuster. The regulation of cellular systems.
@@ -75,8 +76,39 @@ def modal_matrix(kmodel,concentration_dict,parameters, flux_modes=False):
     # The transformation matrix W is given by the eigenrows of the jacobian M,
     # or by the eigenvalues of the transpose of the jacobian M.
 
-    lam,_ = eig(jacobian.todense())
-    _,W = eig(jacobian.todense().T)
+    # lam_1,_ = eig(jacobian.todense())
+    # _  ,W_1 = eig(jacobian.todense().T)
+
+    # # Check for small rows:
+    # MAX_JAC = np.max(np.abs(jacobian.todense()))
+    #
+    # non_zero_rows = np.where(~np.all((np.abs(jacobian.todense()) < MAX_JAC*tolerance), axis=1))[0]
+    #
+    # reduced_jacobian = jacobian[non_zero_rows, :][:,non_zero_rows]
+
+    lamr, lami, vl, vr, info = scipy.linalg.lapack.dgeev(jacobian.todense(),
+                                                         compute_vl=1,
+                                                         compute_vr=0,
+                                                         )
+
+    # Calculate the complex eigenvalues
+    lam = lamr + 1j * lami
+
+    # Calculate the comple eigenvetors
+    W = np.zeros(vl.shape, dtype=complex)
+
+    i = 0
+
+    while i < len(lami):
+        if lami[i] !=0:
+            W[:, i]   = vl[:, i] + vl[:, i+1]*1j
+            W[:, i+1] = vl[:, i] - vl[:, i+1]*1j
+            i += 2
+        else:
+            W[:, i] = vl[:, i] + 0j
+            i += 1
+
+    W = W.T
 
     index = Index(lam, name ='eigenvalues')
     if flux_modes:
