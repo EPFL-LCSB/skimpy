@@ -65,7 +65,10 @@ def calc_max_eigenvalue(parameter_sample,
 def calc_parameters( saturations,
                      compiled_model,
                      concentration_dict,
-                     flux_dict):
+                     flux_dict,
+                     parameters_to_resample=None,
+                     fixed_parameters=None
+                     ):
 
     symbolic_concentrations_dict = {Symbol(k):v
                                     for k,v in concentration_dict.items()}
@@ -95,7 +98,9 @@ def calc_parameters( saturations,
     compiled_model.saturation_parameter_function(
         saturations,
         parameter_sample,
-        symbolic_concentrations_dict
+        symbolic_concentrations_dict,
+        parameters_to_resample,
+        fixed_parameters
     )
 
     # Calculate the Vmax's

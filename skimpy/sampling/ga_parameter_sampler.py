@@ -55,7 +55,8 @@ def default_fitness(saturations,
     parameter_sample = calc_parameters(saturations,
                                        compiled_model,
                                        concentration_dict,
-                                       flux_dict)
+                                       flux_dict,
+                                       )
 
     lambda_max = calc_max_eigenvalue(parameter_sample,
                                      compiled_model,
