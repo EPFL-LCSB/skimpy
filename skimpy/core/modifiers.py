@@ -312,6 +312,7 @@ class ActivationModifier(KineticMechanism,ExpressionModifier):
         reactants = self.Reactants(activator=activator,)
         parameters = self.Parameters(k_activation=k_activation)
         KineticMechanism.__init__(self, name, reactants, parameters)
+        self.link_parameters_and_reactants()
 
         self.reactant_stoichiometry = {'activator': 0 }
 
@@ -348,7 +349,7 @@ class ActivationModifier(KineticMechanism,ExpressionModifier):
 
 class InhibitionModifier(KineticMechanism,ExpressionModifier):
 
-    prefix = "AM"
+    prefix = "IM"
 
     Reactants = make_reactant_set(__name__, ['inhibitor',])
 
@@ -364,6 +365,7 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
         reactants = self.Reactants(inhibitor=inhibitor,)
         parameters = self.Parameters(k_inhibition=k_inhibition)
         KineticMechanism.__init__(self, name, reactants, parameters)
+        self.link_parameters_and_reactants()
 
         self.reactant_stoichiometry = {'inhibitor': 0 }
 
