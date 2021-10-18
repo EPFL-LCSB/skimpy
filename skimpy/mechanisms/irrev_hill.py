@@ -84,9 +84,11 @@ class IrreversibleHill(KineticMechanism):
                               for k in self.reactant_list
                               if k.startswith('substrate')])
 
+        products = TabDict([(k, self.reactants[k])
+                              for k in self.reactant_list
+                              if k.startswith('product')])
 
-
-        keq = self.parameters.k_equilibrium.symbol
+        # keq = self.parameters.k_equilibrium.symbol
         #TODO EXTEND TO ALL OTHER MECHANISMS
         if self.enzyme is None:
             vmaxf = self.parameters.vmax_forward.symbol
