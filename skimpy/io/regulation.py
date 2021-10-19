@@ -28,6 +28,8 @@ from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.mechanisms.generalized_reversible_hill_n_n_h1_with_inhibition import *
 from skimpy.mechanisms.convenience_with_inihibition import *
+from skimpy.core.compartments import Compartment
+
 def load_enzyme_regulation(kmodel, df_regulations_all):
     """
     Test function for loading regulations into an existing kmodel
@@ -36,7 +38,7 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     :param df_regulations_all: a pandas df that has the following columns: reaction_id | regulator | regulation
                                 reaction_id must correspond with the names in the kinetic model
                                 reactor is the name of a metabolite, with the compartment after the _
-                                regulation is either 'inhibitionr', 'activation', or 'competitive inhibition'
+                                regulation is either 'inhibition', 'activation', or 'competitive inhibition'
     :return: new_kmodel : A new kinetic model with regulations
     """
 
@@ -91,8 +93,15 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
             # For Rev MM, only 1 substrate / product pair --> needs handling before converting to Gen Hill
             if 'ReversibleMichaelisMenten' in rxn_mechanism:
                 reactant_key_value = {k + '1': v.name for k, v in this_rxn.mechanism.reactants.items()}
+            elif 'UniBi' in rxn_mechanism:
+                reactant_key_value = TabDict([(k + '1', v.name) if k.startswith('substrate') else (k,v.name )
+                                              for k, v in this_rxn.mechanism.reactants.items()])
+            elif 'BiUni' in rxn_mechanism:
+                reactant_key_value = TabDict([(k + '1', v.name) if k.startswith('product') else (k,v.name )
+                                              for k, v in this_rxn.mechanism.reactants.items()])
             else:
                 reactant_key_value = {k: v.name for k, v in this_rxn.mechanism.reactants.items()}
+
             inhibitor_key_value = {'inhibitor{}'.format(i + 1): e
                                    for i, e in enumerate(list_competitive_inhibitors)}
 
@@ -136,9 +145,9 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
             this_regulator = df_other_regulation.loc[ix_]['regulator']
 
             if this_regulation == 'inhibition':
-                new_rxn.modifiers[this_regulator] = InhibitionModifier(this_regulator)
+                new_rxn.modifiers[this_regulator] = InhibitionModifier(this_regulator, new_rxn)
             elif this_regulation == 'activation':
-                new_rxn.modifiers[this_regulator] = ActivationModifier(this_regulator)
+                new_rxn.modifiers[this_regulator] = ActivationModifier(this_regulator, new_rxn)
 
         # Finally add the new reaction to rxns
         new_kmodel.add_reaction(new_rxn)
@@ -153,7 +162,7 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
 
         met = new_kmodel.reactants[the_met.name]
         if not the_met.compartment is None:
-            comp = new_kmodel.compartments[the_met.compartment]
+            comp = new_kmodel.compartments[the_met.compartment.name]
             met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
