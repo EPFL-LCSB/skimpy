@@ -39,11 +39,11 @@ from ..utils.namespace import *
 from .utils import stringify_stoichiometry
 
 
-def make_generalized_reversible_hill_n_n_h1_with_inhibition(stoichiometry, inhibitor_stoichiometry):
+def make_generalized_reversible_hill_n_n_h1_with_inhibition(stoichiometry, inihbitor_stoichiometry):
 
     """
     This function creates the Generalized Rev. Hill with h = 1 and adds competitive inhibition
-    :param inhibitor_stoichiometry:
+    :param inihbitor_stoichiometry:
     :param stoichiometry is a list of the reaction stoichioemtry
     """
 
@@ -51,7 +51,8 @@ def make_generalized_reversible_hill_n_n_h1_with_inhibition(stoichiometry, inhib
     ALL_MECHANISM_SUBCLASSES = make_subclasses_dict(KineticMechanism)
 
     new_class_name = "H1GeneralizedReversibleHill_with_inhibition"\
-                     + "_{0}".format(stringify_stoichiometry(stoichiometry))
+                     + "_{0}".format(stringify_stoichiometry(stoichiometry,
+                                                             inihibitors=inihbitor_stoichiometry))
 
     if new_class_name in ALL_MECHANISM_SUBCLASSES.keys():
         return ALL_MECHANISM_SUBCLASSES[new_class_name]
@@ -68,7 +69,7 @@ def make_generalized_reversible_hill_n_n_h1_with_inhibition(stoichiometry, inhib
            or not (stoichiometry.count(-1) == stoichiometry.count(1)):
             raise ValueError('Stoichiometry needs to be 1 and n to n substrates! ')
 
-        suffix = "_{0}".format(stringify_stoichiometry(stoichiometry, inihibitors = inhibitor_stoichiometry))
+        suffix = "_{0}".format(stringify_stoichiometry(stoichiometry, inihibitors=inihbitor_stoichiometry))
 
         reactant_list = []
         inhibitor_list = []                    
@@ -106,7 +107,7 @@ def make_generalized_reversible_hill_n_n_h1_with_inhibition(stoichiometry, inhib
                 num_products += 1
 
         # Add inhibitor information
-        for i in inhibitor_stoichiometry:
+        for i in inihbitor_stoichiometry:
             inhibitor = 'inhibitor{}'.format(num_inhibitors)
             ki_inhibitor = 'ki_inhibitor{}'.format(num_inhibitors)
             inhibitor_list.append(inhibitor)

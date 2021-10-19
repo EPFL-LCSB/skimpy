@@ -39,7 +39,7 @@ def stringify_stoichiometry(stoichiometry, inihibitors = None):
     suffix = '_'.join([str(x) for x in stoichiometry])
 
     if inihibitors is not None:
-        suffix += '_'.join(['i'+str(x) for x in inihibitors])
+        suffix += '_'+'_'.join(['i'+str(x) for x in inihibitors])
 
     suffix = suffix.replace('-', 'm')
 

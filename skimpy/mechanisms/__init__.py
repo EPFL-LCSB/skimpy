@@ -31,6 +31,7 @@ from .convenience import *
 from .convenience_with_inihibition import *
 from .generalized_reversible_hill_n_n import *
 from .generalized_reversible_hill_n_n_h1 import *
+from .generalized_reversible_hill_n_n_h1_with_inhibition import *
 from .generalized_elementary_kinetics import *
 from .irrev_m_n_michaelis_menten import *
 from .irrev_massaction import *
