@@ -145,18 +145,18 @@ class KineticModel(object):
                                is v.name:
 
                                this_mod.reactants['small_molecule'] = self.reactants[v.name]
-                elif k.startswith('activator'):
-                    for this_mod in reaction.modifiers.values():
-                        if 'activator' in this_mod.reactants.keys():
-                            if this_mod.reactants['activator'].name \
-                                    is v.name:
-                                this_mod.reactants['activator'] = self.reactants[v.name]
-                elif k.startswith('inhibitor'):
-                    for this_mod in reaction.modifiers.values():
-                        if 'inhibitor' in this_mod.reactants.keys():
-                            if this_mod.reactants['inhibitor'].name \
-                                    is v.name:
-                                this_mod.reactants['inhibitor'] = self.reactants[v.name]
+                # elif k.startswith('activator'):
+                #     for this_mod in reaction.modifiers.values():
+                #         if 'activator' in this_mod.reactants.keys():
+                #             if this_mod.reactants['activator'].name \
+                #                     is v.name:
+                #                 this_mod.reactants['activator'] = self.reactants[v.name]
+                # elif k.startswith('inhibitor'):
+                #     for this_mod in reaction.modifiers.values():
+                #         if 'inhibitor' in this_mod.reactants.keys():
+                #             if this_mod.reactants['inhibitor'].name \
+                #                     is v.name:
+                #                 this_mod.reactants['inhibitor'] = self.reactants[v.name]
                 else:
                     reaction.mechanism.reactants[k] = self.reactants[v.name]
 
