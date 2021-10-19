@@ -137,13 +137,26 @@ class KineticModel(object):
             if v.name in self.reactants.keys():
 
                 # TODO substitute by itemsetter in reactions.reactants
-                # UGLYYYYYYY
+                # BN: edited on 18/10/2021 to add the condition to check if small molecule is there, also added inhibitor/activatorUGLYYYYYYY
                 if k.startswith('small_molecule'):
                     for this_mod in reaction.modifiers.values():
-                        if this_mod.reactants['small_molecule'].name \
-                           is v.name:
+                        if 'small_molecule' in this_mod.reactants.keys():
+                            if this_mod.reactants['small_molecule'].name \
+                               is v.name:
 
-                           this_mod.reactants['small_molecule'] = self.reactants[v.name]
+                               this_mod.reactants['small_molecule'] = self.reactants[v.name]
+                elif k.startswith('activator'):
+                    for this_mod in reaction.modifiers.values():
+                        if 'activator' in this_mod.reactants.keys():
+                            if this_mod.reactants['activator'].name \
+                                    is v.name:
+                                this_mod.reactants['activator'] = self.reactants[v.name]
+                elif k.startswith('inhibitor'):
+                    for this_mod in reaction.modifiers.values():
+                        if 'inhibitor' in this_mod.reactants.keys():
+                            if this_mod.reactants['inhibitor'].name \
+                                    is v.name:
+                                this_mod.reactants['inhibitor'] = self.reactants[v.name]
                 else:
                     reaction.mechanism.reactants[k] = self.reactants[v.name]
 
