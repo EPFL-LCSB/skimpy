@@ -47,10 +47,12 @@ class ExpressionModifier(object):
 
     prefix = 'MOD'
 
-    def __init__(self, name, modifier = None):
+    def __init__(self, name, reaction=None, modifier=None):
         self._name = name
         if modifier is not None:
             self._modifier = modifier
+
+        self._reaction = reaction
 
     def __call__(self,expressions):
         self.modifier(expressions)
@@ -88,7 +90,7 @@ class BoundaryCondition(ExpressionModifier):
 
     prefix = 'BC'
 
-    def __init__(self, name, modifier = None):
+    def __init__(self, name, modifier = None, reaction=None):
         ExpressionModifier.__init__(self, name, modifier)
 
 
@@ -99,7 +101,7 @@ class ConstantConcentration(BoundaryCondition):
 
     prefix = 'CC'
 
-    def __init__(self, reactant, name = None):
+    def __init__(self, reactant, name = None, reaction=None):
 
         # Is the reactant constant it is not a variable anymore
         if name is None:
@@ -131,7 +133,7 @@ class AdditiveConcentrationRate(ExpressionModifier):
 
     prefix = 'ADDCR'
 
-    def __init__(self, reactant, flux_value, name=None):
+    def __init__(self, reactant, flux_value, name=None, reaction=None):
 
         if name is None:
             name = reactant.__str__()
@@ -155,7 +157,7 @@ class BoundaryFlux(BoundaryCondition,AdditiveConcentrationRate):
 
     prefix = "BF"
 
-    def __init__(self, reactant, flux_value):
+    def __init__(self, reactant, flux_value, reaction=None):
         # TODO: Find a way to make sure the flux_value does not depend on an
         # inner variable
         self.check_dependency(flux_value)
@@ -181,7 +183,7 @@ class FirstOrderSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     parameter_reactant_links = {}
 
-    def __init__(self, small_molecule, mechanism_stoichiometry, name=None):
+    def __init__(self, small_molecule, mechanism_stoichiometry, name=None, reaction=None):
 
         if name is None:
             name = small_molecule.__repr__()
@@ -244,7 +246,7 @@ class DisplacementSmallMoleculeModifier(KineticMechanism,ExpressionModifier):
 
     parameter_reactant_links = {}
 
-    def __init__(self, small_molecule, mechanism_stoichiometry, name=None):
+    def __init__(self, small_molecule, mechanism_stoichiometry, name=None, reaction=None):
 
         if name is None:
             name = small_molecule.__str__()
@@ -304,14 +306,24 @@ class ActivationModifier(KineticMechanism,ExpressionModifier):
 
     parameter_reactant_links = {'k_activation':'activator'}
 
-    def __init__(self, activator, name=None, k_activation=None):
+    def __init__(self, activator, name=None, k_activation=None, reaction=None):
 
         if name is None:
             name = activator.__str__()
 
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
         reactants = self.Reactants(activator=activator,)
         parameters = self.Parameters(k_activation=k_activation)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
         KineticMechanism.__init__(self, name, reactants, parameters)
+
         self.link_parameters_and_reactants()
 
         self.reactant_stoichiometry = {'activator': 0 }
@@ -357,13 +369,22 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
 
     parameter_reactant_links = {'k_inhibition':'inhibitor'}
 
-    def __init__(self, inhibitor, name=None, k_inhibition=None):
+    def __init__(self, inhibitor, name=None, k_inhibition=None, reaction=None):
 
         if name is None:
             name = inhibitor.__str__()
 
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
         reactants = self.Reactants(inhibitor=inhibitor,)
         parameters = self.Parameters(k_inhibition=k_inhibition)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
         KineticMechanism.__init__(self, name, reactants, parameters)
         self.link_parameters_and_reactants()
 

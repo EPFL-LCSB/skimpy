@@ -248,7 +248,7 @@ def load_yaml_model(path):
         modifiers = the_reaction['modifiers']
         for the_modifier in modifiers.values():
             TheModifier = get_mechanism(the_modifier)
-            new_modifier = TheModifier(**the_modifier)
+            new_modifier = TheModifier(**the_modifier, reaction=new_reaction)
             new_reaction.modifiers[new_modifier.name] = new_modifier
 
         new.add_reaction(new_reaction)
@@ -270,6 +270,7 @@ def load_yaml_model(path):
     for rxn_obj in new.reactions.values():
         # initalize empty param list
         parameter_init_dict[rxn_obj.name] = rxn_obj.mechanism.__class__.Parameters()
+
     new.parametrize_by_reaction(parameter_init_dict)
 
     # Boundary Conditions
