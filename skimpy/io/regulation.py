@@ -188,7 +188,16 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     new_kmodel.parametrize_by_reaction(parameter_init_dict)
 
     # Boundary Conditions
-    new_kmodel.boundary_conditions = kmodel.boundary_conditions.copy()
+    for the_bc in kmodel.boundary_conditions.values():
+        TheBoundaryCondition = the_bc.__class__
+        reactant = new_kmodel.reactants[the_bc.reactant.name]
+
+        # NOTE: Check how to properly get other things for other BCs than CC
+        new_bc = TheBoundaryCondition(reactant)
+        new_kmodel.add_boundary_condition(new_bc)
+
+        # Do not forget to add the value of the BC!
+        reactant.value = kmodel.parameters[str(reactant.symbol)]
 
     # # Do not forget to add the value of the BC! TODO: need to sort this out but maybe it is already sorted
     # reactant.value = the_dict['parameters'][str(reactant.symbol)]
