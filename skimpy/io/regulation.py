@@ -203,8 +203,8 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         new_bc = TheBoundaryCondition(reactant)
         new_kmodel.add_boundary_condition(new_bc)
 
-        # Do not forget to add the value of the BC!
-        reactant.value = kmodel.parameters[str(reactant.symbol)]
+        # Do not forget to add the value of the BC! Note BN: it has to be .value unlike for the load_yaml
+        reactant.value = kmodel.parameters[str(reactant.symbol)].value
 
     # Update the parameters with all pre-existing parameter values
     this_params = new_kmodel.parameters
