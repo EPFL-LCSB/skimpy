@@ -29,7 +29,6 @@ from skimpy.mechanisms import *
 from skimpy.mechanisms.generalized_reversible_hill_n_n_h1_with_inhibition import *
 from skimpy.mechanisms.convenience_with_inihibition import *
 from skimpy.core.compartments import Compartment
-
 from skimpy.utils.general import get_all_reactants
 
 
@@ -65,10 +64,17 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
                            reactants=the_reactants,
                            enzyme=the_enzyme,
                            )
-        # Add kinetic modifiers
+
+        # Add kinetic modifiers - note this has been changed to once again not just copy the old modifier but create
+        # it from scratch - Currently, this only covers existing small_molecule modifiers
+        # TODO: extend this to all possible modifiers including activation and inhibition
         modifiers = this_rxn.modifiers
-        for the_modifier in modifiers:
-            new_rxn.modifiers[the_modifier] = modifiers[the_modifier]
+        for the_modifier in modifiers.values():
+            TheModifier = the_modifier.__class__
+            new_modifier = TheModifier(small_molecule=the_modifier.reactants['small_molecule'].name,
+                                       mechanism_stoichiometry = the_modifier.reactant_stoichiometry,
+                                       reaction=new_rxn)
+            new_rxn.modifiers[new_modifier.name] = new_modifier
 
         new_kmodel.add_reaction(new_rxn)
 
@@ -121,10 +127,17 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
                                inhibitors=inhibitors,
                                )
 
-            # Add existing kinetic modifiers
+            # Add existing kinetic modifiers - note this has been changed to once again not just copy the old modifier but create
+            # it from scratch - Currently, this only covers existing small_molecule modifiers
+            # TODO: extend this to all possible modifiers including activation and inhibition
             modifiers = this_rxn.modifiers
-            for the_modifier in modifiers:
-                new_rxn.modifiers[the_modifier] = modifiers[the_modifier]
+            for the_modifier in modifiers.values():
+                TheModifier = the_modifier.__class__
+                new_modifier = TheModifier(small_molecule=the_modifier.reactants['small_molecule'].name,
+                                           mechanism_stoichiometry=the_modifier.reactant_stoichiometry,
+                                           reaction=new_rxn)
+                new_rxn.modifiers[new_modifier.name] = new_modifier
+
 
         # If there are no competitive regulations, just recreate the reaction first since the other modifications are applied on top
         else:
