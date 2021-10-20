@@ -166,18 +166,6 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         new_comp = Compartment(the_comp)
         new_kmodel.add_compartment(new_comp)
 
-    # Assing compartments
-    # Note DW: This is needed because not all reactants are variables
-    # e.g. extracellular mets with BC == const > thus they are parameters
-    for the_met in get_all_reactants(kmodel).values():
-        try:
-            new_met = new_kmodel.reactants[the_met.name]
-        except KeyError:
-            new_met = new_kmodel.parameters[the_met.name]
-
-        if not the_met.compartment is None:
-            comp = new_kmodel.compartments[the_met.compartment.name]
-            new_met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
@@ -213,6 +201,20 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Initial conditions
     # we can copy this since it is of type TabDict((str,float) , )
     new_kmodel.initial_conditions = kmodel.initial_conditions.copy()
+
+    # Adding compartments
+    # Note DW: This is needed because not all reactants are variables
+    # e.g. extracellular mets with BC == const > thus they are parameters
+    # Note BN: This has been moved here from above since now all the parameters have been populated as well
+    for the_met in get_all_reactants(kmodel).values():
+        try:
+            new_met = new_kmodel.reactants[the_met.name]
+        except KeyError:
+            new_met = new_kmodel.parameters[the_met.name]
+
+        if not the_met.compartment is None:
+            comp = new_kmodel.compartments[the_met.compartment.name]
+            new_met.compartment = comp
 
     # If the model the model has computed moieties we reconstruct them too
     if hasattr(kmodel,'dependent_reactants'):
