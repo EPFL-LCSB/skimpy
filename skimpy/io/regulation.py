@@ -170,10 +170,14 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Note DW: This is needed because not all reactants are variables
     # e.g. extracellular mets with BC == const > thus they are parameters
     for the_met in get_all_reactants(kmodel).values():
-        met = new_kmodel.reactants[the_met.name]
+        try:
+            new_met = new_kmodel.reactants[the_met.name]
+        except KeyError:
+            new_met = new_kmodel.parameters[the_met.name]
+
         if not the_met.compartment is None:
             comp = new_kmodel.compartments[the_met.compartment.name]
-            met.compartment = comp
+            new_met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
