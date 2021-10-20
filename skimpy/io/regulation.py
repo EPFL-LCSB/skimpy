@@ -30,6 +30,9 @@ from skimpy.mechanisms.generalized_reversible_hill_n_n_h1_with_inhibition import
 from skimpy.mechanisms.convenience_with_inihibition import *
 from skimpy.core.compartments import Compartment
 
+from skimpy.utils.general import get_all_reactants
+
+
 def load_enzyme_regulation(kmodel, df_regulations_all):
     """
     Test function for loading regulations into an existing kmodel
@@ -161,8 +164,9 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         new_kmodel.add_compartment(new_comp)
 
     # Assing compartments
-    for the_met in kmodel.reactants.values():
-
+    # Note DW: This is needed because not all reactants are variables
+    # e.g. extracellular mets with BC == const > thus they are parameters
+    for the_met in get_all_reactants(kmodel).values():
         met = new_kmodel.reactants[the_met.name]
         if not the_met.compartment is None:
             comp = new_kmodel.compartments[the_met.compartment.name]
