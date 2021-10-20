@@ -211,6 +211,7 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
             pass
 
     # Initial conditions
+    # we can copy this since it is of type TabDict((str,float) , )
     new_kmodel.initial_conditions = kmodel.initial_conditions.copy()
 
     # If the model the model has computed moieties we reconstruct them too
