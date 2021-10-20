@@ -39,6 +39,7 @@ from pytfa.optim.constraints import ModelConstraint
 from pytfa.utils import numerics
 
 import numpy as np
+import sympy
 
 MIN_C = 1e-10
 MAX_C = 1e-1
@@ -88,7 +89,7 @@ class FluxRatioCons(ModelConstraint):
     prefix = 'FluxRatioCons_'
 
 
-def impose_flux_concentation_ratios(tmodel, metabolites, reactions, ratio, in_place=False,
+def impose_turnover_concentation_ratios(tmodel, metabolites, tva, ratio, in_place=False,
                                     discretization=LOG, N=11):
 
     if in_place:
@@ -97,8 +98,24 @@ def impose_flux_concentation_ratios(tmodel, metabolites, reactions, ratio, in_pl
         model = tmodel.copy()
 
     LC_VARS = [l.variable for l in model.log_concentration.get_by_any(metabolites)]
-    FLUX_FWD_VARS = [r.forward_variable for r in model.reactions.get_by_any(reactions)]
-    FLUX_BWD_VARS = [r.reverse_variable for r in model.reactions.get_by_any(reactions)]
+
+    # for each metabolites get reactions with stoich -1
+    mets = model.metabolites.get_by_any(metabolites)
+
+    FLUX_FWD_VARS = []
+    FLUX_BWD_VARS = []
+
+    for met in mets:
+        this_fdw_flux = 0
+        this_bwd_flux = 0
+        for rxn in met.reactions:
+            if tva.loc[rxn.id,'minimum']*rxn.metabolites[met] > 0 or \
+                tva.loc[rxn.id,'maximum']*rxn.metabolites[met] > 0:
+                this_fdw_flux += rxn.forward_variable
+                this_bwd_flux += rxn.reverse_variable
+
+        FLUX_FWD_VARS.append(this_fdw_flux)
+        FLUX_BWD_VARS.append(this_bwd_flux)
 
     # Add constraints
     for LC, FWD, BWD in zip(LC_VARS, FLUX_FWD_VARS, FLUX_BWD_VARS):
@@ -149,16 +166,16 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
 
     pos_v = fwd + bwd
     C = model.add_variable(BinVariable,
-                           id_='concentration_{}_{}'.format(lc.name, fwd.name,),
+                           id_='concentration_{}'.format(lc.name),
                            hook=model,
-                           lb = -BIGM,
+                           lb = 0,
                            ub = BIGM,
                            )
 
     # Ratio constraint
     expr = pos_v - ratio*C
     ratio_cons = model.add_constraint(FluxRatioCons,
-                                      id_="ratio_{}_{}".format(lc.name, fwd.name),
+                                      id_="ratio_{}".format(lc.name),
                                       hook=model,
                                       expr=expr,
                                       lb=0)
@@ -170,13 +187,13 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
         upper_bin = bins[i]
 
         bin_use = model.add_variable(BinUseVariable,
-                                     id_='ratio_{}_{}_bin_{}_{}'.format(lc.name, fwd.name, lower_bin, upper_bin),
+                                     id_='ratio_{}_bin_{}_{}'.format(lc.name, lower_bin, upper_bin),
                                      hook=model,)
 
         this_bin_use_variables.append(bin_use)
 
         Ci = model.add_variable(BinVariable,
-                               id_='concentration_{}_{}_bin_{}_{}'.format(lc.name, fwd.name, lower_bin, upper_bin),
+                               id_='concentration_{}_bin_{}_{}'.format(lc.name, lower_bin, upper_bin),
                                hook=model,
                                lb = -BIGM,
                                ub = BIGM,
@@ -186,14 +203,14 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
         # Concentration to log-concentration coupling Ci == UB or Ci == 0
         expr = Ci - upper_bin*bin_use
         bin_coupling = model.add_constraint(FluxRatioCons,
-                                            id_='bin_coupling_{}_{}_bin_{}_{}'.format(lc.name, fwd.name, lower_bin, upper_bin),
+                                            id_='bin_coupling_{}_bin_{}_{}'.format(lc.name, lower_bin, upper_bin),
                                             hook=model,
                                             expr=expr,
                                             lb= -EPSILON,
                                             ub=  EPSILON,)
 
         LCi = model.add_variable(BinVariable,
-                                id_='log_concentration_{}_{}_bin_{}_{}'.format(lc.name, fwd.name, lower_bin, upper_bin),
+                                id_='log_concentration_{}_bin_{}_{}'.format(lc.name, lower_bin, upper_bin),
                                 hook=model,
                                 lb = -BIGM,
                                 ub = BIGM,
@@ -203,14 +220,14 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
         # Bin use
         expr = np.log(lower_bin)*bin_use - LCi
         lower_bin_use = model.add_constraint(FluxRatioCons,
-                                       id_='lower_bin_use_{}_{}_bin_{}_{}'.format(LCi.name, fwd.name, lower_bin, upper_bin),
+                                       id_='lower_bin_use_{}_bin_{}_{}'.format(LCi.name,lower_bin, upper_bin),
                                        hook=model,
                                        expr=expr,
                                        ub=0,
                                        )
         expr = np.log(upper_bin)*bin_use - LCi
         upper_bin_use = model.add_constraint(FluxRatioCons,
-                                   id_='upper_bin_use_{}_{}_bin_{}_{}'.format(LCi.name, fwd.name, lower_bin, upper_bin),
+                                   id_='upper_bin_use_{}_bin_{}_{}'.format(LCi.name, lower_bin, upper_bin),
                                    hook=model,
                                    expr=expr,
                                    lb=0,
@@ -219,7 +236,7 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
     # Force use only one constraint
     expr = symbol_sum(this_bin_use_variables)
     force_use = model.add_constraint(FluxRatioCons,
-                                     id_='force_use_{}_{}'.format(lc.name, fwd.name),
+                                     id_='force_use_{}'.format(lc.name),
                                      hook=model,
                                      expr=expr,
                                      lb=0,
@@ -228,7 +245,7 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
     # Equality sum(LCi) == LC and sum(Ci) == C
     expr = symbol_sum(this_Ci_variables) - C
     force_use = model.add_constraint(FluxRatioCons,
-                                 id_='force_Ci_{}_{}'.format(lc.name, fwd.name),
+                                 id_='force_Ci_{}'.format(lc.name),
                                  hook=model,
                                  expr=expr,
                                  lb= -EPSILON,
@@ -236,7 +253,7 @@ def add_ratio_constraints(model, lc, fwd, bwd, ratio,
 
     expr = symbol_sum(this_LCi_variables) - lc
     force_use = model.add_constraint(FluxRatioCons,
-                                 id_='force_LCi_{}_{}'.format(lc.name, fwd.name),
+                                 id_='force_LCi_{}'.format(lc.name),
                                  hook=model,
                                  expr=expr,
                                  lb= -EPSILON,
