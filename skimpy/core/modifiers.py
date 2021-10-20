@@ -309,7 +309,7 @@ class ActivationModifier(KineticMechanism,ExpressionModifier):
     def __init__(self, activator, name=None, k_activation=None, reaction=None):
 
         if name is None:
-            name = activator.__str__()
+            name = self.prefix+'_'+activator.__str__()
 
         if reaction is None:
             suffix = name
@@ -372,7 +372,7 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
     def __init__(self, inhibitor, name=None, k_inhibition=None, reaction=None):
 
         if name is None:
-            name = inhibitor.__str__()
+            name = self.prefix+'_'+inhibitor.__str__()
 
         if reaction is None:
             suffix = name
