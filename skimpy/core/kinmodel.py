@@ -223,7 +223,7 @@ class KineticModel(object):
     def repair(self):
 
         """
-        Link inhibitors to reactants
+        Link inhibitors and activators to reactants
         FIXME: Any idea to avoid this is dearly welcome
         :return:
         """
@@ -234,6 +234,10 @@ class KineticModel(object):
                     if this_inhibitor.name in self.reactants:
                         this_mechanism.inhibitors[this_keys] = self.reactants[this_inhibitor.name]
 
+            for this_modifier in this_reaction.modifiers.values():
+                for this_keys, this_modifier_reactant in this_modifier.reactants.items():
+                    if this_modifier_reactant.name in self.reactants:
+                        this_modifier.reactants[this_keys] = self.reactants[this_modifier_reactant.name]
 
 
     @property
