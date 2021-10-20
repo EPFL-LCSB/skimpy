@@ -148,9 +148,9 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
             this_regulator = df_other_regulation.loc[ix_]['regulator']
 
             if this_regulation == 'inhibition':
-                new_rxn.modifiers[this_regulator] = InhibitionModifier(this_regulator, new_rxn)
+                new_rxn.modifiers[this_regulator] = InhibitionModifier(this_regulator, reaction=new_rxn)
             elif this_regulation == 'activation':
-                new_rxn.modifiers[this_regulator] = ActivationModifier(this_regulator, new_rxn)
+                new_rxn.modifiers[this_regulator] = ActivationModifier(this_regulator, reaction=new_rxn)
 
         # Finally add the new reaction to rxns
         new_kmodel.add_reaction(new_rxn)
