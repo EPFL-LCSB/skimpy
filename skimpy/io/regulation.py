@@ -158,6 +158,9 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         # Finally add the new reaction to rxns
         new_kmodel.add_reaction(new_rxn)
 
+    # Note DW: This is currently still needed to avoid having 2 objects for the same reactant
+    new_kmodel.repair()
+
     # Resbuild compartments
     for the_comp in kmodel.compartments:
         new_comp = Compartment(the_comp)
