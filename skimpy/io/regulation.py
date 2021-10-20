@@ -52,7 +52,9 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Rebuild all unmodified reactions as is
     for this_rxn in unmodified_rxns:
         TheMechanism = this_rxn.mechanism.__class__
-        the_reactants = this_rxn.mechanism.reactants
+        string_reactants = {k:v.name for k,v in this_rxn.mechanism.reactants.items()}
+        the_reactants = TheMechanism.Reactants(**string_reactants)
+
         the_enzyme = this_rxn.enzyme
 
         new_rxn = Reaction(name=this_rxn.name,
@@ -124,7 +126,8 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         # If there are no competitive regulations, just recreate the reaction first since the other modifications are applied on top
         else:
             TheMechanism = this_rxn.mechanism.__class__
-            the_reactants = this_rxn.mechanism.reactants
+            string_reactants = {k: v.name for k, v in this_rxn.mechanism.reactants.items()}
+            the_reactants = TheMechanism.Reactants(**string_reactants)
             the_enzyme = this_rxn.enzyme
 
             new_rxn = Reaction(name=this_rxn.name,
