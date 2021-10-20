@@ -178,7 +178,13 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Boundary Conditions
     for the_bc in kmodel.boundary_conditions.values():
         TheBoundaryCondition = the_bc.__class__
-        reactant = new_kmodel.reactants[the_bc.reactant.name]
+
+        # We have the following specifically for 'h_e' which is already a parameter at this stage instead reactant
+        # Other ec metabolites are currently reactants. Once they get converted to BCs, they become parameters
+        try:
+            reactant = new_kmodel.reactants[the_bc.reactant.name]
+        except KeyError:
+            reactant = new_kmodel.parameters[the_bc.reactant.name]
 
         # NOTE: Check how to properly get other things for other BCs than CC
         new_bc = TheBoundaryCondition(reactant)
@@ -186,9 +192,6 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
 
         # Do not forget to add the value of the BC!
         reactant.value = kmodel.parameters[str(reactant.symbol)]
-
-    # # Do not forget to add the value of the BC! TODO: need to sort this out but maybe it is already sorted
-    # reactant.value = the_dict['parameters'][str(reactant.symbol)]
 
     # Update the parameters with all pre-existing parameter values
     this_params = new_kmodel.parameters
