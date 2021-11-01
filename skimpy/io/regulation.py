@@ -29,7 +29,6 @@ from skimpy.mechanisms import *
 from skimpy.mechanisms.generalized_reversible_hill_n_n_h1_with_inhibition import *
 from skimpy.mechanisms.convenience_with_inihibition import *
 from skimpy.core.compartments import Compartment
-
 from skimpy.utils.general import get_all_reactants
 
 
@@ -65,10 +64,17 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
                            reactants=the_reactants,
                            enzyme=the_enzyme,
                            )
-        # Add kinetic modifiers
+
+        # Add kinetic modifiers - note this has been changed to once again not just copy the old modifier but create
+        # it from scratch - Currently, this only covers existing small_molecule modifiers
+        # TODO: extend this to all possible modifiers including activation and inhibition
         modifiers = this_rxn.modifiers
-        for the_modifier in modifiers:
-            new_rxn.modifiers[the_modifier] = modifiers[the_modifier]
+        for the_modifier in modifiers.values():
+            TheModifier = the_modifier.__class__
+            new_modifier = TheModifier(small_molecule=the_modifier.reactants['small_molecule'].name,
+                                       mechanism_stoichiometry = the_modifier.reactant_stoichiometry,
+                                       reaction=new_rxn)
+            new_rxn.modifiers[new_modifier.name] = new_modifier
 
         new_kmodel.add_reaction(new_rxn)
 
@@ -121,10 +127,17 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
                                inhibitors=inhibitors,
                                )
 
-            # Add existing kinetic modifiers
+            # Add existing kinetic modifiers - note this has been changed to once again not just copy the old modifier but create
+            # it from scratch - Currently, this only covers existing small_molecule modifiers
+            # TODO: extend this to all possible modifiers including activation and inhibition
             modifiers = this_rxn.modifiers
-            for the_modifier in modifiers:
-                new_rxn.modifiers[the_modifier] = modifiers[the_modifier]
+            for the_modifier in modifiers.values():
+                TheModifier = the_modifier.__class__
+                new_modifier = TheModifier(small_molecule=the_modifier.reactants['small_molecule'].name,
+                                           mechanism_stoichiometry=the_modifier.reactant_stoichiometry,
+                                           reaction=new_rxn)
+                new_rxn.modifiers[new_modifier.name] = new_modifier
+
 
         # If there are no competitive regulations, just recreate the reaction first since the other modifications are applied on top
         else:
@@ -166,18 +179,6 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
         new_comp = Compartment(the_comp)
         new_kmodel.add_compartment(new_comp)
 
-    # Assing compartments
-    # Note DW: This is needed because not all reactants are variables
-    # e.g. extracellular mets with BC == const > thus they are parameters
-    for the_met in get_all_reactants(kmodel).values():
-        try:
-            new_met = new_kmodel.reactants[the_met.name]
-        except KeyError:
-            new_met = new_kmodel.parameters[the_met.name]
-
-        if not the_met.compartment is None:
-            comp = new_kmodel.compartments[the_met.compartment.name]
-            new_met.compartment = comp
 
     # Populate the kinmodel.parameters TabDict
     parameter_init_dict = dict()
@@ -190,17 +191,20 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Boundary Conditions
     for the_bc in kmodel.boundary_conditions.values():
         TheBoundaryCondition = the_bc.__class__
-        reactant = new_kmodel.reactants[the_bc.reactant.name]
+
+        # We have the following specifically for 'h_e' which is already a parameter at this stage instead reactant
+        # Other ec metabolites are currently reactants. Once they get converted to BCs, they become parameters
+        try:
+            reactant = new_kmodel.reactants[the_bc.reactant.name]
+        except KeyError:
+            reactant = new_kmodel.parameters[the_bc.reactant.name]
 
         # NOTE: Check how to properly get other things for other BCs than CC
         new_bc = TheBoundaryCondition(reactant)
         new_kmodel.add_boundary_condition(new_bc)
 
-        # Do not forget to add the value of the BC!
-        reactant.value = kmodel.parameters[str(reactant.symbol)]
-
-    # # Do not forget to add the value of the BC! TODO: need to sort this out but maybe it is already sorted
-    # reactant.value = the_dict['parameters'][str(reactant.symbol)]
+        # Do not forget to add the value of the BC! Note BN: it has to be .value unlike for the load_yaml
+        reactant.value = kmodel.parameters[str(reactant.symbol)].value
 
     # Update the parameters with all pre-existing parameter values
     this_params = new_kmodel.parameters
@@ -213,6 +217,20 @@ def load_enzyme_regulation(kmodel, df_regulations_all):
     # Initial conditions
     # we can copy this since it is of type TabDict((str,float) , )
     new_kmodel.initial_conditions = kmodel.initial_conditions.copy()
+
+    # Adding compartments
+    # Note DW: This is needed because not all reactants are variables
+    # e.g. extracellular mets with BC == const > thus they are parameters
+    # Note BN: This has been moved here from above since now all the parameters have been populated as well
+    for the_met in get_all_reactants(kmodel).values():
+        try:
+            new_met = new_kmodel.reactants[the_met.name]
+        except KeyError:
+            new_met = new_kmodel.parameters[the_met.name]
+
+        if not the_met.compartment is None:
+            comp = new_kmodel.compartments[the_met.compartment.name]
+            new_met.compartment = comp
 
     # If the model the model has computed moieties we reconstruct them too
     if hasattr(kmodel,'dependent_reactants'):

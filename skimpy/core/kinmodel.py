@@ -131,13 +131,16 @@ class KineticModel(object):
         :type reaction: skimpy.core.Reaction
         :return:
         """
-        # If the variable name already exists substitute
-        # with the variable
+        # If the variable name already exists substitute the reactant
+        # with the pre-existing variable
         for k,v in reaction.reactants.items():
             if v.name in self.reactants.keys():
 
                 # TODO substitute by itemsetter in reactions.reactants
-                # BN: edited on 18/10/2021 to add the condition to check if small molecule is there, also added inhibitor/activatorUGLYYYYYYY
+                # Possible reactant types for the reaction.reactant, all handled by the if/elif/else conditions in order
+                # 1. Small molecule  2. Simple activator 3. Simple inhibitor 4. Competitive inhibitor 5. Normal reactant
+                # This way, the inhibitors/activators don't get added to reaction.mechanism.reactants and are correctly
+                # linked
                 if k.startswith('small_molecule'):
                     for this_mod in reaction.modifiers.values():
                         if 'small_molecule' in this_mod.reactants.keys():
@@ -145,18 +148,22 @@ class KineticModel(object):
                                is v.name:
 
                                this_mod.reactants['small_molecule'] = self.reactants[v.name]
-                # elif k.startswith('activator'):
-                #     for this_mod in reaction.modifiers.values():
-                #         if 'activator' in this_mod.reactants.keys():
-                #             if this_mod.reactants['activator'].name \
-                #                     is v.name:
-                #                 this_mod.reactants['activator'] = self.reactants[v.name]
-                # elif k.startswith('inhibitor'):
-                #     for this_mod in reaction.modifiers.values():
-                #         if 'inhibitor' in this_mod.reactants.keys():
-                #             if this_mod.reactants['inhibitor'].name \
-                #                     is v.name:
-                #                 this_mod.reactants['inhibitor'] = self.reactants[v.name]
+                elif k.startswith('activator_'):
+                    for this_mod in reaction.modifiers.values():
+                        if 'activator' in this_mod.reactants.keys():
+                            if this_mod.reactants['activator'].name \
+                                    is v.name:
+                                this_mod.reactants['activator'] = self.reactants[v.name]
+                elif k.startswith('inhibitor_'):
+                    for this_mod in reaction.modifiers.values():
+                        if 'inhibitor' in this_mod.reactants.keys():
+                            if this_mod.reactants['inhibitor'].name \
+                                    is v.name:
+                                this_mod.reactants['inhibitor'] = self.reactants[v.name]
+                elif k.startswith('inhibitor'):
+                    for this_inh_name, this_inh in reaction.mechanism.inhibitors.items():
+                        if this_inh.name is v.name:
+                            reaction.mechanism.inhibitors[this_inh_name] = self.reactants[v.name]
                 else:
                     reaction.mechanism.reactants[k] = self.reactants[v.name]
 
