@@ -23,3 +23,7 @@ h5py
 # extras ORACLE:
 pytfa
 escher==1.7.0
+# Additional things that are useful in RabLab
+python-libsbml
+xlrd
+seaborn
