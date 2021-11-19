@@ -82,10 +82,10 @@ def make_irrev_m_n_michaelis_menten(stoichiometry):
 
             if s > 0:
                 product = 'product{}'.format(num_products)
-                km_product ='km_product{}'.format(num_products)
+                #km_product ='km_product{}'.format(num_products)
                 reactant_list.append(product)
-                parameter_list[km_product] = [ODE, MCA, QSSA]
-                parameter_reactant_links[km_product] = product
+                #parameter_list[km_product] = [ODE, MCA, QSSA]
+                #parameter_reactant_links[km_product] = product
                 reactant_stoichiometry[product] = float(s)
                 num_products += 1
 

@@ -62,10 +62,11 @@ def make_generalized_reversible_hill_n_n_h1(stoichiometry):
 
         """
 
-        #check_if stoichometry_is one
-        if any(np_abs(stoichiometry) > 1)  \
-           or not (stoichiometry.count(-1) == stoichiometry.count(1)):
-            raise ValueError('Stoichiometry needs to be 1 and n to n substrates! ')
+        # This will allow to abuse this kinetic for practical purposes
+        # #check_if stoichometry_is one
+        # if any(np_abs(stoichiometry) > 1)  \
+        #    or not (stoichiometry.count(-1) == stoichiometry.count(1)):
+        #     raise ValueError('Stoichiometry needs to be 1 and n to n substrates! ')
 
         suffix = "_{0}".format(stringify_stoichiometry(stoichiometry))
 
@@ -137,17 +138,18 @@ def make_generalized_reversible_hill_n_n_h1(stoichiometry):
             fwd_nominator = vmaxf
             bwd_nominator = vmaxf/keq
 
+            # NOTE HERE I DID SOME COOKING PLEASE VERIFY LATER!!! > if good ad also to the other gen hills!
             for type, this_substrate in substrates.items():
                 s = this_substrate.symbol
                 kms = self.parameters[self.reactant_parameter_links[type]].symbol
                 stoich = self.reactant_stoichiometry[type]
-                fwd_nominator *= (s/kms)**abs(stoich)
-                bwd_nominator *= kms**(-1*abs(stoich))
+                fwd_nominator *= (s/kms)
+                bwd_nominator *= kms**(-1)
 
             for type, this_product in products.items():
                 p = this_product.symbol
                 stoich = self.reactant_stoichiometry[type]
-                bwd_nominator *= p**abs(stoich)
+                bwd_nominator *= p
 
             common_denominator = 1
 
