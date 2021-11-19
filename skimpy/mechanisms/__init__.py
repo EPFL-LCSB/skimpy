@@ -36,6 +36,7 @@ from .generalized_elementary_kinetics import *
 from .irrev_m_n_michaelis_menten import *
 from .irrev_massaction import *
 from .irrev_hill import *
+from .irrev_m_n_hill import *
 from .rev_massaction import *
 from .bi_uni_reversible_hill import *
 from .uni_bi_reversible_hill import *
