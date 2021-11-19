@@ -59,6 +59,7 @@ ALL_GENERIC_MECHANISM_SUBCLASSES = TabDict([
 ('GeneralizedReversibleHill', make_generalized_reversible_hill_n_n),
 ('H1GeneralizedReversibleHill',make_generalized_reversible_hill_n_n_h1),
 ('IrrevMichaelisMenten', make_irrev_m_n_michaelis_menten),
+('IrrevHillNM', make_irrev_m_n_hill),
 ('IrrevMassaction', make_irrev_massaction),
 ('RevMassaction', make_rev_massaction),
 ('ConvenienceInhibited', make_convenience_with_inhibition),
