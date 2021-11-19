@@ -125,23 +125,66 @@ class ParameterValuePopulation(object):
 
     def __next__(self):
         if self.n < len(self._data):
-            result = self._data[self._index[self.n]]
+            result = self._data[self.n]
             self.n += 1
             return result
         else:
             raise StopIteration
 
+    def _dataframe(self, dropna=True):
+        """
+
+        """
+        if self._index is None:
+            df = pd.DataFrame(data= [dict(self._data[i]) for i in range(len(self._data)) ])
+        else:
+            df = pd.DataFrame(data=[dict(self._data[self._index[i]]) for i in self._index ])
+
+        if dropna:
+            df = df.dropna(axis=1)
+        return df
 
     def mean(self):
         """
         :return Computes the mean parameter values for the population:
         """
-        if self._index is None:
-            this_mean = pd.DataFrame(data= [dict(self._data[i]) for i in self._data.keys() ]).mean()
-        else:
-            this_mean = pd.DataFrame(data=[dict(self._data[self._index[i]]) for i in self._index ]).mean()
+        df = self._dataframe()
+        return df.mean()
 
-        return ParameterValues(this_mean, kmodel)
+    def var(self):
+        """
+        :return Computes the variance parameter values for the population:
+        """
+        df = self._dataframe()
+        return df.var()
+
+    def cov(self):
+        """
+        :return Computes the covaraince parameter values for the population:
+        """
+        df = self._dataframe()
+        return df.cov()
+
+    def log_mean(self):
+        """
+        :return Computes the logarithmic mean parameter values for the population:
+        """
+        df = self._dataframe()
+        return np.log(df).mean()
+
+    def log_var(self):
+        """
+        :return Computes the logarithmic  variance parameter values for the population:
+        """
+        df = self._dataframe()
+        return np.log(df).var()
+
+    def log_cov(self):
+        """
+        :return Computes the logarithmic covaraince parameter values for the population:
+        """
+        df = self._dataframe()
+        return np.log(df).cov()
 
 
     def save(self,filename):
@@ -172,7 +215,6 @@ class ParameterValuePopulation(object):
         f.close()
 
 
-## TODO Lets see this should maybe
 def load_parameter_population(filename, lower_index=None, upper_index=None):
     f = h5py.File(filename, 'r')
     data = []
@@ -206,3 +248,9 @@ def load_parameter_population(filename, lower_index=None, upper_index=None):
 
     return param_population
 
+
+def concat_populations(values, kmodel=None, index=None):
+    data = []
+    for v in values:
+        data.extend(v._data)
+    return ParameterValuePopulation(data, kmodel=kmodel, index=index)
