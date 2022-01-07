@@ -1,6 +1,6 @@
 SKiMpy: Symbolic Kinetic Models in Python
 ==========================================
-|Build Status| |Codecov| |Codacy branch grade| |license| 
+ |docs| |Build Status| |Codecov| |Codacy branch grade| |license| 
 
 SKiMpy is a python package bridging implementing an efficient kinetic model-ing toolbox to build and analyze large-scale kinetic models for various biological domains such as signaling, gene expression, and metabolism. Furthermore, we demonstrate how this toolbox is used to parameterize kinetic models around a steady-state reference efficiently. Finally, we show how SKiMpy can implement multispecies bioreactor simulations to assess biotechnological processes.
 
@@ -127,6 +127,8 @@ License
 
 The software in this repository is put under an APACHE-2.0 licensing scheme - please see the `LICENSE <https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt>`_ file for more details.
 
+.. |docs| image:: https://readthedocs.org/projects/real-skimpy/badge/?version=latest
+   :target: https://real-skimpy.readthedocs.io/en/latest/?badge=latest
 .. |license| image:: http://img.shields.io/badge/license-APACHE2-blue.svg
    :target: https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt
 .. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=master
