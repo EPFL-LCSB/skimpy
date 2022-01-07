@@ -4,6 +4,7 @@ A SKiMpy model can be saved and edited using YAML, allowing users to curate larg
 Further, SKiMpy can generate kinetic draft models from pyTFA or cobrapy models, assigning best guess reaction mechanisms.
 
 Function to save and load YAML model are encoded in the skimpy.io.yaml module
+
 .. code-block:: python
 
     # Loading a yml model
@@ -17,6 +18,7 @@ Function to save and load YAML model are encoded in the skimpy.io.yaml module
     
     
 Cobrapy and pyTFA models can be used in generate unparametrized draft models:
+
 .. code-block:: python
   
   from skimpy.io.generate_from_cobra import FromCobra
