@@ -118,7 +118,7 @@ To get right into building kinetic models please find below a simple example to 
 
 
 More information can be found
-`here <http://skimpy.readthedocs.io/en/latest/quickstart.html>`__.
+`here <http://real-skimpy.readthedocs.io/en/latest/quickstart.html>`__.
 
 
    
