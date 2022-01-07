@@ -6,6 +6,8 @@ In this quick start tutorial we introduce the main functions ODE to build and ma
 All main modelling functionality is imported from submodules of 'skimpy.core' and the libary of mechanisms is imported from 'skimpy.mechanisms'. The model is initialized by the 'KineticModel' constructor. 
 
 .. code-block:: python
+
+    # Load core functionalities + numpy (because useful)
     import numpy as np
     from skimpy.core import *
     from skimpy.mechanisms import *
@@ -16,6 +18,8 @@ All main modelling functionality is imported from submodules of 'skimpy.core' an
 Reaction objects are constricted from a name, a mechanism object and a reactants set inherited from the respective mechanism object to ensure the consitency of e.g. order kinetic mechanisms.
 
 .. code-block:: python
+
+    # Name the reaction
     name = 'pfk'
     
     # Define reaction reactants sets
@@ -36,7 +40,7 @@ Mechanism.Parameters constructor, and can then be assigned using the model.param
 
 .. code-block:: python
 
-     # Define reaction parameters
+    # Define reaction parameters
     parameters = ReversibleMichaelisMenten.Parameters(
         vmax_forward = 1.0,
         k_equilibrium=2.0,
@@ -51,6 +55,8 @@ Mechanism.Parameters constructor, and can then be assigned using the model.param
 Alternatively parameters can be directly assinged using the model.parameter poperty:
 
 .. code-block:: python
+
+    # Direct assginment of parameter values
     this_model.parameters.vmax_forward_pfk.value = 2.0
 
 In this way simple models can be constructed. To integrate the ordinary differntial equations we first compile the respective functions using CYTHON by calling the 
