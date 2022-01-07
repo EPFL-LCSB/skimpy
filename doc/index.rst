@@ -16,6 +16,7 @@ For installtion instructions please refer to `README.rst <https://github.com/EPF
    :caption: Contents:
 
    quickstart
+   reading_writing_files
 
 
 Indices and tables
