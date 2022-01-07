@@ -33,6 +33,7 @@ When building draft models based on cobrapy we assume full reversibility of all 
 by accesing the results of the Gibbs free energy vairables.
 
 .. code-block:: python
+
   import pytfa
   from pytfa.io import import_matlab_model, load_thermoDB
   from pytfa.io.viz import get_reaction_data
