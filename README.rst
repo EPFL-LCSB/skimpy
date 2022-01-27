@@ -60,20 +60,33 @@ Setup
 
 *This step is not required if you're using the container, which bundles all this.*
 
+<!--- 
 You can install this module with ``pip``:
-
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
 .. code:: bash
 
     pip3 install skimpy
 
-or from source
+or from source 
+-->
+
+You can install this module from source using ``pip``:
+*For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
 .. code:: bash
 
     git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
     pip3 install -e /path/to/skimpy
+
+To use the ODE integration features scikit-odes is required to be installed beforehand follwoing the instructions found `here <https://scikits-odes.readthedocs.io/en/stable/installation.html>`_. To use the 'cvode' solver from the scikit-odes packages we strongly recomend to install the `sundials <https://computing.llnl.gov/projects/sundials>`_ solvers as ODE integration of large ODE system can be quite slow with python implemented solvers see benchmark `here <https://scikits-odes.readthedocs.io/en/stable/solvers.html>`_.
+
+Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) requires additional packages:
+
+.. code:: bash
+
+  sudo apt install cython3 gfortran libsundials-dev libflint-dev
+ 
 
 
 Quick start
