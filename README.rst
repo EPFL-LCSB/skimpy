@@ -1,6 +1,6 @@
 SKiMpy: Symbolic Kinetic Models in Python
 ==========================================
-|Build Status| |Codecov| |Codacy branch grade| |license| 
+ |docs| |Build Status| |Codecov| |Codacy branch grade| |license| 
 
 SKiMpy is a python package bridging implementing an efficient kinetic model-ing toolbox to build and analyze large-scale kinetic models for various biological domains such as signaling, gene expression, and metabolism. Furthermore, we demonstrate how this toolbox is used to parameterize kinetic models around a steady-state reference efficiently. Finally, we show how SKiMpy can implement multispecies bioreactor simulations to assess biotechnological processes.
 
@@ -60,20 +60,33 @@ Setup
 
 *This step is not required if you're using the container, which bundles all this.*
 
+<!--- 
 You can install this module with ``pip``:
-
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
 .. code:: bash
 
     pip3 install skimpy
 
-or from source
+or from source 
+-->
+
+You can install this module from source using ``pip``:
+*For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
 .. code:: bash
 
     git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
     pip3 install -e /path/to/skimpy
+
+To use the ODE integration features scikit-odes is required to be installed beforehand follwoing the instructions found `here <https://scikits-odes.readthedocs.io/en/stable/installation.html>`_. To use the 'cvode' solver from the scikit-odes packages we strongly recomend to install the `sundials <https://computing.llnl.gov/projects/sundials>`_ solvers as ODE integration of large ODE system can be quite slow with python implemented solvers see benchmark `here <https://scikits-odes.readthedocs.io/en/stable/solvers.html>`_.
+
+Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) requires additional packages:
+
+.. code:: bash
+
+  sudo apt install cython3 gfortran libsundials-dev libflint-dev
+ 
 
 
 Quick start
@@ -118,7 +131,7 @@ To get right into building kinetic models please find below a simple example to 
 
 
 More information can be found
-`here <http://skimpy.readthedocs.io/en/latest/quickstart.html>`__.
+`here <http://real-skimpy.readthedocs.io/en/latest/quickstart.html>`__.
 
 
    
@@ -127,6 +140,8 @@ License
 
 The software in this repository is put under an APACHE-2.0 licensing scheme - please see the `LICENSE <https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt>`_ file for more details.
 
+.. |docs| image:: https://readthedocs.org/projects/real-skimpy/badge/?version=latest
+   :target: https://real-skimpy.readthedocs.io/en/latest/?badge=latest
 .. |license| image:: http://img.shields.io/badge/license-APACHE2-blue.svg
    :target: https://github.com/EPFL-LCSB/skimpy/blob/master/LICENSE.txt
 .. |Build Status| image:: https://travis-ci.org/EPFL-LCSB/skimpy.svg?branch=master
