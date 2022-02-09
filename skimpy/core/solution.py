@@ -64,20 +64,23 @@ class ODESolutionPopulation:
         sol_cols = list(list_of_solutions[0].concentrations.keys())
         self.data = pd.DataFrame(columns=['solution_id', 'time']+sol_cols)
 
+        temp = []
         if index is None:
             for e, td in enumerate(list_of_solutions):
                 new_block = pd.DataFrame.from_dict(td.concentrations.copy())
                 new_block['time'] = td.time
                 new_block['solution_id'] = e
+                temp.append(new_block)
 
-                self.data = pd.concat([self.data, new_block])
         else:
             for e, td in zip(index,list_of_solutions):
                 new_block = pd.DataFrame.from_dict(td.concentrations.copy())
                 new_block['time'] = td.time
                 new_block['solution_id'] = e
+                temp.append(new_block)
 
-                self.data = pd.concat([self.data, new_block])
+        self.data = pd.concat(temp, axis = 0)
 
     def plot(self, filename, variables=None, **kwargs):
         plot_population_per_variable(self.data, filename, variables=variables, **kwargs)
+
