@@ -110,7 +110,11 @@ class KineticModel(object):
             parameters.update(comp_params)
 
         for key,value in value_dict.items():
-            parameters[str(key)].value = value
+            if str(key) in parameters:
+                parameters[str(key)].value = value
+            # Put warning in logger
+            # else:
+            #     self.logger
 
     @property
     def moieties(self):
