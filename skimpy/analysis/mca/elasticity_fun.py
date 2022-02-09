@@ -144,7 +144,8 @@ class ElasticityFunction:
             Fi = L0[:, all_independent_ix].dot(v_i_)
 
         dxd_dxi = sparse_inv(Fd).dot(-Fi)
-
+        if len(dxd_dxi.shape) == 1:
+            dxd_dxi = dxd_dxi[0]
         # Qd = dxd_dxi.multiply(Xi).T.multiply(reciprocal(Xd)).T
         XD = diags(reciprocal(Xd), 0).tocsc()
         XI = diags(Xi, 0).tocsc()
