@@ -182,8 +182,16 @@ class SimpleParameterSampler(ParameterSampler):
         # Set all vmax/flux parameters to 1.
         # TODO Generalize into Flux and Saturation parameters
         for this_reaction in compiled_model.reactions.values():
-            vmax_param = this_reaction.parameters.vmax_forward
-            parameter_sample[vmax_param.symbol] = 1
+            try:
+                if this_reaction.enzyme is None:
+                    vmax_param = this_reaction.parameters.vmax_forward
+                    parameter_sample[vmax_param.symbol] = 1
+                else:
+                    vmax_param = this_reaction.parameters.kcat_forward
+                    parameter_sample[vmax_param.symbol] = 1
+
+            except AttributeError:
+                pass
 
         if not hasattr(compiled_model, 'saturation_parameter_function')\
            or not hasattr(compiled_model, 'flux_parameter_function'):

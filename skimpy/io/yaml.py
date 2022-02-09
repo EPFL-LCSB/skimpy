@@ -251,9 +251,9 @@ def load_yaml_model(path):
                                 )
         # Add kinetic modifiers
         modifiers = the_reaction['modifiers']
-        for the_modifier in modifiers.values():
+        for the_mod_name, the_modifier in modifiers.items():
             TheModifier = get_mechanism(the_modifier)
-            new_modifier = TheModifier(**the_modifier, reaction=new_reaction)
+            new_modifier = TheModifier(**the_modifier, name=the_mod_name, reaction=new_reaction)
             new_reaction.modifiers[new_modifier.name] = new_modifier
 
         new.add_reaction(new_reaction)

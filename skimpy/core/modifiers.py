@@ -420,3 +420,215 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
     def calculate_rate_constants(self):
         raise NotImplementedError
 
+
+class HillActivationModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "HAM"
+
+    Reactants = make_reactant_set(__name__, ['activator',])
+
+    Parameters = make_parameter_set(__name__, {'k_activation': [ODE, MCA, QSSA],
+                                               'a_max': [ODE, MCA, QSSA],
+                                                'hill_coefficient':[ODE, MCA, QSSA], })
+
+    parameter_reactant_links = {'k_activation':'activator'}
+
+    def __init__(self, activator, name=None,
+                 k_activation=None,
+                 a_max=None,
+                 hill_coefficient=None,
+                 reaction=None):
+
+        if name is None:
+            name = self.prefix+'_'+activator.__str__()
+
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
+        reactants = self.Reactants(activator=activator,)
+        parameters = self.Parameters(k_activation=k_activation,
+                                     a_max=a_max,
+                                     hill_coefficient=hill_coefficient)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.link_parameters_and_reactants()
+
+        self.reactant_stoichiometry = {'activator': 0 }
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+        activation = 1 + self.get_qssa_rate_expression()
+        expressions['v_bwd'] = expressions['v_bwd'] * activation
+        expressions['v_fwd'] = expressions['v_fwd'] * activation
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        a = self.reactants.activator.symbol
+        k = self.parameters.k_activation.symbol
+        a_max = self.parameters.a_max.symbol
+        h = self.parameters.hill_coefficient.symbol
+        return a_max * ( (a/k)**h / (1 + (a/k)**h ))
+
+    def update_qssa_rate_expression(self):
+        return None
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
+
+
+class SimpleHillActivationModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "SHAM"
+
+    Reactants = make_reactant_set(__name__, ['activator',])
+
+    Parameters = make_parameter_set(__name__, {'k_activation': [ODE, MCA, QSSA],
+                                                'hill_coefficient':[ODE, MCA, QSSA], })
+
+    parameter_reactant_links = {'k_activation':'activator'}
+
+    def __init__(self, activator, name=None,
+                 k_activation=None,
+                 a_max=None,
+                 hill_coefficient=None,
+                 reaction=None):
+
+        if name is None:
+            name = self.prefix+'_'+activator.__str__()
+
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
+        reactants = self.Reactants(activator=activator,)
+        parameters = self.Parameters(k_activation=k_activation,
+                                     hill_coefficient=hill_coefficient)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.link_parameters_and_reactants()
+
+        self.reactant_stoichiometry = {'activator': 0 }
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+        activation = 1 + self.get_qssa_rate_expression()
+        expressions['v_bwd'] = expressions['v_bwd'] * activation
+        expressions['v_fwd'] = expressions['v_fwd'] * activation
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        a = self.reactants.activator.symbol
+        k = self.parameters.k_activation.symbol
+        h = self.parameters.hill_coefficient.symbol
+        return (a/k)**h
+
+    def update_qssa_rate_expression(self):
+        return None
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
+
+
+
+class HillInhibitionModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "HIM"
+
+    Reactants = make_reactant_set(__name__, ['inhibitor',])
+
+    Parameters = make_parameter_set(__name__, {'k_inhibition': [ODE, MCA, QSSA],
+                                               'hill_coefficient':[ODE, MCA, QSSA], })
+
+    parameter_reactant_links = {'k_inhibition':'inhibitor'}
+
+    def __init__(self, inhibitor, name=None,
+                 k_inhibition=None,
+                 hill_coefficient=None,
+                 reaction=None):
+
+        if name is None:
+            name = self.prefix+'_'+inhibitor.__str__()
+
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
+        reactants = self.Reactants(inhibitor=inhibitor,)
+        parameters = self.Parameters(k_inhibition=k_inhibition,
+                                     hill_coefficient=hill_coefficient)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.link_parameters_and_reactants()
+
+        self.reactant_stoichiometry = {'inhibitor': 0 }
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+        activation = self.get_qssa_rate_expression()
+        expressions['v_bwd'] = expressions['v_bwd'] * activation
+        expressions['v_fwd'] = expressions['v_fwd'] * activation
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        i = self.reactants.inhibitor.symbol
+        k = self.parameters.k_inhibition.symbol
+        h = self.parameters.hill_coefficient.symbol
+        return ( 1 / (1 + (i/k)**h ))
+
+    def update_qssa_rate_expression(self):
+        return None
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
