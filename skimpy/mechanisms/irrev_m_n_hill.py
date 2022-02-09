@@ -71,7 +71,7 @@ def make_irrev_m_n_hill(stoichiometry):
         num_substrates = 1
         num_products = 1
         for s in stoichiometry:
-            if s < 0:
+            if s <= 0:
                 substrate = 'substrate{}'.format(num_substrates)
                 km_substrate ='km_substrate{}'.format(num_substrates)
                 hill_substrate = 'hill_coefficient_substrate{}'.format(num_substrates)
