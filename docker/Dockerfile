@@ -60,9 +60,10 @@ ENV SUNDIALS_LIBDIR ="${HOME}/sundials-5.1.0/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-5.1.0"
 # Install python interface to sundials
 #modify this
-RUN pip install 'scikits.odes'
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"${HOME}/sundials-5.1.0/lib"
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"${HOME}/usr/local/lib"
+RUN pip install 'scikits.odes==2.6.3'
+ENV LD_LIBRARY_PATH="${HOME}/sundials-5.1.0/lib"
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
 
 
 # If files are provided install cplex and gurobi
@@ -89,11 +90,10 @@ RUN mkdir ./work
 WORKDIR ./work
 
 # Load your package in development mode on startup
-ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy/docker/pytfa && \
-                                pip install --user -e /skimpy/docker/mfapy && \
-                                pip install --user -e /skimpy[ORACLE] && \
-                                $0 $*"]
-#ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && \
+#ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy/docker/pytfa && \
+#                                pip install --user -e /skimpy[ORACLE] && \
 #                                $0 $*"]
+ENTRYPOINT ["/bin/bash", "-c", "pip install --user -e /skimpy[ORACLE] && \
+                                $0 $*"]
 
 CMD /bin/bash
