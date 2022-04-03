@@ -125,3 +125,8 @@ ENV/
 
 # Sphinx doc build
 _build/
+# conda smithy ci-skeleton start
+*.pyc
+
+build_artifacts
+# conda smithy ci-skeleton end
