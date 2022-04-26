@@ -1,4 +1,4 @@
-cobra==0.17.0
+cobra
 jedi==0.17.2 # Fix tab complete in ipython for  python 3.6
 ipython
 ipdb
@@ -9,12 +9,13 @@ sphinx>=1.4
 sphinx-rtd-theme
 matplotlib
 # from setup.py
-sympy==1.3
+sympy
 pytest
 scipy
 numpy
 pandas
-bokeh>=0.12.1
+markupsafe<=2.0.1
+bokeh>=0.12.0
 Cython
 # scikits.odes # installation/compilation done with sundials in Dockerfile
 deap
