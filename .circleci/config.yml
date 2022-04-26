@@ -4,6 +4,23 @@
 
 version: 2
 
+orbs:
+  python: circleci/python@2.0.3
+
+  jobs:
+    example-job:
+      docker:
+        # replace with your preferred image
+        - image: cimg/base:stable
+      steps:
+        - python/install-packages
+
+    workflows:
+      example-workflow:
+        jobs:
+          - example-job
+
+
 jobs:
   build:
     working_directory: ~/test

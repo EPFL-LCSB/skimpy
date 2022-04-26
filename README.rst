@@ -60,33 +60,46 @@ Setup
 
 *This step is not required if you're using the container, which bundles all this.*
 
-<!--- 
-You can install this module with ``pip``:
-*For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
+If you prefer a local installation of skimpy we provide a conda package bundeling binary depdendecies for linux and OSX operatings systems. 
+Windows users can install the conda packages using a linux subsystem via `WLS <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
+
+A comprehensive explanation to install anaconda/miniconda within the WLS linux subsystem can be found `here <https://gist.github.com/kauffmanes/5e74916617f9993bc3479f401dfec7da>`_.
 
 .. code:: bash
 
-    pip3 install skimpy
+  conda TO BE FINISHED SOON 
 
-or from source 
--->
 
-You can install this module from source using ``pip``:
+
+Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
 .. code:: bash
 
     git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
     pip3 install -e /path/to/skimpy
+    
+    
+Note that the manual installation requieres additional packages:
+  - cython3
+  - build-essential
+  - gcc
+  - gfortran
+  - libsundials-dev
+  - libflint- dev
 
+
+Installation of these packages on the native windows system is challenging we thus recomend windows users to install the package only with in linux subsystem using `WLS <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
+  
 To use the ODE integration features scikit-odes is required to be installed beforehand follwoing the instructions found `here <https://scikits-odes.readthedocs.io/en/stable/installation.html>`_. To use the 'cvode' solver from the scikit-odes packages we strongly recomend to install the `sundials <https://computing.llnl.gov/projects/sundials>`_ solvers as ODE integration of large ODE system can be quite slow with python implemented solvers see benchmark `here <https://scikits-odes.readthedocs.io/en/stable/solvers.html>`_.
 
-Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) requires additional packages:
+Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) the additional packages can be installed using:
 
 .. code:: bash
 
   sudo apt install cython3 gfortran libsundials-dev libflint-dev
  
+Windows users using *WSL* can install these dependicies in a similar fashion after starting the subsystem console. 
 
 
 Quick start
