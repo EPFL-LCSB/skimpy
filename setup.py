@@ -10,25 +10,33 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
+from numpy.distutils.system_info import default_include_dirs, default_lib_dirs
 
+from distutils.sysconfig import get_config_vars
 
+if sys.platform == 'win32':
+    libraries = ["gmp", "flint", "mpir", "mpfr", "pthreads"]
+else:
+    libraries = ["gmp", "flint"]
+    (opt,) = get_config_vars('OPT')
+    os.environ['OPT'] = " ".join(flag for flag in opt.split() if flag != '-Wstrict-prototypes')
 
-version_tag = '0.0.1'
+default_include_dirs += [
+    os.path.join(d, "flint") for d in default_include_dirs
+]
+
+# Current version 0.9,1-beta
+version_tag = '0.9.1-beta'
 
 
 extensions = [
             Extension("skimpy.nullspace",
                       sources=["skimpy/cython/nullspace.pyx"],
-                      library_dirs=['/usr/lib'],
-                      extra_compile_args=[],
-                      extra_link_args=['-lgmp','-lflint'],
-                      include_dirs=[],
                       language = 'c',
-                      libraries=['/usr/local/lib/libgmp.so.23',
-                                 '/usr/local/lib/libflint.so.13'],
-                      )
-            ,]
-
+                      libraries=libraries,
+                      library_dirs = default_lib_dirs,
+                      include_dirs = default_include_dirs),
+            ]
 
 setup(name='skimpy',
       version=version_tag,
@@ -41,20 +49,21 @@ setup(name='skimpy',
                         'scipy',
                         'numpy',
                         'pandas',
-                        'bokeh',
                         'Cython',
+                        'markupsafe<=2.0.1',
+                        'bokeh>=0.12.0',
                         'scikits.odes==2.6.3',
                         'deap',
                         'dill',
                         'h5py',
                         'escher',
                         'matplotlib',
+                        'pytfa',
                         ],
       packages = find_packages(),
       python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
-      description='SKiMPy adds Thermodynamics-based Flux Analysis',
-      keywords=['skimpy','kinetic','models'],
-      extras_require={ 'ORACLE':  ["pytfa"], },
+      description='SKiMPy allows to develop and analyze large-scale biochemical kinetic models',
+      keywords=['skimpy', 'kinetic', 'models'],
 
       #ext_modules=cythonize(extensions ),
       ext_modules=extensions,
@@ -81,7 +90,9 @@ setup(name='skimpy',
 
             # Specify the Python versions you support here. In particular, ensure
             # that you indicate whether you support Python 2, Python 3 or both.
-            'Programming Language :: Python :: 3.5',
-            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
+
       ],
      )
+

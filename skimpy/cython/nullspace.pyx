@@ -63,7 +63,7 @@ cdef extern from "nullspace.pyh":
 
     cdef void fmpz_clear(fmpz_t x)
     cdef void fmpz_init(fmpz_t x)
-    cdef void fmpz_set(fmpz_t dest , const fmpz_t src)
+    #cdef void fmpz_set(fmpz_t dest , const fmpz_t src)
 
 
     cdef void fmpq_mat_init(fmpq_mat_t A, int rows, int columns);
