@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.9-bullseye
 # Install missing deps
 USER root
 # Install unix requirements for the docker
@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		fort77          \
 		wget            \
 		cmake           \
-        libflint-2.5.2  \
         libflint-dev    \
         libgmp-dev      \
 		yasm            \
@@ -60,9 +59,10 @@ ENV SUNDIALS_LIBDIR ="${HOME}/sundials-5.1.0/lib"
 ENV SUNDIALS_INST="${HOME}/sundials-5.1.0"
 # Install python interface to sundials
 #modify this
-RUN pip install 'scikits.odes==2.6.3'
+# TODO WE NEED TO INDERSTAD WHY THIS FAILS WO
+ENV CPPFLAGS="-I${HOME}/sundials-5.1.0/include"
+RUN pip install "scikits.odes==2.6.3"
 ENV LD_LIBRARY_PATH="${HOME}/sundials-5.1.0/lib"
-
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"/usr/local/lib"
 
 
