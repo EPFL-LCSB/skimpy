@@ -38,9 +38,8 @@ from sympy.printing import ccode
 from sympy import Symbol
 
 
-#Get default C-compiler executable based on the OS
-CC = os.getenv("CC")
-COMPILER = "{} -fPIC -shared -w -O3".format(CC)
+#SUPPORTS ONLY GCC!
+COMPILER = "gcc -fPIC -shared -w -O3"
 
 # Test to write our own compiler
 INCLUDE = "#include <stdlib.h>\n" \
