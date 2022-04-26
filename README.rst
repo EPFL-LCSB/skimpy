@@ -12,36 +12,6 @@ SKiMpy is a python package bridging implementing an efficient kinetic model-ing 
     - Uncertainty propagation in metabolic control
     - Multispecies bioreactor modeling
 
-Requirements
-------------
-
-You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to properly download some binary files:
-
-.. code:: bash
-
-    git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
-    cd /path/to/skimpy
-    git lfs install
-    git lfs pull
- 
-
-
-This module was developed in Python 3.6, and it is recommended to run Python 3.6.
-The module also was tested in Python 3.7.
-
-Further the following pip-python packages are required
-    - sympy >= 1.1.
-    - pytest
-    - scipy
-    - numpy
-    - bokeh
-    - pandas
-    - Cython
-    - scikits.odes
-    - deap
-    - dill
-    - h5py
-    - escher
 
 Container-based install
 -----------------------
@@ -69,8 +39,6 @@ A comprehensive explanation to install anaconda/miniconda within the WLS linux s
 
   conda TO BE FINISHED SOON 
 
-
-
 Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
 
@@ -78,28 +46,64 @@ Alternatively you can install this module from source using ``pip``:
 
     git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
     pip3 install -e /path/to/skimpy
-    
-    
-Note that the manual installation requieres additional packages:
-  - cython3
-  - build-essential
-  - gcc
-  - gfortran
-  - libsundials-dev
-  - libflint- dev
 
 
-Installation of these packages on the native windows system is challenging we thus recomend windows users to install the package only with in linux subsystem using `WLS <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
+Installation of these packages on the native windows system is challenging we thus recommend windows users to install
+the package only with in linux subsystem using `WLS <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
   
-To use the ODE integration features scikit-odes is required to be installed beforehand follwoing the instructions found `here <https://scikits-odes.readthedocs.io/en/stable/installation.html>`_. To use the 'cvode' solver from the scikit-odes packages we strongly recomend to install the `sundials <https://computing.llnl.gov/projects/sundials>`_ solvers as ODE integration of large ODE system can be quite slow with python implemented solvers see benchmark `here <https://scikits-odes.readthedocs.io/en/stable/solvers.html>`_.
+To use the ODE integration features scikit-odes is required to be installed beforehand following the instructions found
+`here <https://scikits-odes.readthedocs.io/en/stable/installation.html>`_.
+To use the 'cvode' solver from the scikit-odes packages we strongly recommend to install the
+`sundials <https://computing.llnl.gov/projects/sundials>`_ solvers as ODE integration of large ODE system can be
+slow with python implemented solvers see benchmark `here <https://scikits-odes.readthedocs.io/en/stable/solvers.html>`_.
 
-Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) the additional packages can be installed using:
+Installation from source has been tested on Ubuntu 21.10  (`@eladnoor <https://github.com/eladnoor/>`_) the additional
+packages can be installed using:
 
 .. code:: bash
 
-  sudo apt install cython3 gfortran libsundials-dev libflint-dev
- 
-Windows users using *WSL* can install these dependicies in a similar fashion after starting the subsystem console. 
+  sudo apt install gfortran libsundials-dev libflint-dev libgmp-dev
+
+
+Windows users using *WSL* can install these dependencies in a similar fashion after starting the subsystem console.
+
+Requirements
+------------
+
+You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to properly download some binary files:
+
+.. code:: bash
+
+    git clone https://github.com/EPFL-LCSB/skimpy.git /path/to/skimpy
+    cd /path/to/skimpy
+    git lfs install
+    git lfs pull
+
+
+
+This module was developed in Python 3.9, and it is recommended to run Python 3.9.
+The module also was tested in Python 3.8.
+
+Further the following pip-python packages are required
+    - sympy >= 1.1.
+    - pytest
+    - scipy
+    - numpy
+    - bokeh
+    - pandas
+    - Cython
+    - scikits.odes
+    - deap
+    - dill
+    - h5py
+    - escher
+
+The installation requires additionaly the following libraries:
+  - gcc
+  - gfortran
+  - libsundials-dev
+  - libflint-dev
+  - libgmp-dev
 
 
 Quick start
