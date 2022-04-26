@@ -39,3 +39,4 @@ workflows:
             branches:
               ignore:
                 - /.*/
+
