@@ -74,8 +74,8 @@ Make tfa analysis of the model
 thermo_data = load_thermoDB('../../data/thermo_data.thermodb')
 this_pytfa_model = pytfa.ThermoModel(thermo_data, this_cobra_model)
 
-CPLEX = 'optlang-cplex'
-this_pytfa_model.solver = CPLEX
+GLPK = 'optlang-glpk'
+this_pytfa_model.solver = GLPK
 
 # TFA conversion
 this_pytfa_model.prepare()
