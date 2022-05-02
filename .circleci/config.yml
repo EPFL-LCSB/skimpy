@@ -25,10 +25,9 @@ orbs:
               - .
               
     workflows:
-      example-workflow:
+      skimpy-workflow:
         jobs:
-          - example-job
-
+          - skimpy-docker-install
 
 jobs:
   build:
