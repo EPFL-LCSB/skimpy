@@ -8,13 +8,22 @@ orbs:
   python: circleci/python@2.0.3
 
   jobs:
-    example-job:
+    skimpy-docker-install:
       docker:
         # replace with your preferred image
-        - image: cimg/base:stable
+        - image: danielweilandt/skimpy:latest
       steps:
-        - python/install-packages
-
+        - checkout
+        - python/install-packages:
+            pkg-manager: pip
+        - run:
+            name: Run tests
+            command: python -m pytest
+        - persist_to_workspace:
+            root: /skimpy
+            paths:
+              - .
+              
     workflows:
       example-workflow:
         jobs:
