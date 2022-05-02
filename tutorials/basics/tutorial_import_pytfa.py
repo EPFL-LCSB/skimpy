@@ -37,6 +37,7 @@ from skimpy.utils.namespace import *
 from skimpy.sampling.simple_parameter_sampler import SimpleParameterSampler
 from skimpy.core.solution import ODESolutionPopulation
 from skimpy.io.generate_from_pytfa import FromPyTFA
+from skimpy.io.yaml import export_to_yaml
 from skimpy.utils.general import sanitize_cobra_vars
 from skimpy.utils.tabdict import TabDict
 
@@ -63,6 +64,8 @@ this_pytfa_model.solver = GLPK
 this_pytfa_model.prepare()
 this_pytfa_model.convert(add_displacement=True)
 
+pytfa_solution = this_pytfa_model.optimize()
+
 """ 
 Generate a draft Kinetic Model
 """
@@ -75,6 +78,6 @@ Generate a draft Kinetic Model
 small_molecules = ['h_c', 'h_e']
 
 model_gen = FromPyTFA(small_molecules=small_molecules)
-this_skimpy_model = model_gen.import_model(this_pytfa_model,solution.raw)
+this_skimpy_model = model_gen.import_model(this_pytfa_model,pytfa_solution.raw)
 
 export_to_yaml(this_skimpy_model, 'toy_draft.yml')
