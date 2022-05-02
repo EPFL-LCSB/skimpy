@@ -100,4 +100,4 @@ this_model.initial_conditions['I'] = 0.0
 
 this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500),solver_type = 'cvode')
 
-this_sol_qssa.plot('output/base_out_qssa.html')
+this_sol_qssa.plot('base_out_qssa.html')

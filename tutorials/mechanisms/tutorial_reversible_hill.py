@@ -62,7 +62,7 @@ this_model.initial_conditions['B'] = 1.0
 
 this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-this_sol_qssa.plot('output/uni_bi_base_out_qssa.html')
+this_sol_qssa.plot('uni_bi_base_out_qssa.html')
 
 
 
@@ -102,4 +102,4 @@ this_model.initial_conditions['C2'] = 5.0
 
 this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 10.0, 1000),solver_type = 'cvode')
 
-this_sol_qssa.plot('output/bi_uni_base_out_qssa.html')
+this_sol_qssa.plot('bi_uni_base_out_qssa.html')
