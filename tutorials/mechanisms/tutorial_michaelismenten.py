@@ -40,7 +40,6 @@ parameters = ReversibleMichaelisMenten.Parameters(
     k_equilibrium=2.0,
     km_substrate = 10.0,
     km_product = 10.0,
-    total_enzyme_concentration = 1.0,
 )
 
 
@@ -59,19 +58,7 @@ this_model.initial_conditions['B'] = 1.0
 
 this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-this_sol_qssa.plot('output/uni_uni_base_out_qssa.html')
-
-## Full rate method
-this_model.compile_ode(sim_type = ELEMENTARY)
-
-this_model.initial_conditions['A'] = 1.0
-this_model.initial_conditions['B'] = 1.0
-this_model.initial_conditions['pfk'] = 0.8
-this_model.initial_conditions['EC_pfk'] = 0.2
-
-this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
-
-this_sol_full.plot('output/uni_uni_base_out_elemetary.html')
+this_sol_qssa.plot('uni_uni_base_out_qssa.html')
 
 
 """
@@ -111,4 +98,4 @@ this_model.initial_conditions['C2'] = 5.0
 
 this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 10.0, 1000),solver_type = 'cvode')
 
-this_sol_qssa.plot('output/bi_bi_base_out_qssa.html')
+this_sol_qssa.plot('bi_bi_base_out_qssa.html')
