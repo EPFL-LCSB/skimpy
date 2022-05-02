@@ -87,7 +87,7 @@ this_model.initial_conditions['MAPK'] = 300.0
 this_sol_full = this_model.solve_ode(np.linspace(0.0, 10000.0, 1000),
                                      solver_type='cvode')
 
-this_sol_full.plot('output/time_signaling_response_oscillations.html',
+this_sol_full.plot('time_signaling_response_oscillations.html',
                    backend='svg',
                    )
 
