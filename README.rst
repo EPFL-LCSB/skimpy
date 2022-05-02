@@ -105,6 +105,9 @@ The installation requires additionaly the following libraries:
   - libflint-dev
   - libgmp-dev
 
+Further more using the escher plot and aninmation functions (skimpy.viz.escher) requires a Chrome installation. 
+An installation sript for linux systems can be found in docker/utils/install_chrome.sh
+
 
 Quick start
 ===========
