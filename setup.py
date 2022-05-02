@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """ Simple Kinetic Models in Python
 
 .. moduleauthor:: SKiMPy team
@@ -13,6 +15,10 @@ from Cython.Distutils import build_ext
 from numpy.distutils.system_info import default_include_dirs, default_lib_dirs
 
 from distutils.sysconfig import get_config_vars
+
+import os
+import sys
+
 
 if sys.platform == 'win32':
     libraries = ["gmp", "flint", "mpir", "mpfr", "pthreads"]
@@ -44,7 +50,7 @@ setup(name='skimpy',
       author_email='softwares.lcsb@epfl.ch',
       url='https://github.com/EPFL-LCSB/skimpy/',
       download_url='https://github.com/EPFL-LCSB/skimpy/archive/'+version_tag+'.tar.gz',
-      install_requires=['sympy',
+      install_requires=['sympy<=1.5',
                         'pytest',
                         'scipy',
                         'numpy',
