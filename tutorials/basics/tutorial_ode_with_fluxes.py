@@ -32,6 +32,9 @@ from skimpy.mechanisms import *
 from skimpy.analysis.ode.utils import make_flux_fun
 from skimpy.utils.namespace import *
 
+from skimpy.core.parameters import ParameterValues
+
+
 name = 'pfk'
 metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
                                                    product = 'B')
@@ -42,7 +45,6 @@ parameters = ReversibleMichaelisMenten.Parameters(
     k_equilibrium = 1.5,
     km_substrate = 10.0,
     km_product = 10.0,
-    total_enzyme_concentration = 1.0,
 )
 
 pfk = Reaction(name=name,
@@ -56,15 +58,18 @@ this_model.parametrize_by_reaction({pfk.name:parameters})
 
 
 ## Elementary rate method
-this_model.compile_ode(sim_type = ELEMENTARY)
+this_model.compile_ode(sim_type = QSSA)
 
 this_model.initial_conditions['A'] = 10.0
 this_model.initial_conditions['B']= 1.0
-this_model.initial_conditions['pfk'] = 1.0
 
 this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
 
-calc_fluxes = make_flux_fun(this_model, ELEMENTARY)
+calc_fluxes = make_flux_fun(this_model, QSSA)
 
-steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1])
+
+parameter_values = ParameterValues({p.symbol: p.value for p in this_model.parameters.values()},
+                                   kmodel=this_model)
+
+steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameter_values)
 
