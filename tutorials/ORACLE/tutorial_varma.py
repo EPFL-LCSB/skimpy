@@ -102,7 +102,7 @@ for sec in secretions:
 print(tmodel.optimize())
 
 samples = sample(tmodel, NUM_TFA_SAMPLES, method='achr')
-samples.to_csv('./output/samples_fdp1_1000.csv'.format())
+samples.to_csv('./samples_fdp1_1000.csv'.format())
 
 """
 Parameter sampling 
@@ -132,7 +132,7 @@ flux_scaling_factor = 1e-3 / (GDW_GWW_RATIO / DENSITY) \
 
 
 path_to_kmodel = './../../models/kin_varma.yml'
-path_for_output = './output/paramter_pop_{}.h5'
+path_for_output = './paramter_pop_{}.h5'
 kmodel = load_yaml_model(path_to_kmodel)
 
 # Perp and compile to sample parameters
