@@ -88,7 +88,7 @@ Plot results
 
 species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1', 'biomass_strain_2']]
 timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='output_multi/time_response.html',
+               filename='multi_time_response.html',
                legend=species,
                x_label='time [h]',
                y_label='concentrations [M]',
@@ -97,7 +97,7 @@ timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentratio
 MASS_PER_CELL = 1e-12 #[g]
 species = ['biomass_strain_1', 'biomass_strain_2']
 timetrace_plot(sol.time, sol.concentrations[species].values*MASS_PER_CELL,
-               filename='output_multi/time_response_biomass.html',
+               filename='multi_time_response_biomass.html',
                legend=species,
                x_label='time [h]',
                y_label='biomass [g]',
@@ -112,7 +112,7 @@ delta_t = np.array(  [(sol.time[1:] -  sol.time[:-1])]*2).T
 x = sol.concentrations[species].values[:-1,:]
 mu = delta_x/delta_t/x
 timetrace_plot(sol.time[:-1], mu,
-               filename='output_multi/time_response_growth.html',
+               filename='multi_time_response_growth.html',
                legend=species,
                x_label='time [h]',
                y_label='growth rate [1/h]',
@@ -122,7 +122,7 @@ timetrace_plot(sol.time[:-1], mu,
 # Medium
 species = list(reactor.medium.keys())
 timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='output_multi/time_response_medium.html',
+               filename='multi_time_response_medium.html',
                legend=species,
                x_label='time [h]',
                y_label='concentrations [M]',

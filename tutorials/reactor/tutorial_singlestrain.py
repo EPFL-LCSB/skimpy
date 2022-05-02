@@ -92,7 +92,7 @@ Plot results
 
 species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1',]]
 timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='output_single/time_response.html',
+               filename='single_time_response.html',
                legend=species,
                x_label='time [h]',
                y_label='concentrations [M]',
@@ -101,7 +101,7 @@ timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentratio
 MASS_PER_CELL = 1e-12 #[g/cell]
 species = ['biomass_strain_1', ]
 timetrace_plot(sol.time, sol.concentrations[species].values*MASS_PER_CELL,
-               filename='output_single/time_response_biomass.html',
+               filename='single_time_response_biomass.html',
                legend=species,
                x_label='time [h]',
                y_label='biomass [g]',
@@ -115,7 +115,7 @@ delta_t = np.array(  [(sol.time[1:] -  sol.time[:-1])]).T
 x = sol.concentrations[species].values[:-1,:]
 mu = delta_x/delta_t/x
 timetrace_plot(sol.time[:-1], mu,
-               filename='output_single/time_response_growth.html',
+               filename='single_time_response_growth.html',
                legend=species,
                x_label='time [h]',
                y_label='growth rate [1/h]',
@@ -125,7 +125,7 @@ timetrace_plot(sol.time[:-1], mu,
 # Medium
 species = list(reactor.medium.keys())
 timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='output_single/time_response_medium.html',
+               filename='single_time_response_medium.html',
                legend=species,
                x_label='time [h]',
                y_label='concentrations [M]',
@@ -152,10 +152,11 @@ fluxes.index = sol.time
 """
 Animate the fluxes solutions in a escher map
 """
+
 if WITH_ANIMATION:
     animate_fluxes(fluxes[::10],
                    './../../data/varma_map.json',
-                   outputfile='output_single/animation_fluxes_strain_1.mp4',
+                   outputfile='single_animation_fluxes_strain_1.mp4',
                    height=600,
                    width=800,
                    time_interval_ms=100,
@@ -164,7 +165,7 @@ if WITH_ANIMATION:
 
 plot_fluxes( fluxes.iloc[0],
              './../../data/varma_map.json',
-             output_file='output_single/map_1.html',
+             output_file='single_map_1.html',
              height=600,
              width=800,
              min_flux = -10,
@@ -172,7 +173,7 @@ plot_fluxes( fluxes.iloc[0],
 
 plot_fluxes( fluxes.iloc[100],
              './../../data/varma_map.json',
-             output_file='output_single/map_2.html',
+             output_file='single_map_2.html',
              height=600,
              width=800,
              min_flux = -10,
