@@ -118,7 +118,7 @@ add_min_log_displacement(tmodel, min_log_displacement)
 solution = tmodel.optimize()
 
 # Export solution for Escher
-export_reactions_for_escher(tmodel,solution.raw, 'output/reference_fluxes.csv')
+export_reactions_for_escher(tmodel,solution.raw, 'reference_fluxes.csv')
 
 """
 Get a Kinetic Model
@@ -243,6 +243,6 @@ for this_parameter in parameters_to_resample:
 # Plot
 plot_sobol_coefficients(df_si.loc['vmax_forward_ENO'],
                         df_st.loc['vmax_forward_ENO'],
-                        filename='output/eno_si_st.html',
+                        filename='eno_si_st.html',
                         colors=['#3399FF','#205f99'],
                         backend='svg')
