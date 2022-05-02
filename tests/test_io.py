@@ -1,4 +1,5 @@
 from skimpy.io.yaml import export_to_yaml, load_yaml_model
+from skimpy.io.sbml import export_sbml, import_sbml
 import os.path
 from os.path import join
 import pytest
@@ -36,7 +37,8 @@ dummy_model = KineticModel()
 dummy_model.add_reaction(pfk)
 dummy_model.parametrize_by_reaction({pfk.name:parameters})
 
-dummy_model_path = 'test.yaml'
+dummy_model_path_yml = 'test.yaml'
+dummy_model_path_sbml = 'test.sbml'
 
 #######################################################
 
@@ -70,7 +72,8 @@ def test_fluxes():
     steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameters=parameter_values)
 
 def test_export():
-    export_to_yaml(dummy_model, dummy_model_path)
+    export_to_yaml(dummy_model, dummy_model_path_yml)
+    export_sbml(dummy_model, dummy_model_path_sbml)
 
 def test_cobra_import():
     from skimpy.io.generate_from_cobra import FromCobra
@@ -87,5 +90,8 @@ def test_cobra_import():
 
 @pytest.mark.dependency(depends=['cobra_import'])
 def test_import():
-    model = load_yaml_model(dummy_model_path)
+    model = load_yaml_model(dummy_model_path_yml)
+    model.compile_ode()
+
+    model = import_sbml(dummy_model_path_sbml)
     model.compile_ode()
