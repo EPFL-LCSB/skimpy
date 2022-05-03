@@ -8,7 +8,7 @@
 
 [---------]
 
-Copyright 2017 Laboratory of Computational Systems Biotechnology (LCSB),
+Copyright 2022 Laboratory of Computational Systems Biotechnology (LCSB),
 Ecole Polytechnique Federale de Lausanne (EPFL), Switzerland
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,11 +27,16 @@ limitations under the License.
 from skimpy.core.kinmodel import KineticModel
 from skimpy.utils.namespace import PARAMETER, VARIABLE
 
+from skimpy.mechanisms.direct_expression import make_mechanism_from_expression
 from skimpy.utils.general import make_subclasses_dict, get_stoichiometry, get_all_reactants
 
 
 from libsbml import *
 import sys
+
+from skimpy.core import Item, Reactant, Parameter, Reaction, BoundaryCondition, \
+    ConstantConcentration, KineticModel, ExpressionModifier
+from skimpy.core.compartments import Compartment
 
 # DEFAULT UNITS:
 TIME = 'hour'
@@ -40,7 +45,7 @@ VOLUME = 'litre'
 
 
 """
-Check function adapted as recomenden from SBML-examples:
+Check function adapted as recommended from SBML-examples:
 See: https://synonym.caltech.edu/software/libsbml/5.18.0/docs/formatted/python-api/create_simple_model_8py-example.html
 """
 def check(value, message):
@@ -190,27 +195,78 @@ def export_sbml(kmodel, filename, time_unit=TIME, substance_unit=SUBSTANCE, volu
     writeSBML(document, filename)
 
 
-
-
 def import_sbml(filename):
     reader = SBMLReader()
-
     document = reader.readSBML(filename)
 
     if document.getNumErrors() > 0:
         raise RuntimeError("Reading the SBML file raised several errors")
 
-    # TODO
-    smbl_model = document.getModel()
+    sbml_model = document.getModel()
 
     new = KineticModel()
 
-    return
+    # Rebuild the reactions
+    for the_reaction in sbml_model.reactions:
+        expression = the_reaction.getKineticLaw().getFormula()
+        products = [(p.getSpecies(), p.getStoichiometry()) for p in the_reaction.products]
+        substrates = [(p.getSpecies(), -p.getStoichiometry()) for p in the_reaction.reactants]
+
+        reactants, stoichiometry = list(zip(*(substrates+products)))
+
+        TheMechanism = make_mechanism_from_expression(stoichiometry, reactants, expression )
+        the_reactants = TheMechanism.Reactants(**{k:v for k,v in zip(TheMechanism.reactant_list, reactants)})
+
+        # FIXME: Needs a corresponding input in the SBML?
+
+        the_enzyme = None
+
+        new_reaction = Reaction(name=the_reaction.id,
+                                mechanism=TheMechanism,
+                                reactants=the_reactants,
+                                enzyme = the_enzyme,
+                                )
+
+        new.add_reaction(new_reaction)
+        
+    #Resbuild compartments
+    for the_comp in sbml_model.compartments:
+        new_comp = Compartment(the_comp.id)
+        new.add_compartment(new_comp)
 
 
+    # Assing compartments
+    for the_met in sbml_model.species:
+        met = new.reactants[the_met.id]
+        comp = new.compartments[the_met.compartment]
+        met.compartment = comp
 
 
+    # Populate the kinmodel.parameters TabDict
+    parameter_init_dict = dict()
+    for rxn_obj in new.reactions.values():
+        # initalize empty param list
+        parameter_init_dict[rxn_obj.name] = rxn_obj.mechanism.__class__.Parameters()
+    new.parametrize_by_reaction(parameter_init_dict)
 
+    # Boundary Conditions
+    for the_met in sbml_model.species:
+        if the_met.boundary_condition:
+            if the_met.constant:
+                TheBoundaryCondition = ConstantConcentration
+            else:
+                raise NotImplementedError('TODO Implement flux boundary condition')
+
+            the_bc = TheBoundaryCondition(reactant, **the_bc_dict)
+            new.add_boundary_condition(the_bc)
+
+            # Do not forget to add the value of the BC!
+            reactant.value = the_met.id
+
+    return new
+
+
+# Utility Functions
 def get_reversiblity(reaction):
     if reaction.mechanism.reaction_rates['v_bwd'] ==0:
         return False

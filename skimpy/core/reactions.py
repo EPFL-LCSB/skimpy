@@ -109,8 +109,11 @@ class Reaction(object):
 
     @parameters.setter
     def parameters(self, value):
-        for name, p in value.items():
-            p.suffix = self.name
+        # Exception for expression based mechanisms
+        if not 'ExpressionBasedKinetics' in self.mechanism.__class__.__name__:
+            for name, p in value.items():
+                p.suffix = self.name
+
         self.mechanism.parameters = value
 
     @property
