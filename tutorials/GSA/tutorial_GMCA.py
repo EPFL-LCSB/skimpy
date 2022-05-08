@@ -48,6 +48,11 @@ from skimpy.analysis.oracle import *
 from skimpy.viz.sensitivty import plot_sobol_coefficients
 
 """
+This tutorial demonstrate how to use SKiMpy to implement global vairance based sensitivty
+for metabolic control and reproduces figure S7b 
+"""
+
+"""
 Parameters
 """
 CONCENTRATION_SCALING = 1e6 # 1 mol to 1 mmol

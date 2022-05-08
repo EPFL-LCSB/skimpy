@@ -26,7 +26,7 @@ limitations under the License.
 """
 
 """
-This Tutorial illustrates how signaling models can be build using skimpy
+This Tutorial models periodic signaling network dynamics and reproduces Figure S3c
 """
 
 import numpy as np

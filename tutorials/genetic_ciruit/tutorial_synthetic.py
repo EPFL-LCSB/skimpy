@@ -38,6 +38,8 @@ Degradation = make_irrev_massaction([-1])
 Here we model a GFP stripe forming genetic gene circuit based scheme on the SI in Schaerli et al, 2014
 Schaerli, Y., Munteanu, A., Gili, M. et al. A unified design space of synthetic stripe-forming networks. 
 Nat Commun 5, 4905 (2014). https://doi.org/10.1038/ncomms5905
+
+This tutorial reproduces figure S4b
 """
 
 k_deg = 4 # This param is guessed until a stripe was observed not found in the SI of above

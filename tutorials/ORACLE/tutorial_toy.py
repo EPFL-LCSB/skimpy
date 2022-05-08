@@ -48,6 +48,11 @@ from skimpy.analysis.oracle import *
 
 from optlang.exceptions import SolverError
 
+
+"""
+A simplified version of the workflow presented in figure S9
+"""
+
 CONCENTRATION_SCALING = 1e6 # 1 mol to 1 mmol
 TIME_SCALING = 1 # 1hr
 # Parameters of the E. Coli cell

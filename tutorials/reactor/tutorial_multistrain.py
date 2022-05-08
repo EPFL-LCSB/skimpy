@@ -40,8 +40,10 @@ from skimpy.viz.escher import animate_fluxes, plot_fluxes
 import numpy as np
 import pandas as pd
 
+
 """
-Set up batch reactor
+This tutorial show how to setup a batch reactor simulation with two differnt strains or organisms 
+reproduces figures S6c,d
 """
 
 reactor = make_batch_reactor('multi_species.yaml')
@@ -83,7 +85,7 @@ sol = reactor.solve_ode(np.linspace(0, 10.0, 1000),
                         )
 
 """
-Plot results 
+Plot results / figures S6 c,d
 """
 
 species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1', 'biomass_strain_2']]

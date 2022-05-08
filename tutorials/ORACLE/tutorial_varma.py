@@ -32,6 +32,8 @@ This Tutorial walks you through the ORACLE workflow and show case several analys
 implemented in SkiMpy
 Each section contains a short introduction on the purpose and pitfalls 
 Further the key parameters of the step are shown in the beginning of each step
+
+Implements the workflow presented in figure S9
 """
 
 

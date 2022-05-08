@@ -29,7 +29,7 @@ import numpy as np
 
 """
 This tutorial demonstrates modal analysis, MCA, large parameter changes, and basins of attraction
-at the example of a metabolic model
+at the example of a metabolic model, reproducing figures S5b,c,d
 """
 from pytfa.io.json import load_json_model
 from skimpy.io.yaml import  load_yaml_model
@@ -69,7 +69,7 @@ parameter_values = {p.symbol:p.value for p in kmodel.parameters.values()}
 parameter_values = ParameterValues(parameter_values, kmodel)
 
 """
-Modal analysis
+Modal analysis / Figure S5b
 """
 kmodel.prepare()
 kmodel.compile_jacobian(sim_type=QSSA,ncpu=8)
@@ -82,7 +82,7 @@ plot_modal_matrix(M,filename='modal_matrix.html',
                   )
 
 """
-Metabolic control analysis
+Metabolic control analysis / Figure S5c
 """
 
 # Compile mca with parameter elasticities with respect to Vmaxes
@@ -105,7 +105,7 @@ plot_control_coefficients(lac_control_coeff,
                           )
 
 """
-Large parameter perturbations 
+Large parameter perturbations / Figure S5c
 """
 
 kmodel.compile_ode(sim_type=QSSA,ncpu=8)

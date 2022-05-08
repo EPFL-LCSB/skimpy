@@ -51,7 +51,8 @@ import pandas as pd
 WITH_ANIMATION = False # This can take some time
 
 """
-Set up batch reactor
+This tutorial show how to setup a batch reactor simulation with a single strain and 
+reproduces figures S6a,b
 """
 
 reactor = make_batch_reactor('single_species.yaml')
@@ -87,7 +88,7 @@ sol = reactor.solve_ode(np.linspace(0, 10.0, 1000),
                         )
 
 """
-Plot results 
+Plot results plot figures S6a/b
 """
 
 species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1',]]
@@ -97,6 +98,7 @@ timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentratio
                x_label='time [h]',
                y_label='concentrations [M]',
                backend='svg',)
+
 
 MASS_PER_CELL = 1e-12 #[g/cell]
 species = ['biomass_strain_1', ]
