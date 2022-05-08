@@ -14,12 +14,15 @@ SKiMpy is a python package bridging implementing an efficient kinetic model-ing 
 
 
 Container-based install
------------------------
+=====
+
 
 You might want to use this program inside of a container. The
 |docker|_
-subfolder has all the necessary information and source files to set it
-up.
+subfolder has all the necessary information and source files to build it
+locally.
+
+Also you can directly pull the docker image: docker.io/danielweilandt/skimpy
 
 .. |docker| replace:: ``docker/``
 .. _docker: https://github.com/EPFL-LCSB/skimpy/tree/master/docker
