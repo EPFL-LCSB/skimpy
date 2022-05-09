@@ -53,10 +53,14 @@ Then install pytfa and skimpy using the local source:
   conda create --name skimpy-env
   conda activate skimpy-env
   
-  cd /path/to/conda/packakges/
-  conda install --use-local pytfa
-  conda install --use-local skimpy
+  wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.0/linux-64.tar.gz
+  tar -xzf linux-64.tar.gz
+  ls local-channel
+  
+  conda install -c file:///absolute/path/to/local-channel pytfa
+  conda install -c file:///absolute/path/to/local-channel skimpy
 
+Note that it is essentaial to pass the absolute path to the local channel. 
 
 Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
