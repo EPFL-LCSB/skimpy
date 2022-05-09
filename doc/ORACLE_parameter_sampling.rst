@@ -1,10 +1,9 @@
 ORACLE parameter sampling 
 ===========================
-We here present the first open-source  implementation of the ORACLE parametrization method [3-6]. ORACLE makes use of sampling alternative steady states and parameter backcalculation to effeciently sample large sets of locally stable parameters. 
+We here present the first open-source  implementation of the ORACLE parametrization method [3-6]. ORACLE makes use of sampling alternative steady states and parameter backcalculation to efficiently sample large sets of locally stable parameters.
 
 
-The first step in the ORACLE workflow is to integrate physological data. Here we integrare observed concentrations and we assume that the glucose transporter operates far from equilibrium. 
-
+The first step in the ORACLE workflow is to integrate physiological data. Here we integrare observed concentrations and we assume that the glucose transporter operates far from equilibrium.
 
 .. code-block:: python
 
@@ -18,7 +17,6 @@ The first step in the ORACLE workflow is to integrate physological data. Here we
   tmodel.solver = GLPK
 
   tmodel.solver.configuration.tolerances.feasibility = 1e-9
-  #tmodel.solver.configuration.tolerances.optimality  = 1e-9
 
   # Define the reactor medium
   #Glucose  to 10 g/L = 0.056 mol/l 1/2 Reactor concentration
@@ -42,19 +40,6 @@ The first step in the ORACLE workflow is to integrate physological data. Here we
   # Enforce glucose transporter displacements
   tmodel.thermo_displacement.GLCptspp.variable.ub = -2.0
 
-  # Reduce the other
-  # Constraint non-medium concentrations to be lower then muM
-  LC_SECRETION = np.log(1e-6)
-  secretions = [r for r in tmodel.boundary if r.upper_bound <= 0]
-  for sec in secretions:
-      for met in sec.metabolites:
-          if met.id in ['h2o_2', 'h_e']:
-              continue
-          try:
-              tmodel.log_concentration.get_by_id(met.id).variable.upper_bound = LC_SECRETION
-          except KeyError:
-              pass
-
   # Test feasiblity
   print(tmodel.optimize())
 
@@ -70,8 +55,24 @@ In the next step we sample the flux and concentration space:
   samples = sample(tmodel, NUM_TFA_SAMPLES, method='achr')
   samples.to_csv('./samples_fdp1_1000.csv'.format())
   
-  
-Finally we call the parameter sampler for each sampled reference steady-state. The parameter sampler provides then information on the charateristic timescales this information can then later be used to discard parameter samples exhibting unphysiological charateristics.
+
+Fluxes sampled in the TFA problem are mass fluxes in units of mmol/gDW/hr we convert these
+to reaction rates in units of [concentration]/[time] therefore we require the cell density and
+the wet weight to dry weight ratio. It is also useful to choose a different concentration unit than [M] since
+most intracellular metabolite concentration are between 1 mM and 1 uM, which can be achived by choosing a different
+concentration scaling factor: ``[C] = [M] x CONCENTRATION_SCALING``.
+
+.. code-block:: python
+
+  N_PARAMETER_SAMPLES = 10
+  CONCENTRATION_SCALING = 1e6 # 1 umol
+  TIME_SCALING = 1 # 1hr
+  DENSITY = 1200 # g/L
+  GDW_GWW_RATIO = 0.3 # Assumes 70% Water
+
+
+Finally we call the parameter sampler for each sampled reference steady-state. The parameter sampler provides then information on the charateristic timescales this information can then later be used to discard parameter samples exhibiting unphysiological characteristics.
+The parameter sampler will requires that the Jacobian is compiled ``kmodel.compile_jacobian()`` to evaluate the stablity of the samples.
 
 .. code-block:: python
 
@@ -84,17 +85,6 @@ Finally we call the parameter sampler for each sampled reference steady-state. T
 
 
   NCPU = 8
-  N_PARAMETER_SAMPLES = 10
-  CONCENTRATION_SCALING = 1e6 # 1 mol to 1 mmol
-  TIME_SCALING = 1 # 1hr
-  # Parameters of the E. Coli cell
-  DENSITY = 1200 # g/L
-  GDW_GWW_RATIO = 0.3 # Assumes 70% Water
-
-  flux_scaling_factor = 1e-3 / (GDW_GWW_RATIO / DENSITY) \
-                        * CONCENTRATION_SCALING \
-                        / TIME_SCALING
-
 
   path_to_kmodel = './../../models/kin_varma.yml'
   path_for_output = './paramter_pop_{}.h5'
@@ -118,27 +108,24 @@ Finally we call the parameter sampler for each sampled reference steady-state. T
   fluxes = []
 
   for i, sample in samples.iterrows():
-      # Load fluxes and concentrations
+      # Load fluxes and concentrations and scale them to the desired units
       fluxes = load_fluxes(sample, tmodel, kmodel,
                            density=DENSITY,
                            ratio_gdw_gww=GDW_GWW_RATIO,
                            concentration_scaling=CONCENTRATION_SCALING,
                            time_scaling=TIME_SCALING)
+
       concentrations = load_concentrations(sample, tmodel, kmodel,
                                            concentration_scaling=CONCENTRATION_SCALING)
 
-      # Calibrate the glucose transporter to have a Vmax of 10mmol/gDW/h
-      pep_c = concentrations['pep_c']
-      pyr_c = concentrations['pyr_c']
-      g6p_c = concentrations['g6p_c']
 
-      # Fetch equilibrium constants
+      # Fetch equilibrium constants and scale them to the desired units
       load_equilibrium_constants(sample, tmodel, kmodel,
                                  concentration_scaling=CONCENTRATION_SCALING,
                                  in_place=True)
 
 
-      # Generate sampels and fetch slowest and fastest eigenvalues
+      # Generate samples and fetch slowest and fastest eigenvalues
       params, lamda_max, lamda_min = sampler.sample(kmodel, fluxes, concentrations,
                                                     only_stable=True,
                                                     min_max_eigenvalues=True)
