@@ -1,5 +1,5 @@
-Reading and writing model files
-===============================
+Draft model generation from COBRA/ pyTFA
+==========================================
 SKiMpy can generate kinetic draft models from pyTFA or cobrapy models, assigning best guess reaction mechanisms.    
 
 Cobrapy and pyTFA models can be used in generate unparametrized draft models:
