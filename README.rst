@@ -40,7 +40,7 @@ A comprehensive explanation to install anaconda/miniconda within the WLS linux s
 
 
 We arre currently in the process of deploying SKiMpy and its depdency pyTFA to conda forge for a fullly atomated installation. 
-In the meantime you can download current version of the respective packages `here <>`_.  TEMP PACKAGES COMMING SOON! 
+In the meantime you can download current version of the respective packages `here <https://github.com/EPFL-LCSB/skimpy/releases/tag/v1.0.0>`_.
 
 Then install pytfa and skimpy using the local source:
 
