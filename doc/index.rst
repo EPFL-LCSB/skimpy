@@ -17,6 +17,11 @@ For installtion instructions please refer to `README.rst <https://github.com/EPF
 
    quickstart
    reading_writing_files
+   build_draft_models
+   ORACLE_parameter_sampling
+   metabolic_control_analysis
+   modal_analysis
+   dynamic_simulations 
 
 
 Indices and tables
