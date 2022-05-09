@@ -38,9 +38,21 @@ Windows users can install the conda packages using a linux subsystem via `WLS <h
 
 A comprehensive explanation to install anaconda/miniconda within the WLS linux subsystem can be found `here <https://gist.github.com/kauffmanes/5e74916617f9993bc3479f401dfec7da>`_.
 
+
+We arre currently in the process of deploying SKiMpy and its depdency pyTFA to conda forge for a fullly atomated installation. 
+In the meantime you can download current version of the respective packages `here <>`_.  TEMP PACKAGES COMMING SOON! 
+
+Then install pytfa and skimpy using the local source:
+
 .. code:: bash
 
-  conda TO BE FINISHED SOON 
+  conda create --name skimpy-env
+  conda activate skimpy-env
+  
+  cd /path/to/conda/packakges/
+  conda install --use-local pytfa
+  conda install --use-local skimpy
+
 
 Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
