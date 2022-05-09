@@ -45,7 +45,11 @@ In the meantime you can download current version of the respective packages `her
 Then install pytfa and skimpy using the local source:
 
 .. code:: bash
-
+  
+  # Add conda-forge channels (required)
+  conda config --add channels conda-forge
+  conda config --set channel_priority strict
+  
   conda create --name skimpy-env
   conda activate skimpy-env
   
