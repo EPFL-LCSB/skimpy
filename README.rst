@@ -50,9 +50,11 @@ Then install pytfa and skimpy using the local source:
   conda config --add channels conda-forge
   conda config --set channel_priority strict
   
+  # Create a new environment (optional)
   conda create --name skimpy-env
   conda activate skimpy-env
   
+  # Get the ditribution of pytfa and skimpy 
   wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.0/linux-64.tar.gz
   tar -xzf linux-64.tar.gz
   ls local-channel
