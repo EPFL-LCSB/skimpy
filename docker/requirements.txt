@@ -9,7 +9,7 @@ sphinx>=1.4
 sphinx-rtd-theme
 matplotlib
 # from setup.py
-sympy
+sympy <=1.5
 pytest
 scipy
 numpy
@@ -23,6 +23,7 @@ dill
 h5py
 # extras ORACLE:
 pytfa
+cobra <= 0.24.0
 escher==1.7.0
 # Additional things that are useful in RabLab
 python-libsbml
