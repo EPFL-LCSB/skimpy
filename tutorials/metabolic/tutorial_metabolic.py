@@ -44,110 +44,112 @@ from skimpy.viz.modal import plot_modal_matrix
 from skimpy.viz.controll_coefficients import plot_control_coefficients
 from skimpy.viz.plotting import timetrace_plot
 
-# Units of the parameters are muM and hr
-CONCENTRATION_SCALING = 1e6
-TIME_SCALING = 1 # 1hr to 1min
-DENSITY = 1200 # g/L
-GDW_GWW_RATIO = 0.3 # Assumes 70% Water
+if __main__ == '__main__':
 
-kmodel =  load_yaml_model('./../../models/varma_strain_1.yml')
-tmodel = load_json_model('./../../models/tfa_varma.json')
+    # Units of the parameters are muM and hr
+    CONCENTRATION_SCALING = 1e6
+    TIME_SCALING = 1 # 1hr to 1min
+    DENSITY = 1200 # g/L
+    GDW_GWW_RATIO = 0.3 # Assumes 70% Water
 
-# Reference steady-state data
-ref_solution = pd.read_csv('./../../data/tfa_reference_strains.csv',
-                           index_col=0).loc['strain_1',:]
+    kmodel =  load_yaml_model('./../../models/varma_strain_1.yml')
+    tmodel = load_json_model('./../../models/tfa_varma.json')
 
-ref_concentrations = load_concentrations(ref_solution, tmodel, kmodel,
-                                         concentration_scaling=CONCENTRATION_SCALING)
-ref_fluxes = load_fluxes(ref_solution, tmodel, kmodel,
-                               density=DENSITY,
-                               ratio_gdw_gww=GDW_GWW_RATIO,
-                               concentration_scaling=CONCENTRATION_SCALING,
-                               time_scaling=TIME_SCALING)
+    # Reference steady-state data
+    ref_solution = pd.read_csv('./../../data/tfa_reference_strains.csv',
+                               index_col=0).loc['strain_1',:]
 
-parameter_values = {p.symbol:p.value for p in kmodel.parameters.values()}
-parameter_values = ParameterValues(parameter_values, kmodel)
+    ref_concentrations = load_concentrations(ref_solution, tmodel, kmodel,
+                                             concentration_scaling=CONCENTRATION_SCALING)
+    ref_fluxes = load_fluxes(ref_solution, tmodel, kmodel,
+                                   density=DENSITY,
+                                   ratio_gdw_gww=GDW_GWW_RATIO,
+                                   concentration_scaling=CONCENTRATION_SCALING,
+                                   time_scaling=TIME_SCALING)
 
-"""
-Modal analysis / Figure S5b
-"""
-kmodel.prepare()
-kmodel.compile_jacobian(sim_type=QSSA,ncpu=8)
-M = modal_matrix(kmodel,ref_concentrations,parameter_values)
+    parameter_values = {p.symbol:p.value for p in kmodel.parameters.values()}
+    parameter_values = ParameterValues(parameter_values, kmodel)
 
-plot_modal_matrix(M,filename='modal_matrix.html',
-                  plot_width=800, plot_height=600,
-                  clustered=True,
-                  backend='svg',
-                  )
+    """
+    Modal analysis / Figure S5b
+    """
+    kmodel.prepare()
+    kmodel.compile_jacobian(sim_type=QSSA,ncpu=8)
+    M = modal_matrix(kmodel,ref_concentrations,parameter_values)
 
-"""
-Metabolic control analysis / Figure S5c
-"""
+    plot_modal_matrix(M,filename='modal_matrix.html',
+                      plot_width=800, plot_height=600,
+                      clustered=True,
+                      backend='svg',
+                      )
 
-# Compile mca with parameter elasticities with respect to Vmaxes
-parameter_list = TabDict([(k, p.symbol) for k, p in
-                          kmodel.parameters.items() if
-                          p.name.startswith('vmax_forward')])
+    """
+    Metabolic control analysis / Figure S5c
+    """
 
-kmodel.compile_mca(sim_type=QSSA,ncpu=8, parameter_list=parameter_list)
+    # Compile mca with parameter elasticities with respect to Vmaxes
+    parameter_list = TabDict([(k, p.symbol) for k, p in
+                              kmodel.parameters.items() if
+                              p.name.startswith('vmax_forward')])
 
-flux_control_coeff = kmodel.flux_control_fun(ref_fluxes,
-                                             ref_concentrations,
-                                             [parameter_values, ])
+    kmodel.compile_mca(sim_type=QSSA,ncpu=8, parameter_list=parameter_list)
 
-lac_control_coeff = flux_control_coeff.slice_by('sample',0).loc['LDH_D', :]
+    flux_control_coeff = kmodel.flux_control_fun(ref_fluxes,
+                                                 ref_concentrations,
+                                                 [parameter_values, ])
 
-lac_control_coeff.index = [v.replace('vmax_forward_','') for v in lac_control_coeff.index ]
-plot_control_coefficients(lac_control_coeff,
-                          filename='lac_control_coeff.html',
-                          backend='svg',
-                          )
+    lac_control_coeff = flux_control_coeff.slice_by('sample',0).loc['LDH_D', :]
 
-"""
-Large parameter perturbations / Figure S5c
-"""
+    lac_control_coeff.index = [v.replace('vmax_forward_','') for v in lac_control_coeff.index ]
+    plot_control_coefficients(lac_control_coeff,
+                              filename='lac_control_coeff.html',
+                              backend='svg',
+                              )
 
-kmodel.compile_ode(sim_type=QSSA,ncpu=8)
-# make function to calculate the fluxes
-flux_fun = make_flux_fun(kmodel, QSSA)
+    """
+    Large parameter perturbations / Figure S5c
+    """
 
-for k in kmodel.initial_conditions:
-    kmodel.initial_conditions[k] = ref_concentrations[k]
+    kmodel.compile_ode(sim_type=QSSA,ncpu=8)
+    # make function to calculate the fluxes
+    flux_fun = make_flux_fun(kmodel, QSSA)
 
-desings = {'vmax_forward_LDH_D': 2.0,
-           'vmax_forward_GAPD': 2.0}
+    for k in kmodel.initial_conditions:
+        kmodel.initial_conditions[k] = ref_concentrations[k]
 
-fluxes = []
-for p,v in desings.items():
-    kmodel.parameters = parameter_values
-    # Implement parameter desing
-    kmodel.parameters[p].value = kmodel.parameters[p].value*v
+    desings = {'vmax_forward_LDH_D': 2.0,
+               'vmax_forward_GAPD': 2.0}
 
-    sol = kmodel.solve_ode(np.logspace(-9,0, 1000),
-                             solver_type='cvode')
+    fluxes = []
+    for p,v in desings.items():
+        kmodel.parameters = parameter_values
+        # Implement parameter desing
+        kmodel.parameters[p].value = kmodel.parameters[p].value*v
 
-    # Calculate fluxes:
-    this_fluxes = []
-    for i, concentrations in sol.concentrations.iterrows():
-        t_fluxes = flux_fun(concentrations, parameters=parameter_values)
-        this_fluxes.append(t_fluxes)
+        sol = kmodel.solve_ode(np.logspace(-9,0, 1000),
+                                 solver_type='cvode')
 
-    # Make it a DataFrame
-    this_fluxes = pd.DataFrame(this_fluxes)/ref_fluxes
-    this_fluxes.index = sol.time
-    fluxes.append(this_fluxes)
+        # Calculate fluxes:
+        this_fluxes = []
+        for i, concentrations in sol.concentrations.iterrows():
+            t_fluxes = flux_fun(concentrations, parameters=parameter_values)
+            this_fluxes.append(t_fluxes)
 
-ldh_fluxes = np.array([fluxes[0]['LDH_D'].values, fluxes[1]['LDH_D'].values ]).T
+        # Make it a DataFrame
+        this_fluxes = pd.DataFrame(this_fluxes)/ref_fluxes
+        this_fluxes.index = sol.time
+        fluxes.append(this_fluxes)
 
-timetrace_plot(sol.time,ldh_fluxes ,
-               filename='ldh_flux.html',
-               legend=['2 x [LDH]','2 x [GAPD]'],
-               backend='svg'
-               )
+    ldh_fluxes = np.array([fluxes[0]['LDH_D'].values, fluxes[1]['LDH_D'].values ]).T
+
+    timetrace_plot(sol.time,ldh_fluxes ,
+                   filename='ldh_flux.html',
+                   legend=['2 x [LDH]','2 x [GAPD]'],
+                   backend='svg'
+                   )
 
 
-"""
-Basins of attraction
-"""
+    """
+    Basins of attraction
+    """
 
