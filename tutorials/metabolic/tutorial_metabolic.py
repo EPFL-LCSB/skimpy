@@ -44,6 +44,7 @@ from skimpy.viz.modal import plot_modal_matrix
 from skimpy.viz.controll_coefficients import plot_control_coefficients
 from skimpy.viz.plotting import timetrace_plot
 
+
 if __name__ == '__main__':
 
     # Units of the parameters are muM and hr
