@@ -110,18 +110,23 @@ This module was developed in Python 3.9, and it is recommended to run Python 3.9
 The module also was tested in Python 3.8.
 
 Further the following pip-python packages are required
-    - sympy >= 1.1.
+    - sympy >=1.1 <=1.5
     - pytest
     - scipy
     - numpy
     - bokeh
     - pandas
     - Cython
-    - scikits.odes
+    - markupsafe <=2.0.1
+    - bokeh >=0.12.0
+    - scikits.odes ==2.6.3
     - deap
     - dill
     - h5py
     - escher
+    - pytfa
+    - cobra <=0.24.0
+
 
 The installation requires additionaly the following libraries:
   - gcc
