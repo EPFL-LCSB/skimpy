@@ -30,40 +30,43 @@ from skimpy.core import *
 from skimpy.mechanisms import *
 from skimpy.utils.namespace import ELEMENTARY
 
-name = 'pfk'
-metabolites = ReversibleMichaelisMenten.Reactants(substrate='A', product='B')
 
-## ELEMENTARY Method
-parameters = ReversibleMichaelisMenten.Parameters(
-    vmax_forward=1,
-    k_equilibrium=1,
-    km_substrate=10,
-    km_product=10,
-)
+if __name__ == '__main__':
 
-import warnings
-warnings.warn('We still need to implement vmax to elementary')
+    name = 'pfk'
+    metabolites = ReversibleMichaelisMenten.Reactants(substrate='A', product='B')
 
-pfk = Reaction(name=name,
-               mechanism=ReversibleMichaelisMenten,
-               reactants=metabolites,
-               )
+    ## ELEMENTARY Method
+    parameters = ReversibleMichaelisMenten.Parameters(
+        vmax_forward=1,
+        k_equilibrium=1,
+        km_substrate=10,
+        km_product=10,
+    )
 
-this_model = KineticModel()
-this_model.add_reaction(pfk)
-this_model.parametrize_by_reaction({pfk.name:parameters})
+    import warnings
+    warnings.warn('We still need to implement vmax to elementary')
 
-## Make the Boundary Condition
-the_boundary_condition = ConstantConcentration(this_model.reactants['A'])
+    pfk = Reaction(name=name,
+                   mechanism=ReversibleMichaelisMenten,
+                   reactants=metabolites,
+                   )
 
-this_model.add_boundary_condition(the_boundary_condition)
+    this_model = KineticModel()
+    this_model.add_reaction(pfk)
+    this_model.parametrize_by_reaction({pfk.name:parameters})
 
-this_model.parameters.A.value = 10.0
+    ## Make the Boundary Condition
+    the_boundary_condition = ConstantConcentration(this_model.reactants['A'])
 
-this_model.compile_ode()
+    this_model.add_boundary_condition(the_boundary_condition)
 
-this_model.initial_conditions.B = 1.0
+    this_model.parameters.A.value = 10.0
 
-this_sol_full = this_model.solve_ode([0, 100.0], solver_type='cvode')
+    this_model.compile_ode()
 
-this_sol_full.plot('boundary_out_full.html')
+    this_model.initial_conditions.B = 1.0
+
+    this_sol_full = this_model.solve_ode([0, 100.0], solver_type='cvode')
+
+    this_sol_full.plot('boundary_out_full.html')

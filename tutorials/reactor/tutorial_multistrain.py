@@ -40,95 +40,96 @@ from skimpy.viz.escher import animate_fluxes, plot_fluxes
 import numpy as np
 import pandas as pd
 
+if __name__ == '__main__':
 
-"""
-This tutorial show how to setup a batch reactor simulation with two differnt strains or organisms 
-reproduces figures S6c,d
-"""
+    """
+    This tutorial show how to setup a batch reactor simulation with two differnt strains or organisms 
+    reproduces figures S6c,d
+    """
 
-reactor = make_batch_reactor('multi_species.yaml')
-reactor.compile_ode(add_dilution=False)
-
-
-"""
-"""
-path_to_kmodel = './../../models/kin_varma.yml'
-path_to_tmodel = './../../models/tfa_varma.json'
-
-# load models
-tmodel = load_json_model(path_to_tmodel)
-kmodel = load_yaml_model(path_to_kmodel)
+    reactor = make_batch_reactor('multi_species.yaml')
+    reactor.compile_ode(add_dilution=False)
 
 
-reference_solutions = pd.read_csv('./../../data/tfa_reference_strains.csv', index_col=0)
-ref_concentrations = load_concentrations(reference_solutions.loc['strain_1'], tmodel, kmodel,
-                                         concentration_scaling=reactor.concentration_scaling)
+    """
+    """
+    path_to_kmodel = './../../models/kin_varma.yml'
+    path_to_tmodel = './../../models/tfa_varma.json'
+
+    # load models
+    tmodel = load_json_model(path_to_tmodel)
+    kmodel = load_yaml_model(path_to_kmodel)
 
 
-reactor.initialize(ref_concentrations, 'strain_1')
-reactor.initialize(ref_concentrations, 'strain_2')
-
-# Biomass currently in numbers! TODO consistent and usefull scaling
-reactor.initial_conditions['biomass_strain_1'] = 0.1e12
-reactor.initial_conditions['biomass_strain_2'] = 0.1e12
+    reference_solutions = pd.read_csv('./../../data/tfa_reference_strains.csv', index_col=0)
+    ref_concentrations = load_concentrations(reference_solutions.loc['strain_1'], tmodel, kmodel,
+                                             concentration_scaling=reactor.concentration_scaling)
 
 
-"""
-Solve 
-"""
+    reactor.initialize(ref_concentrations, 'strain_1')
+    reactor.initialize(ref_concentrations, 'strain_2')
 
-sol = reactor.solve_ode(np.linspace(0, 10.0, 1000),
-                        solver_type='cvode',
-                        rtol=1e-9,
-                        atol=1e-9,
-                        max_steps=1e9,
-                        )
-
-"""
-Plot results / figures S6 c,d
-"""
-
-species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1', 'biomass_strain_2']]
-timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='multi_time_response.html',
-               legend=species,
-               x_label='time [h]',
-               y_label='concentrations [M]',
-               backend='svg',)
-
-MASS_PER_CELL = 1e-12 #[g]
-species = ['biomass_strain_1', 'biomass_strain_2']
-timetrace_plot(sol.time, sol.concentrations[species].values*MASS_PER_CELL,
-               filename='multi_time_response_biomass.html',
-               legend=species,
-               x_label='time [h]',
-               y_label='biomass [g]',
-               legend_location='top_left',
-               backend='svg',)
+    # Biomass currently in numbers! TODO consistent and usefull scaling
+    reactor.initial_conditions['biomass_strain_1'] = 0.1e12
+    reactor.initial_conditions['biomass_strain_2'] = 0.1e12
 
 
+    """
+    Solve 
+    """
 
-species = ['biomass_strain_1', 'biomass_strain_2']
-delta_x =  (sol.concentrations[species].values[1:,:] -  sol.concentrations[species].values[:-1,:])
-delta_t = np.array(  [(sol.time[1:] -  sol.time[:-1])]*2).T
-x = sol.concentrations[species].values[:-1,:]
-mu = delta_x/delta_t/x
-timetrace_plot(sol.time[:-1], mu,
-               filename='multi_time_response_growth.html',
-               legend=species,
-               x_label='time [h]',
-               y_label='growth rate [1/h]',
-               backend='svg',
-               )
+    sol = reactor.solve_ode(np.linspace(0, 10.0, 1000),
+                            solver_type='cvode',
+                            rtol=1e-9,
+                            atol=1e-9,
+                            max_steps=1e9,
+                            )
 
-# Medium
-species = list(reactor.medium.keys())
-timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
-               filename='multi_time_response_medium.html',
-               legend=species,
-               x_label='time [h]',
-               y_label='concentrations [M]',
-               backend='svg',)
+    """
+    Plot results / figures S6 c,d
+    """
+
+    species = [s for s in sol.concentrations.columns if not s in ['biomass_strain_1', 'biomass_strain_2']]
+    timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
+                   filename='multi_time_response.html',
+                   legend=species,
+                   x_label='time [h]',
+                   y_label='concentrations [M]',
+                   backend='svg',)
+
+    MASS_PER_CELL = 1e-12 #[g]
+    species = ['biomass_strain_1', 'biomass_strain_2']
+    timetrace_plot(sol.time, sol.concentrations[species].values*MASS_PER_CELL,
+                   filename='multi_time_response_biomass.html',
+                   legend=species,
+                   x_label='time [h]',
+                   y_label='biomass [g]',
+                   legend_location='top_left',
+                   backend='svg',)
+
+
+
+    species = ['biomass_strain_1', 'biomass_strain_2']
+    delta_x =  (sol.concentrations[species].values[1:,:] -  sol.concentrations[species].values[:-1,:])
+    delta_t = np.array(  [(sol.time[1:] -  sol.time[:-1])]*2).T
+    x = sol.concentrations[species].values[:-1,:]
+    mu = delta_x/delta_t/x
+    timetrace_plot(sol.time[:-1], mu,
+                   filename='multi_time_response_growth.html',
+                   legend=species,
+                   x_label='time [h]',
+                   y_label='growth rate [1/h]',
+                   backend='svg',
+                   )
+
+    # Medium
+    species = list(reactor.medium.keys())
+    timetrace_plot(sol.time, sol.concentrations[species].values/reactor.concentration_scaling,
+                   filename='multi_time_response_medium.html',
+                   legend=species,
+                   x_label='time [h]',
+                   y_label='concentrations [M]',
+                   backend='svg',)
 
 
 

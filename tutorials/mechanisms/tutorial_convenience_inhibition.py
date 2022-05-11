@@ -30,74 +30,76 @@ import numpy as np
 from skimpy.core import *
 from skimpy.mechanisms import *
 
-name = 'pfk'
+if __name__ == '__main__':
 
-SpecificConvenience = make_convenience_with_inhibition([-2, -1, 3], [1])
-metabolites = SpecificConvenience.Reactants(substrate1 = 'A',
-                                            substrate2 = 'B',
-                                            product1 = 'C' )
+    name = 'pfk'
 
-inhibitors = SpecificConvenience.Inhibitors(inhibitor1 = 'I')
+    SpecificConvenience = make_convenience_with_inhibition([-2, -1, 3], [1])
+    metabolites = SpecificConvenience.Reactants(substrate1 = 'A',
+                                                substrate2 = 'B',
+                                                product1 = 'C' )
 
-# thermo_data = {'S':     1e-2,
-#                'P':     1e-2,
-#                'sig_S': 0.1,
-#                'sig_P': 0.1,
-#                'gamma': 0.1,
-#                'flux':  1.0,
-#                'E_tot': 1e-5}
+    inhibitors = SpecificConvenience.Inhibitors(inhibitor1 = 'I')
 
-## QSSA Method
-parameters = SpecificConvenience.Parameters(
-                            vmax_forward = 1.0,
-                            k_equilibrium=2.0,
-                            km_substrate1 = 10.0,
-                            km_substrate2 = 10.0,
-                            km_product1 = 10.0,
-                            ki_inhibitor1 = 1.0)
+    # thermo_data = {'S':     1e-2,
+    #                'P':     1e-2,
+    #                'sig_S': 0.1,
+    #                'sig_P': 0.1,
+    #                'gamma': 0.1,
+    #                'flux':  1.0,
+    #                'E_tot': 1e-5}
 
-pfk = Reaction(name=name,
-               mechanism=SpecificConvenience,
-               reactants=metabolites,
-               inhibitors=inhibitors,
-               )
+    ## QSSA Method
+    parameters = SpecificConvenience.Parameters(
+                                vmax_forward = 1.0,
+                                k_equilibrium=2.0,
+                                km_substrate1 = 10.0,
+                                km_substrate2 = 10.0,
+                                km_product1 = 10.0,
+                                ki_inhibitor1 = 1.0)
 
-
-
-name = 'inhib'
-metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'C',
-                                                   product = 'I')
-
-## QSSA Method
-parameters_inh = ReversibleMichaelisMenten.Parameters(
-    vmax_forward = 1.0,
-    k_equilibrium=2.0,
-    km_substrate = 10.0,
-    km_product = 10.0,
-    total_enzyme_concentration = 1.0,
-)
+    pfk = Reaction(name=name,
+                   mechanism=SpecificConvenience,
+                   reactants=metabolites,
+                   inhibitors=inhibitors,
+                   )
 
 
-inh = Reaction(name=name,
-               mechanism=ReversibleMichaelisMenten,
-               reactants=metabolites,
-               )
+
+    name = 'inhib'
+    metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'C',
+                                                       product = 'I')
+
+    ## QSSA Method
+    parameters_inh = ReversibleMichaelisMenten.Parameters(
+        vmax_forward = 1.0,
+        k_equilibrium=2.0,
+        km_substrate = 10.0,
+        km_product = 10.0,
+        total_enzyme_concentration = 1.0,
+    )
 
 
-this_model = KineticModel()
-this_model.add_reaction(pfk)
-this_model.add_reaction(inh)
-this_model.parametrize_by_reaction({inh.name:parameters_inh,
-                                    pfk.name: parameters})
+    inh = Reaction(name=name,
+                   mechanism=ReversibleMichaelisMenten,
+                   reactants=metabolites,
+                   )
 
-this_model.compile_ode(sim_type = QSSA)
 
-this_model.initial_conditions['A'] = 10.0
-this_model.initial_conditions['B'] = 10.0
-this_model.initial_conditions['C'] = 10.0
+    this_model = KineticModel()
+    this_model.add_reaction(pfk)
+    this_model.add_reaction(inh)
+    this_model.parametrize_by_reaction({inh.name:parameters_inh,
+                                        pfk.name: parameters})
 
-this_model.initial_conditions['I'] = 0.0
+    this_model.compile_ode(sim_type = QSSA)
 
-this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500),solver_type = 'cvode')
+    this_model.initial_conditions['A'] = 10.0
+    this_model.initial_conditions['B'] = 10.0
+    this_model.initial_conditions['C'] = 10.0
 
-this_sol_qssa.plot('base_out_qssa.html')
+    this_model.initial_conditions['I'] = 0.0
+
+    this_sol_qssa = this_model.solve_ode(np.linspace(0.0, 50.0, 500),solver_type = 'cvode')
+
+    this_sol_qssa.plot('base_out_qssa.html')

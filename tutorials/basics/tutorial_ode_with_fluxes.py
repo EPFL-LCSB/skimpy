@@ -34,42 +34,43 @@ from skimpy.utils.namespace import *
 
 from skimpy.core.parameters import ParameterValues
 
+if __name__ == '__main__':
 
-name = 'pfk'
-metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
-                                                   product = 'B')
+    name = 'pfk'
+    metabolites = ReversibleMichaelisMenten.Reactants(substrate = 'A',
+                                                       product = 'B')
 
-## QSSA Method
-parameters = ReversibleMichaelisMenten.Parameters(
-    vmax_forward = 1.0,
-    k_equilibrium = 1.5,
-    km_substrate = 10.0,
-    km_product = 10.0,
-)
+    ## QSSA Method
+    parameters = ReversibleMichaelisMenten.Parameters(
+        vmax_forward = 1.0,
+        k_equilibrium = 1.5,
+        km_substrate = 10.0,
+        km_product = 10.0,
+    )
 
-pfk = Reaction(name=name,
-               mechanism = ReversibleMichaelisMenten,
-               reactants=metabolites,
-               )
+    pfk = Reaction(name=name,
+                   mechanism = ReversibleMichaelisMenten,
+                   reactants=metabolites,
+                   )
 
-this_model = KineticModel()
-this_model.add_reaction(pfk)
-this_model.parametrize_by_reaction({pfk.name:parameters})
-
-
-## Elementary rate method
-this_model.compile_ode(sim_type = QSSA)
-
-this_model.initial_conditions['A'] = 10.0
-this_model.initial_conditions['B']= 1.0
-
-this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
-
-calc_fluxes = make_flux_fun(this_model, QSSA)
+    this_model = KineticModel()
+    this_model.add_reaction(pfk)
+    this_model.parametrize_by_reaction({pfk.name:parameters})
 
 
-parameter_values = ParameterValues({p.symbol: p.value for p in this_model.parameters.values()},
-                                   kmodel=this_model)
+    ## Elementary rate method
+    this_model.compile_ode(sim_type = QSSA)
 
-steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameter_values)
+    this_model.initial_conditions['A'] = 10.0
+    this_model.initial_conditions['B']= 1.0
+
+    this_sol_full = this_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
+
+    calc_fluxes = make_flux_fun(this_model, QSSA)
+
+
+    parameter_values = ParameterValues({p.symbol: p.value for p in this_model.parameters.values()},
+                                       kmodel=this_model)
+
+    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameter_values)
 
