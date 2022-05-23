@@ -76,10 +76,14 @@ class FromCobra(ModelGenerator):
                     if not (this_met .formula == WATER_FORMULA) \
                        and (this_met .id not in self.reactants_to_exclude):
                         met = sanitize_cobra_vars(this_met.id)
-                        this_reactant = skimpy_model.reactants[met]
-                        this_const_met = ConstantConcentration(this_reactant)
-                        skimpy_model.add_boundary_condition(this_const_met)
-
+                        try:
+                            this_reactant = skimpy_model.reactants[met]
+                            this_const_met = ConstantConcentration(this_reactant)
+                            skimpy_model.add_boundary_condition(this_const_met)
+                        except KeyError:
+                            skimpy_model.logger.warning('Metabolite {} in CORBA model is not part of any reaction and is '
+                                                        'omitted in the SKiMpy model '
+                                                        .format(met,))
         skimpy_model.parametrize_by_reaction(parameters)
         return skimpy_model
 
