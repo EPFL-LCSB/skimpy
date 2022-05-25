@@ -64,6 +64,7 @@ ALL_GENERIC_MECHANISM_SUBCLASSES = TabDict([
 ('RevMassaction', make_rev_massaction),
 ('ConvenienceInhibited', make_convenience_with_inhibition),
 ('H1GeneralizedReversibleHillInhibited', make_generalized_reversible_hill_n_n_h1_with_inhibition),
+('SoftPlus', make_soft_plus),
 ])
 
 FIELDS_TO_SERIALIZE = [
