@@ -93,6 +93,101 @@ def make_ode_fun(kinetic_model, sim_type, pool=None, custom_ode_update=None):
     return ode_fun, variables
 
 
+def make_flux_fun(kinetic_model, sim_type):
+    """
+
+    :param kinetic_model:
+    :param sim_type:
+    :return:
+    """
+    all_data = get_expressions_from_model(kinetic_model, sim_type)
+
+    # Get flux expressions
+    _, all_expr, all_parameters = list(zip(*all_data))
+
+    reactions = kinetic_model.reactions.keys()
+
+    # Flatten all the lists
+    flatten_list = lambda this_list: [item for sublist in this_list \
+                                      for item in sublist]
+
+    if sim_type == ELEMENTARY:
+        expr = [[(r+'_'+er, ex) for er, ex in e.items()] for r, e in zip(reactions, all_expr)]
+        expr = TabDict(flatten_list(expr))
+    else:
+        expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
+
+
+    all_parameters = flatten_list(all_parameters)
+    all_parameters = list(set(all_parameters))
+    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
+
+    # Better since this is implemented now
+    reactant_items = kinetic_model.reactants.items()
+    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
+
+    # Make vector function from expressions in this case all_expressions
+    # are all the expressions indexed by the
+    flux_fun = FluxFunction(variables, expr, all_parameters)
+    flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
+
+    return flux_fun
+
+
+def make_gamma_fun(kinetic_model):
+    """
+    Return a function that calculates the thermodynamic displacement for
+    all the reactions in a model
+    :param kinetic_model:
+    :return:
+    """
+    reactions = kinetic_model.reactions.values()
+    all_parameters = []
+    expr = TabDict([])
+    for r in reactions:
+        try:
+            keq = r.parameters.k_equilibrium.symbol
+            expr[r.name] = 1/keq
+
+            # Here we need to get all variables and parameters
+            reactant_stoichiometry = TabDict([])
+            for k, v in r.mechanism.reactant_stoichiometry.items():
+                this_reactant = r.mechanism.reactants[k]
+                if this_reactant in reactant_stoichiometry.keys():
+                    reactant_stoichiometry[this_reactant] += v
+                else:
+                    reactant_stoichiometry[this_reactant] = v
+
+            for this_modifier in r.modifiers.values():
+                for k,v in this_modifier.reactants.items():
+                    if this_modifier.reactant_stoichiometry[k] != 0:
+                        reactant_stoichiometry[v] = this_modifier.reactant_stoichiometry[k]
+
+            for v, s in reactant_stoichiometry.items():
+                expr[r.name] *= v.symbol**s
+                if v.type == PARAMETER:
+                    all_parameters.append(v.symbol)
+
+            all_parameters.append(keq)
+
+        except AttributeError:
+            pass
+
+    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
+
+    # Better since this is implemented now
+    reactant_items = kinetic_model.reactants.items()
+    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
+
+    # Make vector function from expressions in this case all_expressions
+    # are all the expressions indexed by the
+    gamma_fun = GammaFunction(variables, expr, all_parameters)
+    gamma_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
+
+    return gamma_fun
+
+
+
 def make_expressions(variables, all_flux_expr, volume_ratios=None,pool=None):
 
     if pool is None:
@@ -137,46 +232,6 @@ def make_expresson_single_var(input):
     return this_expr
 
 
-
-def make_flux_fun(kinetic_model, sim_type):
-    """
-
-    :param kinetic_model:
-    :param sim_type:
-    :return:
-    """
-    all_data = get_expressions_from_model(kinetic_model, sim_type)
-
-    # Get flux expressions
-    _, all_expr, all_parameters = list(zip(*all_data))
-
-    reactions = kinetic_model.reactions.keys()
-
-    # Flatten all the lists
-    flatten_list = lambda this_list: [item for sublist in this_list \
-                                      for item in sublist]
-
-    if sim_type == ELEMENTARY:
-        expr = [[(r+'_'+er, ex) for er, ex in e.items()] for r, e in zip(reactions, all_expr)]
-        expr = TabDict(flatten_list(expr))
-    else:
-        expr = TabDict([(r, e) for r, e in zip(reactions, all_expr)])
-
-
-    all_parameters = flatten_list(all_parameters)
-    all_parameters = list(set(all_parameters))
-    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
-
-    # Better since this is implemented now
-    reactant_items = kinetic_model.reactants.items()
-    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
-
-    # Make vector function from expressions in this case all_expressions
-    # are all the expressions indexed by the
-    flux_fun = FluxFunction(variables, expr, all_parameters)
-    flux_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
-
-    return flux_fun
 def get_expressions_from_model(kinetic_model, sim_type,
                                medium_symbols=None,
                                biomass_symbol=None):
@@ -243,56 +298,3 @@ def get_expressions_from_model(kinetic_model, sim_type,
         raise(ValueError('Simulation type not recognized: {}'.format(sim_type)))
 
     return all_data
-
-
-def make_gamma_fun(kinetic_model):
-    """
-    Return a function that calculates the thermodynamic displacement for
-    all the reactions in a model
-    :param kinetic_model:
-    :return:
-    """
-    reactions = kinetic_model.reactions.values()
-    all_parameters = []
-    expr = TabDict([])
-    for r in reactions:
-        try:
-            keq = r.parameters.k_equilibrium.symbol
-            expr[r.name] = 1/keq
-
-            # Here we need to get all variables and parameters
-            reactant_stoichiometry = TabDict([])
-            for k, v in r.mechanism.reactant_stoichiometry.items():
-                this_reactant = r.mechanism.reactants[k]
-                if this_reactant in reactant_stoichiometry.keys():
-                    reactant_stoichiometry[this_reactant] += v
-                else:
-                    reactant_stoichiometry[this_reactant] = v
-
-            for this_modifier in r.modifiers.values():
-                for k,v in this_modifier.reactants.items():
-                    if this_modifier.reactant_stoichiometry[k] != 0:
-                        reactant_stoichiometry[v] = this_modifier.reactant_stoichiometry[k]
-
-            for v, s in reactant_stoichiometry.items():
-                expr[r.name] *= v.symbol**s
-                if v.type == PARAMETER:
-                    all_parameters.append(v.symbol)
-
-            all_parameters.append(keq)
-
-        except AttributeError:
-            pass
-
-    all_parameters = iterable_to_tabdict(all_parameters, use_name=False)
-
-    # Better since this is implemented now
-    reactant_items = kinetic_model.reactants.items()
-    variables = TabDict([(k,v.symbol) for k,v in reactant_items])
-
-    # Make vector function from expressions in this case all_expressions
-    # are all the expressions indexed by the
-    gamma_fun = GammaFunction(variables, expr, all_parameters)
-    gamma_fun._parameter_values = {v:p.value for v,p in kinetic_model.parameters.items()}
-
-    return gamma_fun
