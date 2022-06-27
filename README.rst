@@ -52,7 +52,6 @@ Then install pytfa and skimpy using the local source:
   conda config --set channel_priority strict
 
 
-  
   # Create a new environment (optional)
   conda create --name skimpy-env
   conda activate skimpy-env
@@ -62,7 +61,6 @@ Then install pytfa and skimpy using the local source:
   tar -xzf conda-py3.8-linux-64.tar.gz
   ls local-channel
   
-  conda install -c file:///absolute/path/to/local-channel pytfa
   conda install -c file:///absolute/path/to/local-channel skimpy
 
 Note that it is essentaial to pass the absolute path to the local channel. WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
