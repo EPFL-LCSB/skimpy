@@ -233,6 +233,9 @@ def import_sbml(filename):
     #Resbuild compartments
     for the_comp in sbml_model.compartments:
         new_comp = Compartment(the_comp.id)
+        # Set comp size parameter
+        new_comp.parameters.volume.value = the_comp.size
+        new_comp.parameters.cell_volume.value = 1.0
         new.add_compartment(new_comp)
 
 
@@ -263,6 +266,13 @@ def import_sbml(filename):
 
             # Do not forget to add the value of the BC!
             reactant.value = the_met.id
+
+    # Fetch parameter values
+    for the_param in sbml_model.parameters:
+        try:
+            new.parameters[the_param.id].value = the_param.value
+        except KeyError:
+            pass
 
     return new
 
