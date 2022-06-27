@@ -31,8 +31,8 @@ default_include_dirs += [
     os.path.join(d, "flint") for d in default_include_dirs
 ]
 
-# Current version 1.0.1
-version_tag = '1.0.1'
+# Current version 1.0.2
+version_tag = '1.0.2'
 
 
 extensions = [
