@@ -144,20 +144,21 @@ def export_sbml(kmodel, filename, time_unit=TIME, substance_unit=SUBSTANCE, volu
     # initialize the parameter with a value along with its units.
     all_reactants = get_all_reactants(kmodel)
     for parameter in kmodel.parameters.values():
-        if parameter.name in all_reactants:
+        unique_parameter_name = str(parameter.symbol)
+        if unique_parameter_name in all_reactants:
             # Skip boundary condition parameters
             continue
 
         k = model.createParameter()
-        check(k, 'create parameter {}'.format(parameter.name))
-        check(k.setId(str(parameter.symbol)), 'set parameter {} id'.format(parameter.name))
-        check(k.setConstant(True), 'set parameter {} "constant"'.format(parameter.name))
+        check(k, 'create parameter {}'.format(unique_parameter_name))
+        check(k.setId(unique_parameter_name), 'set parameter {} id'.format(unique_parameter_name))
+        check(k.setConstant(True), 'set parameter {} "constant"'.format(unique_parameter_name))
 
         value = parameter.value if not parameter.value is None else 0.0
-        check(k.setValue(value), 'set parameter {} value'.format(parameter.name))
+        check(k.setValue(value), 'set parameter {} value'.format(unique_parameter_name))
 
-        unit = get_unit(str(parameter.symbol))
-        check(k.setUnits(unit), 'set parameter {} units'.format(parameter.name))
+        unit = get_unit(unique_parameter_name)
+        check(k.setUnits(unit), 'set parameter {} units'.format(unique_parameter_name))
 
     for reaction in kmodel.reactions.values():
 
