@@ -57,7 +57,7 @@ Then install pytfa and skimpy using the local source:
   conda activate skimpy-env
   
   # Get the ditribution of pytfa and skimpy 
-  wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.1/conda-py3.8-linux-64.tar.gz
+  wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.2/conda-py3.8-linux-64.tar.gz
   tar -xzf conda-py3.8-linux-64.tar.gz
   ls local-channel
   
@@ -111,7 +111,7 @@ This module was developed in Python 3.9, and it is recommended to run Python 3.9
 The module also was tested in Python 3.8.
 
 Further the following pip-python packages are required
-    - sympy >=1.1 <=1.5
+    - sympy >=1.1
     - pytest
     - scipy
     - numpy
