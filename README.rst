@@ -23,6 +23,7 @@ subfolder has all the necessary information and source files to build it
 locally.
 
 Also you can directly pull the docker image: docker.io/danielweilandt/skimpy
+Note that if you want to use a comercial solver such as CPLEX or GUROBI you will need rebuild the |docker|_ repository.
 
 .. |docker| replace:: ``docker/``
 .. _docker: https://github.com/EPFL-LCSB/skimpy/tree/master/docker
@@ -94,7 +95,7 @@ packages can be installed using:
 Windows users using *WSL* can install these dependencies in a similar fashion after starting the subsystem console.
 
 Requirements
-------------
+============
 
 You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to properly download some binary files:
 
@@ -104,8 +105,6 @@ You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to prope
     cd /path/to/skimpy
     git lfs install
     git lfs pull
-
-
 
 This module was developed in Python 3.9, and it is recommended to run Python 3.9.
 The module also was tested in Python 3.8.
@@ -145,6 +144,7 @@ Note that SKiMpy requires a python version >= 3.7 the default docker version is 
 It is important that your solver supports your installed python version. We recommend installing CPLEX Studio221 which
 supports python versions: 3.7, 3.8, 3.9 and 3.10.
 
+=======
 Quick start
 ===========
 To get right into building kinetic models please find below a simple example to get started:
