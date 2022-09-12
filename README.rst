@@ -23,6 +23,7 @@ subfolder has all the necessary information and source files to build it
 locally.
 
 Also you can directly pull the docker image: docker.io/danielweilandt/skimpy
+Note that if you want to use a comercial solver such as CPLEX or GUROBI you will need rebuild the |docker|_ repository.
 
 .. |docker| replace:: ``docker/``
 .. _docker: https://github.com/EPFL-LCSB/skimpy/tree/master/docker
@@ -94,7 +95,7 @@ packages can be installed using:
 Windows users using *WSL* can install these dependencies in a similar fashion after starting the subsystem console.
 
 Requirements
-------------
+============
 
 You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to properly download some binary files:
 
@@ -104,8 +105,6 @@ You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to prope
     cd /path/to/skimpy
     git lfs install
     git lfs pull
-
-
 
 This module was developed in Python 3.9, and it is recommended to run Python 3.9.
 The module also was tested in Python 3.8.
@@ -138,7 +137,6 @@ The installation requires additionaly the following libraries:
 
 Further more using the escher plot and aninmation functions (skimpy.viz.escher) requires a Chrome installation. 
 An installation sript for linux systems can be found in docker/utils/install_chrome.sh
-
 
 Quick start
 ===========
