@@ -137,8 +137,13 @@ The installation requires additionaly the following libraries:
   - libgmp-dev
 
 Further more using the escher plot and aninmation functions (skimpy.viz.escher) requires a Chrome installation. 
-An installation sript for linux systems can be found in docker/utils/install_chrome.sh
+An installation script for linux systems can be found in docker/utils/install_chrome.sh
 
+To use the ORACLE method for large-scale metabolic networks it is recommended to install a commercial
+solver package such as CPLEX or GUROBI.
+Note that SKiMpy requires a python version >= 3.7 the default docker version is currently 3.9.
+It is important that your solver supports your installed python version. We recommend installing CPLEX Studio221 which
+supports python versions: 3.7, 3.8, 3.9 and 3.10.
 
 Quick start
 ===========
