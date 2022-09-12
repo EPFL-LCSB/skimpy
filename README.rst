@@ -144,7 +144,7 @@ Note that SKiMpy requires a python version >= 3.7 the default docker version is 
 It is important that your solver supports your installed python version. We recommend installing CPLEX Studio221 which
 supports python versions: 3.7, 3.8, 3.9 and 3.10.
 
-=======
+
 Quick start
 ===========
 To get right into building kinetic models please find below a simple example to get started:
