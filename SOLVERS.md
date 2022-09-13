@@ -15,5 +15,11 @@ python /Applications/CPLEX_Studio221/python/setup.py install
 
 ## Linux/WSL 
 
-Run the 
+Execute the binary file you downloaded from the IBM website and follow the installtion instructions. 
+Then navigate to the installation directory of the CPLEX Solver Suite, `path/to/yourCplexHome` and install the python API for the respective virtual environment.
 
+```bash
+cd path/to/yourCplexhome/python/PYTHON-VERSION/PLATFORM
+conda activate skimpy-env
+python setup.py install
+```
