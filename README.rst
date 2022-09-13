@@ -53,15 +53,13 @@ Then install pytfa and skimpy using the local source:
   conda config --set channel_priority strict
 
 
-  # Create a new environment (optional)
-  conda create --name skimpy-env
-  conda activate skimpy-env
-  
-  # Get the ditribution of pytfa and skimpy 
-  wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.2/skimpy-1.0.2-py38-linux-64.tar.bz2 
-  conda install skimpy-1.0.2-py38-linux-64.tar.bz2 
+  # Create a new environment (highly recommended since currently only python 3.8 is supported for conda)
+  conda create --name skimpy-env python=3.8
+  conda activate skimpy-env 
+ 
+  conda install -c weilandtd skimpy
 
-Note that it is essentaial to pass the absolute path to the local channel. WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
+WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
 
 Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
