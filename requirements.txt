@@ -1,27 +1,16 @@
-cobra
-jedi==0.17.2 # Fix tab complete in ipython for  python 3.6
-ipython
-ipdb
-lxml
-openpyxl
-tabulate
-sphinx>=1.4
-sphinx-rtd-theme
-matplotlib
-# from setup.py
-sympy <=1.5
 pytest
 scipy
-numpy <1.22
+numpy
 pandas
+Cython
 markupsafe<=2.0.1
 bokeh>=0.12.0
-Cython
-scikits.odes
+scikits.odes==2.6.3
 deap
 dill
 h5py
+escher
 pytfa
-cobra <=0.24.0
-escher==1.7.0
-python-libsbml
+sympy
+cobra <= 0.24.0
+cobra
