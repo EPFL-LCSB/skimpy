@@ -1,4 +1,4 @@
-pytest
+pytest<5,>=4.0.1
 scipy
 numpy
 pandas
@@ -12,5 +12,5 @@ h5py
 escher
 pytfa
 sympy
-cobra <= 0.24.0
+cobra<=0.24.0
 cobra
