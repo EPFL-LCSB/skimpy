@@ -57,7 +57,7 @@ Then install pytfa and skimpy using the local source:
   conda create --name skimpy-env python=3.8
   conda activate skimpy-env 
  
-  conda install -c weilandtd skimpy
+  conda install weilandtd::skimpy
 
 WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
 
