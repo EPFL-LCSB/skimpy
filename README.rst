@@ -14,7 +14,7 @@ SKiMpy is a python package bridging implementing an efficient kinetic model-ing 
 
 
 Container-based install
-=====
+=======================
 
 
 You might want to use this program inside of a container. The
