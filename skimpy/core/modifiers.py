@@ -314,7 +314,7 @@ class ActivationModifier(KineticMechanism,ExpressionModifier):
         if reaction is None:
             suffix = name
         else:
-            suffix = name+'_'+reaction.name
+            suffix = name+'_'+reaction.name+'_'+activator.__str__()
 
         reactants = self.Reactants(activator=activator,)
         parameters = self.Parameters(k_activation=k_activation)
@@ -377,7 +377,7 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
         if reaction is None:
             suffix = name
         else:
-            suffix = name+'_'+reaction.name
+            suffix = name+'_'+reaction.name+'_'+inhibitor.__str__()
 
         reactants = self.Reactants(inhibitor=inhibitor,)
         parameters = self.Parameters(k_inhibition=k_inhibition)
@@ -445,7 +445,7 @@ class HillActivationModifier(KineticMechanism,ExpressionModifier):
         if reaction is None:
             suffix = name
         else:
-            suffix = name+'_'+reaction.name
+            suffix = name+'_'+reaction.name+'_'+activator.__str__()
 
         reactants = self.Reactants(activator=activator,)
         parameters = self.Parameters(k_activation=k_activation,
@@ -517,7 +517,7 @@ class SimpleHillActivationModifier(KineticMechanism,ExpressionModifier):
         if reaction is None:
             suffix = name
         else:
-            suffix = name+'_'+reaction.name
+            suffix = name+'_'+reaction.name+'_'+activator.__str__()
 
         reactants = self.Reactants(activator=activator,)
         parameters = self.Parameters(k_activation=k_activation,
@@ -587,7 +587,7 @@ class HillInhibitionModifier(KineticMechanism,ExpressionModifier):
         if reaction is None:
             suffix = name
         else:
-            suffix = name+'_'+reaction.name
+            suffix = name+'_'+reaction.name+'_'+inhibitor.__str__()
 
         reactants = self.Reactants(inhibitor=inhibitor,)
         parameters = self.Parameters(k_inhibition=k_inhibition,
