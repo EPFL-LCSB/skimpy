@@ -255,7 +255,10 @@ def load_yaml_model(path):
         for the_mod_name, the_modifier in modifiers.items():
             TheModifier = get_mechanism(the_modifier)
             new_modifier = TheModifier(**the_modifier, name=the_mod_name, reaction=new_reaction)
-            new_reaction.modifiers[new_modifier.name] = new_modifier
+            # FIXME: This is a fix that works but it does not seem adress the problem
+            # Currently new_modifier.name is set e.g. SUFFIX + PARAMETER_TYPE_NAME (IM_k_inihibition)
+            # This is wrong there should be a unique name for each modifier
+            new_reaction.modifiers[the_mod_name] = new_modifier
 
         new.add_reaction(new_reaction)
 
