@@ -12,6 +12,7 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
+# FIXME: numpy.distutils is deprecated for nump>=1.23 replace the following
 from numpy.distutils.system_info import default_include_dirs, default_lib_dirs
 
 from distutils.sysconfig import get_config_vars
