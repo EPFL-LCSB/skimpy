@@ -39,6 +39,7 @@ def load_fluxes(solution_raw,tmodel,kmodel,
                 ratio_gdw_gww=None,
                 concentration_scaling=None,
                 time_scaling=None,
+                additional_fluxes=[],
                 xmol_in_flux=1e-3):
     # TODO try to fetch from model
     if density is None \
@@ -59,6 +60,11 @@ def load_fluxes(solution_raw,tmodel,kmodel,
     solution_nf =  { this_rxn.id: (solution_raw[this_rxn.forward_variable.name] \
                       - solution_raw[this_rxn.reverse_variable.name])  \
                      for this_rxn in tmodel.reactions}
+    
+    # Add fluxes of reactions not in the tmodel
+    # (fluxes added manually for modeling purposes)
+    for rxn in additional_fluxes:
+        solution_nf[rxn] = solution_raw[rxn]
 
     # Convert tmodel net fluxes to kmodel fluxes
     flux_dict = {rxn: solution_nf[rxn]*flux_scaling_factor for rxn in fluxes_in_kmodel}
@@ -68,14 +74,22 @@ def load_fluxes(solution_raw,tmodel,kmodel,
     return fluxes[fluxes_in_kmodel]
 
 
-def load_concentrations(solution_raw, tmodel, kmodel, concentration_scaling=None):
+def load_concentrations(solution_raw, tmodel, kmodel, 
+                        additional_concentrations=[],
+                        concentration_scaling=None):
     # TODO try to fetch from model
     if concentration_scaling is None:
         raise  ValueError("concentration_scaling is required as input or field of kmodel")
 
+    # Load concentrations from TFA 
     concentration_dict = {sanitize_cobra_vars(lc.id): np.exp(solution_raw[lc.variable.name])
                                                       *concentration_scaling
                           for lc in tmodel.log_concentration}
+    
+    # Add additional concentrations
+    for met in additional_concentrations:
+        concentration_dict[met] = solution_raw[met] * concentration_scaling
+    
     concentrations = pd.Series(concentration_dict)
 
     return concentrations
