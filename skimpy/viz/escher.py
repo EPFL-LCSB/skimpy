@@ -57,6 +57,7 @@ def animate_fluxes(flux_time_data,
                    time_unit='h',
                    x_time=0.95,
                    y_time=0.9,
+                   docker=True,
                    ):
 
     if min_flux is None:
@@ -94,7 +95,11 @@ def animate_fluxes(flux_time_data,
 
         # Hacky hack hack ...
         # Use chrome to make a screenshot
-        cmd = "{} {} {}".format(XVFB_DOCKER, chrome, SCREENSHOT.format('tmp.png', 'tmp.html'))
+        if docker:
+            cmd = "{} {} {}".format(XVFB_DOCKER, chrome, SCREENSHOT.format('tmp.png', 'tmp.html'))
+        else:
+            cmd = "{} {}".format(chrome, SCREENSHOT.format('tmp.png', 'tmp.html'))
+
         os.system(cmd)
 
         # Add time text
