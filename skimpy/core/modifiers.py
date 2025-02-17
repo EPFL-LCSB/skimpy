@@ -817,3 +817,67 @@ class HillInhibitionModifier(KineticMechanism,ExpressionModifier):
     def calculate_rate_constants(self):
         raise NotImplementedError
 
+
+class PropToModifier(KineticMechanism,ExpressionModifier):
+
+    prefix = "PM"
+
+    Reactants = make_reactant_set(__name__, ['activator',])
+
+    Parameters = make_parameter_set(__name__, {'k_activation': [ODE, MCA, QSSA],})
+
+    parameter_reactant_links = {'k_activation':'activator'}
+
+    def __init__(self, activator, name=None,
+                 k_activation=None,
+                 reaction=None):
+
+        if name is None:
+            name = self.prefix+'_'+activator.__str__()
+
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
+        reactants = self.Reactants(activator=activator,)
+        parameters = self.Parameters(k_activation=k_activation,)
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.link_parameters_and_reactants()
+
+        self.reactant_stoichiometry = {'activator': 0 }
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+        activation = self.get_qssa_rate_expression()
+        expressions['v_bwd'] = expressions['v_bwd'] * activation
+        expressions['v_fwd'] = expressions['v_fwd'] * activation
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        a = self.reactants.activator.symbol
+        k = self.parameters.k_activation.symbol
+        return a/k
+
+    def update_qssa_rate_expression(self):
+        return None
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
