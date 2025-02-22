@@ -105,7 +105,7 @@ class SaturationParameterFunction():
             _upper_saturations = np.array(upper_saturations)
 
             # Scale according to lower/upper bounds. `saturations` are in [0,1]
-            _saturations = _lower_saturations + saturations * (upper_saturations - _lower_saturations)
+            _saturations = _lower_saturations + saturations * (_upper_saturations - _lower_saturations)
 
             # Get the numerical values of the concentrations
             _concentrations = np.array([concentrations[c] for c in self.sym_concentrations])
