@@ -498,15 +498,15 @@ class InhibitionModifier(KineticMechanism,ExpressionModifier):
         #                        ('v_fwd', forward_rate_expression),
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
-        inhibition = 1 + self.get_qssa_rate_expression()
-        expressions['v_bwd'] = expressions['v_bwd'] / inhibition
-        expressions['v_fwd'] = expressions['v_fwd'] / inhibition
+        inhibition = self.get_qssa_rate_expression()
+        expressions['v_bwd'] = expressions['v_bwd'] * inhibition
+        expressions['v_fwd'] = expressions['v_fwd'] * inhibition
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
 
     def get_qssa_rate_expression(self):
         a = self.reactants.inhibitor.symbol
         k = self.parameters.k_inhibition.symbol
-        return a/k
+        return 1/(1 + a/k)
 
     def update_qssa_rate_expression(self):
         return None
@@ -569,7 +569,7 @@ class HillActivationModifier(KineticMechanism,ExpressionModifier):
         #                        ('v_fwd', forward_rate_expression),
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
-        activation = 1 + self.get_qssa_rate_expression()
+        activation = self.get_qssa_rate_expression()
         expressions['v_bwd'] = expressions['v_bwd'] * activation
         expressions['v_fwd'] = expressions['v_fwd'] * activation
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
@@ -579,7 +579,7 @@ class HillActivationModifier(KineticMechanism,ExpressionModifier):
         k = self.parameters.k_activation.symbol
         a_max = self.parameters.a_max.symbol
         h = self.parameters.hill_coefficient.symbol
-        return a_max * ( (a/k)**h / (1 + (a/k)**h ))
+        return 1 + a_max * ( (a/k)**h / (1 + (a/k)**h ))
 
     def update_qssa_rate_expression(self):
         return None
@@ -651,7 +651,7 @@ class HillActivationModifierInhibited(KineticMechanism,ExpressionModifier):
         #                        ('v_fwd', forward_rate_expression),
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
-        activation = 1 + self.get_qssa_rate_expression()
+        activation = self.get_qssa_rate_expression()
         expressions['v_bwd'] = expressions['v_bwd'] * activation
         expressions['v_fwd'] = expressions['v_fwd'] * activation
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
@@ -665,7 +665,7 @@ class HillActivationModifierInhibited(KineticMechanism,ExpressionModifier):
         h = self.parameters.hill_coefficient.symbol
         # Effective activation with inhibition 
         k = k_a * (1 + i/k_i)
-        return a_max * ( (a/k)**h / (1 + (a/k)**h ))
+        return 1 + a_max * ( (a/k)**h / (1 + (a/k)**h ))
 
     def update_qssa_rate_expression(self):
         return None
@@ -727,7 +727,7 @@ class SimpleHillActivationModifier(KineticMechanism,ExpressionModifier):
         #                        ('v_fwd', forward_rate_expression),
         #                        ('v_bwd', backward_rate_expression),
         #                        ])
-        activation = 1 + self.get_qssa_rate_expression()
+        activation = self.get_qssa_rate_expression()
         expressions['v_bwd'] = expressions['v_bwd'] * activation
         expressions['v_fwd'] = expressions['v_fwd'] * activation
         expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
@@ -736,7 +736,7 @@ class SimpleHillActivationModifier(KineticMechanism,ExpressionModifier):
         a = self.reactants.activator.symbol
         k = self.parameters.k_activation.symbol
         h = self.parameters.hill_coefficient.symbol
-        return (a/k)**h
+        return 1 + (a/k)**h
 
     def update_qssa_rate_expression(self):
         return None
