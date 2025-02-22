@@ -50,7 +50,7 @@ class JacobianFunction:
         self.dependent_variable_ix = dependent_variable_ix
         self.conservation_relation = conservation_relation
 
-    def __call__(self, fluxes, concentrations, parameters, flux_jacobian=False):
+    def __call__(self, fluxes, concentrations, parameters, flux_jacobian=False, log_transformed=False):
         """
         :param fluxes: `Dict` or `pd.Series` of reference flux vector
         :param concentrations: `Dict` or `pd.Series` of reference concentration vector
@@ -99,18 +99,28 @@ class JacobianFunction:
 
             elasticity_matrix += self.dependent_elasticity_function(concentrations, parameters)\
                                  .dot(dependent_weights)
-
-        if flux_jacobian:
-            jacobian = flux_matrix.dot(elasticity_matrix)\
-                .dot(inv_concentration_matrix)\
-                .dot(volume_ratio_matrix_indep)\
-                .dot(self.reduced_stoichometry)
             
+        if log_transformed:
+            if flux_jacobian:
+                jacobian = flux_matrix.dot(elasticity_matrix)\
+                    .dot(volume_ratio_matrix_indep)\
+                    .dot(self.reduced_stoichometry)
+                
+            else:
+                jacobian = volume_ratio_matrix_indep.dot(self.reduced_stoichometry)\
+                            .dot(elasticity_matrix)
         else:
-            jacobian = volume_ratio_matrix_indep.dot(self.reduced_stoichometry)\
-                        .dot(flux_matrix)\
-                        .dot(elasticity_matrix)\
-                        .dot(inv_concentration_matrix)
+            if flux_jacobian:
+                jacobian = flux_matrix.dot(elasticity_matrix)\
+                    .dot(inv_concentration_matrix)\
+                    .dot(volume_ratio_matrix_indep)\
+                    .dot(self.reduced_stoichometry)
+                
+            else:
+                jacobian = volume_ratio_matrix_indep.dot(self.reduced_stoichometry)\
+                            .dot(flux_matrix)\
+                            .dot(elasticity_matrix)\
+                            .dot(inv_concentration_matrix)
 
 
 
