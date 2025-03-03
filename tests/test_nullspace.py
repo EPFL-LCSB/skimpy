@@ -20,7 +20,7 @@ def test_left_nullspace():
 
     rs = ThisCustomRandomState()
     rvs = stats.poisson(2, loc=10).rvs
-    S = random(5,6, density=0.1, random_state=rs, data_rvs=rvs, dtype=np.int)
+    S = random(5,6, density=0.1, random_state=rs, data_rvs=rvs, dtype=int)
 
     # print(S.todense())
 

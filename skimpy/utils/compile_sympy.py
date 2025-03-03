@@ -76,7 +76,7 @@ def make_cython_function(symbols, expressions, quiet=True, simplify=True, optimi
                                  ctypes.POINTER(ctypes.c_double),]
         #Cast to numpy float
         if not type(input_array) ==  np.ndarray.dtype:
-            input_array = np.array(input_array, dtype=np.float)
+            input_array = np.array(input_array, dtype=float)
 
         #x.ctypes.data_as(ctypes.POINTER(ctypes.c_long))
         fun.function(input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_double)) ,

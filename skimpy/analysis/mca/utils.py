@@ -139,7 +139,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
 
         # Per moiety, select one variable that has not been selected before
         # L0
-        L0_sparse = sparse_matrix(np.array(L0), dtype=np.float)
+        L0_sparse = sparse_matrix(np.array(L0), dtype=float)
 
         all_dependent_ix, all_independent_ix = get_dep_indep_vars_from_basis(L0_sparse, all_dependent_ix)
 
@@ -182,7 +182,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         # This is equivalent to
         N = Matrix(S[all_independent_ix, :])
 
-        reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=np.float)
+        reduced_stoichiometry   = sparse_matrix(np.array(N),dtype=float)
         conservation_relation = L0_sparse
 
     # If the left hand null space is empty no mojeties
@@ -190,7 +190,7 @@ def get_reduced_stoichiometry(kinetic_model, all_variables, all_dependent_ix=Non
         reduced_stoichiometry = full_stoichiometry
         all_independent_ix = range(full_stoichiometry.shape[0])
         all_dependent_ix = []
-        conservation_relation = sparse_matrix(np.array([]),dtype=np.float)
+        conservation_relation = sparse_matrix(np.array([]),dtype=float)
 
     return reduced_stoichiometry, conservation_relation, all_independent_ix, all_dependent_ix
 
