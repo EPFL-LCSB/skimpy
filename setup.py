@@ -7,18 +7,19 @@
 
 """
 
+
 from setuptools import setup, find_packages
-from distutils.extension import Extension
+from setuptools.extension import Extension
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
-# FIXME: numpy.distutils is deprecated for nump>=1.23 replace the following
-from numpy.distutils.system_info import default_include_dirs, default_lib_dirs
-
+import numpy as np
 from distutils.sysconfig import get_config_vars
 
 import os
 import sys
+import sysconfig
+
 
 
 if sys.platform == 'win32':
@@ -28,9 +29,12 @@ else:
     (opt,) = get_config_vars('OPT')
     os.environ['OPT'] = " ".join(flag for flag in opt.split() if flag != '-Wstrict-prototypes')
 
-default_include_dirs += [
-    os.path.join(d, "flint") for d in default_include_dirs
-]
+# Include directories
+default_include_dir = sysconfig.get_paths()['include']
+numpy_include = np.get_include()
+flint_include = os.path.join(default_include_dir, 'flint')
+include = [numpy_include, flint_include, default_include_dir]
+
 
 # Current version 1.1.0-dev
 version_tag = '1.1.0-dev'
@@ -41,8 +45,8 @@ extensions = [
                       sources=["skimpy/cython/nullspace.pyx"],
                       language = 'c',
                       libraries=libraries,
-                      library_dirs = default_lib_dirs,
-                      include_dirs = default_include_dirs),
+                      library_dirs = libraries,
+                      include_dirs = include),
             ]
 
 setup(name='skimpy',
@@ -66,8 +70,8 @@ setup(name='skimpy',
                         'matplotlib',
                         'pytfa',
                         'sympy<=1.5',
-                        'cobra<=0.24.0',
-                        'setuptools<60'
+                        'cobra',
+                        'setuptools'
                         ],
       packages = find_packages(),
       python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4',
@@ -82,25 +86,28 @@ setup(name='skimpy',
 
       # See https://PyPI.python.org/PyPI?%3Aaction=list_classifiers
       classifiers=[
-            # How mature is this project? Common values are
-            #   3 - Alpha
-            #   4 - Beta
-            #   5 - Production/Stable
-            'Development Status :: 3 - Alpha',
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 3 - Alpha',
 
-            # Indicate who your project is intended for
-            'Intended Audience :: Science/Research',
-            'Topic :: Scientific/Engineering :: Bio-Informatics',
-            'Topic :: Scientific/Engineering :: Chemistry'
-            'Environment :: Console',
+        # Indicate who your project is intended for
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Topic :: Scientific/Engineering :: Chemistry'
+        'Environment :: Console',
 
-            # Pick your license as you wish (should match "license" above)
-            'License :: OSI Approved :: Apache Software License',
+        # Pick your license as you wish (should match "license" above)
+        'License :: OSI Approved :: Apache Software License',
 
-            # Specify the Python versions you support here. In particular, ensure
-            # that you indicate whether you support Python 2, Python 3 or both.
-            'Programming Language :: Python :: 3.8',
-            'Programming Language :: Python :: 3.9',
+        # Specify the Python versions you support here. In particular, ensure
+        # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+
 
       ],
      )
