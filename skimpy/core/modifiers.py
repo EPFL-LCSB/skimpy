@@ -304,35 +304,28 @@ class MembranePotentialModifier(KineticMechanism,ExpressionModifier):
     """
     prefix = "MPM"
 
-    Reactants = make_reactant_set(__name__, ['inside_ion','outside_ion'])
+    Reactants = make_reactant_set(__name__, ['membrane_potential',])
 
     # TODO this will result in a lot of additional parameters for each reaction that uses this modifier
     # Think about global parameters
     Parameters = make_parameter_set(__name__, {'delta_psi_scaled': [ODE, MCA, QSSA],
-                                               'delta_ion_concentration': [ODE, MCA, QSSA],
-                                               'charge_ion': [ODE, MCA, QSSA],
-                                               'charge_transport': [ODE, MCA, QSSA],})
+                                               'charge_transport': [ODE, MCA, QSSA],
+                                               })
 
     parameter_reactant_links = {}
 
-    def __init__(self, inside_ion, outside_ion,
-                 delta_psi_scale=None, delta_ion_concentration=None,
-                 charge_ion=None, charge_transport=None,
-                 name=None, reaction=None):
+    def __init__(self, membrane_potential, delta_psi_scale=None, charge_transport=None, name=None, reaction=None):
 
         if name is None:
-            name = outside_ion.__str__() + "__" + inside_ion.__str__()
+            name = membrane_potential.__str__()
 
         if reaction is None:
             suffix = name
         else:
             suffix = name+'_'+reaction.name
 
-        reactants = self.Reactants(inside_ion=inside_ion,
-                                   outside_ion=outside_ion)
+        reactants = self.Reactants(membrane_potential=membrane_potential,)
         parameters = self.Parameters(delta_psi_scaled=delta_psi_scale,
-                                     delta_ion_concentration=delta_ion_concentration,
-                                     charge_ion=charge_ion,
                                      charge_transport=charge_transport)
 
         for name, p in parameters.items():
@@ -343,7 +336,7 @@ class MembranePotentialModifier(KineticMechanism,ExpressionModifier):
         self.link_parameters_and_reactants()
 
         # The ions are not part of the reaction but only effectors
-        self.reactant_stoichiometry = {'inside_ion': 0 , 'outside_ion': 0,}
+        self.reactant_stoichiometry = {'membrane_potential': 0 }
 
     def modifier(self, expressions):
         """
@@ -364,19 +357,15 @@ class MembranePotentialModifier(KineticMechanism,ExpressionModifier):
 
     def get_qssa_rate_expression(self):
         # This modifier expresses the change in the equilibrium constant
-        # as a function of two ion concentrations and a reference membrane potential
-        x_i = self.reactants.inside_ion.symbol
-        x_o = self.reactants.outside_ion.symbol
-
-        delta_psi_scaled = self.parameters.delta_psi_scaled.symbol
-        delta_ion_concentration = self.parameters.delta_ion_concentration.symbol
-        charge_ion = self.parameters.charge_ion.symbol
+        # due to a change in the membrane potential psi
+        # the membrane potential modeled as dynamic variable
+        delta_psi_dyn = self.reactants.membrane_potential.symbol
+        delta_psi_scaled_0 = self.parameters.delta_psi_scaled.symbol
         charge_transport = self.parameters.charge_transport.symbol
         
-        rel_delta_psi_modified = charge_ion * (x_i - x_o) / delta_ion_concentration 
-        delta_delta_psi_scaled = delta_psi_scaled * ( rel_delta_psi_modified - 1.0 ) 
+        delta_delta_psi_scaled = delta_psi_scaled_0 - delta_psi_dyn
 
-        return exp( -charge_transport * delta_delta_psi_scaled)
+        return exp( - charge_transport * delta_delta_psi_scaled)
 
     def update_qssa_rate_expression(self):
         return None
@@ -386,6 +375,95 @@ class MembranePotentialModifier(KineticMechanism,ExpressionModifier):
 
     def calculate_rate_constants(self):
         raise NotImplementedError
+
+
+class MembranePotantialDynamicModifier(KineticMechanism,ExpressionModifier):
+
+    """
+    This modifier can model how the difference in ion concentrations 
+    can modify the rate the thermodynamic equilibrium of a reaction
+    """
+    prefix = "MPDYN"
+
+    Reactants = make_reactant_set(__name__, ['membrane_potential',])
+
+    # TODO this will result in a lot of additional parameters for each reaction that uses this modifier
+    # Think about global parameters
+    Parameters = make_parameter_set(__name__, {'capacitance': [ODE, MCA, QSSA],
+                                               })
+
+    parameter_reactant_links = {}
+
+    def __init__(self, membrane_potential, capacitance=None, name=None, reaction=None, eletrogenic_reactions=dict() ):
+
+        if name is None:
+            name = membrane_potential.__str__()
+
+        if reaction is None:
+            suffix = name
+        else:
+            suffix = name+'_'+reaction.name
+
+        reactants = self.Reactants(membrane_potential=membrane_potential,)
+        parameters = self.Parameters(capacitance=capacitance)
+
+
+        for name, p in parameters.items():
+            p.suffix = suffix
+        
+        KineticMechanism.__init__(self, name, reactants, parameters)
+
+        self.link_parameters_and_reactants()
+
+        # Eletrcogeninc reactions are the reactions that directly influnce 
+        # by the membrane potential by transporting a net charge across the membrane
+        self.eletrogenic_reactions = eletrogenic_reactions
+        # We need this to link back to the model
+        self.reaction = reaction
+
+        # The ions are not part of the reaction but only effectors
+        self.reactant_stoichiometry = {'membrane_potential': 0}
+
+    def modifier(self, expressions):
+        """
+        change the flux reaction rate expressions
+        :param expression: {vnet, vfwd, vbwd}
+        :return:
+        """
+        # Modification of the of Keq
+        # expressions = TabDict([('v_net', rate_expression),
+        #                        ('v_fwd', forward_rate_expression),
+        #                        ('v_bwd', backward_rate_expression),
+        #                        ])
+
+        # This dynamic modifier is a bit more complex because it relys on the expression 
+        # of other fluxes 
+        total_ion_flux = 0
+        
+        # Grab the other expressions 
+        model = self.reaction._model
+        for rxn, charge_transport in self.eletrogenic_reactions.items():
+            total_ion_flux += model.reactions[rxn].mechanism.reaction_rates['v_net'] * charge_transport
+
+        # NOTE: THIS MODIFIER OVERWRITES THE FLUX EXPRESSION ITS ASSIGNED TO 
+        # THIS MIGHT NEED TO BE MODIFIED
+        expressions['v_fwd'] = expressions['v_fwd'] * total_ion_flux     
+        expressions['v_net'] = expressions['v_fwd'] - expressions['v_bwd']
+
+    def get_qssa_rate_expression(self):
+        return 0
+
+    def update_qssa_rate_expression(self):
+        return None
+
+    def get_full_rate_expression(self):
+        raise NotImplementedError
+
+    def calculate_rate_constants(self):
+        raise NotImplementedError
+
+
+
 
 
 

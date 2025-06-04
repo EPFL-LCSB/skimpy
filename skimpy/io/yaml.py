@@ -61,6 +61,7 @@ ALL_GENERIC_MECHANISM_SUBCLASSES = TabDict([
 ('IrrevMichaelisMenten', make_irrev_m_n_michaelis_menten),
 ('IrrevHillNM', make_irrev_m_n_hill),
 ('IrrevMassaction', make_irrev_massaction),
+('IrrevConstant',make_irrev_constant),
 ('RevMassaction', make_rev_massaction),
 ('ConvenienceInhibited', make_convenience_with_inhibition),
 ('H1GeneralizedReversibleHillInhibited', make_generalized_reversible_hill_n_n_h1_with_inhibition),
@@ -126,6 +127,11 @@ def mechanism_representer(dumper, data):
     return dumper.represent_dict(the_dict)
 
 def reaction_representer(dumper,data):
+    dict = vars(data)
+    # Drop hidden attributes )
+    hidded_attributes = [k for k in dict if k.startswith('_')]
+    for k in hidded_attributes:
+        dict.pop(k)
     return dumper.represent_dict(vars(data))
 
 def boundary_condition_representer(dumper, data):

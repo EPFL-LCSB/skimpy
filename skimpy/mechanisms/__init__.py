@@ -35,6 +35,7 @@ from .generalized_reversible_hill_n_n_h1_with_inhibition import *
 from .generalized_elementary_kinetics import *
 from .irrev_m_n_michaelis_menten import *
 from .irrev_massaction import *
+from .irrev_constant import *
 from .irrev_hill import *
 from .irrev_m_n_hill import *
 from .rev_massaction import *

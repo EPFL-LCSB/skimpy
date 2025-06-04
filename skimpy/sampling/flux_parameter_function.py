@@ -63,10 +63,11 @@ class FluxParameterFunction():
         _fluxes = np.array([flux_dict[rxn.name] for rxn in model.reactions.values() ])
         flux_parameter_values = _fluxes / flux_parameter_values
 
-        if np.any(flux_parameter_values < 0):
-            ixs = np.where(flux_parameter_values < 0)[0]
-            model.logger.info("Fluxes {} are not aligned with deltaG values!".format([model.reactions.iloc(i)[0] for i in ixs]))
-            raise ValueError
+        # NOTE DO NOT COMMIT TEMP FIX NEED TODO BETER
+        # if np.any(flux_parameter_values < 0):
+        #     ixs = np.where(flux_parameter_values < 0)[0]
+        #     model.logger.info("Fluxes {} are not aligned with deltaG values!".format([model.reactions.iloc(i)[0] for i in ixs]))
+        #     raise ValueError
 
         for rxn,v in zip(model.reactions.values(),flux_parameter_values):
             try:

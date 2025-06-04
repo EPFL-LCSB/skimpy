@@ -223,4 +223,47 @@ class SimpleParameterSampler(ParameterSampler):
             flux_dict
         )
 
+        # NOTE: Currently support one nested level 
+        # Do a second pass to calculate the Vmaxes that are nested 
+        # TODO Only run when nessecary!!! 
+        if compiled_model.second_pass:
+
+            parameter_sample_2 = parameter_sample.copy()
+
+            # Reset vmax to 1 
+            for this_reaction_id in compiled_model.second_pass:
+                this_reaction = compiled_model.reactions[this_reaction_id]
+                try:
+                    if this_reaction.enzyme is None:
+                        vmax_param = this_reaction.parameters.vmax_forward
+                        parameter_sample_2[vmax_param.symbol] = 1
+                    else:
+                        vmax_param = this_reaction.parameters.kcat_forward
+                        parameter_sample_2[vmax_param.symbol] = 1
+
+                except AttributeError:
+                    pass
+
+
+            compiled_model.flux_parameter_function(
+                compiled_model,
+                parameter_sample_2,
+                concentration_dict,
+                flux_dict
+            )
+
+            # Fetch the need a second pass
+            for this_reaction_id in compiled_model.second_pass:
+                this_reaction = compiled_model.reactions[this_reaction_id]
+                try:
+                    if this_reaction.enzyme is None:
+                        vmax_param = this_reaction.parameters.vmax_forward
+                        parameter_sample[vmax_param.symbol] = parameter_sample_2[vmax_param.symbol]
+                    else:
+                        vmax_param = this_reaction.parameters.kcat_forward
+                        parameter_sample[vmax_param.symbol] = parameter_sample_2[vmax_param.symbol]
+                
+                except AttributeError:
+                    pass            
+
         return parameter_sample
