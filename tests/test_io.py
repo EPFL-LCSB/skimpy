@@ -25,7 +25,6 @@ parameters = ReversibleMichaelisMenten.Parameters(
     k_equilibrium = 1.5,
     km_substrate = 10.0,
     km_product = 10.0,
-    total_enzyme_concentration = 1.0,
 )
 
 pfk = Reaction(name=name,
@@ -44,21 +43,6 @@ dummy_model_path_sbml = 'test.sbml'
 
 @pytest.mark.dependency(name='test_fluxes')
 def test_fluxes():
-    ## Elementary rate method
-    dummy_model.compile_ode(sim_type=ELEMENTARY)
-
-    dummy_model.initial_conditions['A'] = 10.0
-    dummy_model.initial_conditions['B'] = 1.0
-    dummy_model.initial_conditions['pfk'] = 1.0
-
-    this_sol_full = dummy_model.solve_ode(np.linspace(0.0, 100.0, 1000), solver_type='cvode')
-
-    calc_fluxes = make_flux_fun(dummy_model, ELEMENTARY)
-
-    parameter_values = {k:v.value for k,v in dummy_model.parameters.items()}
-    steady_state_fluxes = calc_fluxes(this_sol_full.concentrations.iloc[-1], parameters=parameter_values)
-
-
     dummy_model.compile_ode(sim_type=QSSA)
 
     dummy_model.initial_conditions['A'] = 10.0

@@ -5,7 +5,7 @@ You actually only need the following substructure (makes the container lighter):
 .
 └───ibm
     └───ILOG
-        └───CPLEX_Studio1271
+        └───CPLEX_Studio221
             └───cplex
                 ├───bin
                 ├───include

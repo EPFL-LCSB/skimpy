@@ -14,7 +14,7 @@ SKiMpy is a python package bridging implementing an efficient kinetic model-ing 
 
 
 Container-based install
-=====
+=======================
 
 
 You might want to use this program inside of a container. The
@@ -23,6 +23,7 @@ subfolder has all the necessary information and source files to build it
 locally.
 
 Also you can directly pull the docker image: docker.io/danielweilandt/skimpy
+Note that if you want to use a comercial solver such as CPLEX or GUROBI you will need rebuild the |docker|_ repository.
 
 .. |docker| replace:: ``docker/``
 .. _docker: https://github.com/EPFL-LCSB/skimpy/tree/master/docker
@@ -46,23 +47,19 @@ Then install pytfa and skimpy using the local source:
 
 .. code:: bash
   
-  # Add conda-forge channels (required)
+  # Add conda-forge / bioconda channels (required)
+  conda config --add channels bioconda
   conda config --add channels conda-forge
   conda config --set channel_priority strict
-  
-  # Create a new environment (optional)
-  conda create --name skimpy-env
-  conda activate skimpy-env
-  
-  # Get the ditribution of pytfa and skimpy 
-  wget https://github.com/EPFL-LCSB/skimpy/releases/download/v1.0.1/conda-py3.8-linux-64.tar.gz
-  tar -xzf conda-py3.8-linux-64.tar.gz
-  ls local-channel
-  
-  conda install -c file:///absolute/path/to/local-channel pytfa
-  conda install -c file:///absolute/path/to/local-channel skimpy
 
-Note that it is essentaial to pass the absolute path to the local channel. WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
+
+  # Create a new environment (highly recommended since currently only python 3.8 is supported for conda)
+  conda create --name skimpy-env python=3.8
+  conda activate skimpy-env 
+ 
+  conda install weilandtd::skimpy
+
+WIP: the conda package package will currenly print an error message upon plotting with bokeh although  it produces the desired file see #11. 
 
 Alternatively you can install this module from source using ``pip``:
 *For Python 3, you might have to use* ``pip3`` *instead of* ``pip``
@@ -93,7 +90,7 @@ packages can be installed using:
 Windows users using *WSL* can install these dependencies in a similar fashion after starting the subsystem console.
 
 Requirements
-------------
+============
 
 You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to properly download some binary files:
 
@@ -104,13 +101,11 @@ You will need to have `Git-LFS <https://git-lfs.github.com/>`_ in order to prope
     git lfs install
     git lfs pull
 
-
-
 This module was developed in Python 3.9, and it is recommended to run Python 3.9.
 The module also was tested in Python 3.8.
 
 Further the following pip-python packages are required
-    - sympy >=1.1 <=1.5
+    - sympy >=1.1
     - pytest
     - scipy
     - numpy
@@ -136,7 +131,13 @@ The installation requires additionaly the following libraries:
   - libgmp-dev
 
 Further more using the escher plot and aninmation functions (skimpy.viz.escher) requires a Chrome installation. 
-An installation sript for linux systems can be found in docker/utils/install_chrome.sh
+An installation script for linux systems can be found in docker/utils/install_chrome.sh
+
+To use the ORACLE method for large-scale metabolic networks it is recommended to install a commercial
+solver package such as CPLEX or GUROBI.
+Note that SKiMpy requires a python version >= 3.7 the default docker version is currently 3.9.
+It is important that your solver supports your installed python version. We recommend installing CPLEX Studio221 which
+supports python versions: 3.7, 3.8, 3.9 and 3.10. A point by point installation guide for OSx and Linux is found `here <https://github.com/EPFL-LCSB/skimpy/edit/master/SOLVERS.md>`_.
 
 
 Quick start
