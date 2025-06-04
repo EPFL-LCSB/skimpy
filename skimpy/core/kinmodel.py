@@ -171,8 +171,10 @@ class KineticModel(object):
                 else:
                     reaction.mechanism.reactants[k] = self.reactants[v.name]
 
-
+        # Add the reaction to the model
         self.add_to_tabdict(reaction, 'reactions')
+        # Link to the model 
+        reaction._model = self
 
     def add_compartment(self, compartment):
         """

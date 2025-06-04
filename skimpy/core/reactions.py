@@ -33,9 +33,12 @@ class Reaction(object):
     """
     Global reaction class
     """
-    def __init__(self, name, reactants, mechanism, parameters=None, inhibitors=None, enzyme=None):
+    def __init__(self, name, reactants, mechanism, parameters=None, inhibitors=None, enzyme=None, model=None):
         self.name = name
         self.enzyme = enzyme
+
+        # Hidded reactions attributes
+        self._model = model
 
         if inhibitors is not None:
             self.mechanism = mechanism(name=name,
